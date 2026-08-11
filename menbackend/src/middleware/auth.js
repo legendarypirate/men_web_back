@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
 const { fail, publicUser } = require('../utils/response');
+const { jwtSecret, jwtExpiresIn } = require('../config/env');
 
 async function authRequired(req, res, next) {
   try {
@@ -8,7 +9,7 @@ async function authRequired(req, res, next) {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return fail(res, 'Нэвтрэх шаардлагатай', 401);
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, jwtSecret);
     const user = await User.findByPk(payload.sub);
     if (!user) return fail(res, 'Хэрэглэгч олдсонгүй', 401);
 
@@ -25,7 +26,7 @@ function optionalAuth(req, res, next) {
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return next();
 
-  jwt.verify(token, process.env.JWT_SECRET, async (err, payload) => {
+  jwt.verify(token, jwtSecret, async (err, payload) => {
     if (err) return next();
     try {
       const user = await User.findByPk(payload.sub);
@@ -43,8 +44,8 @@ function optionalAuth(req, res, next) {
 function signToken(user) {
   return jwt.sign(
     { sub: user.id, email: user.email, role: user.role || 'user' },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '30d' }
+    jwtSecret,
+    { expiresIn: jwtExpiresIn }
   );
 }
 
@@ -54,7 +55,7 @@ async function adminRequired(req, res, next) {
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return fail(res, 'Нэвтрэх шаардлагатай', 401);
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, jwtSecret);
     const user = await User.findByPk(payload.sub);
     if (!user) return fail(res, 'Хэрэглэгч олдсонгүй', 401);
     if (user.role !== 'admin') return fail(res, 'Админ эрх шаардлагатай', 403);
