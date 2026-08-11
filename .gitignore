@@ -1,0 +1,13 @@
+.DS_Store
+*.log
+
+# Backend
+menbackend/node_modules/
+menbackend/data/
+menbackend/.env
+menbackend/uploads/
+
+# Admin
+menadmin/node_modules/
+menadmin/.next/
+menadmin/.env.local

@@ -1,0 +1,183 @@
+import { ResourceConfig } from '@/lib/types/fields';
+import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan } from '@/lib/api';
+import { formatMnt } from '@/lib/api';
+import { StatusBadge } from '@/components/page-ui';
+
+const categoryOptions = [
+  { label: 'Витамин', value: 'supplements' },
+  { label: 'Тоног төхөөрөмж', value: 'devices' },
+  { label: 'Сэргээлт', value: 'wellness' },
+  { label: 'Хоол тэжээл', value: 'nutrition' },
+];
+
+export const productConfig: ResourceConfig<Product> = {
+  title: 'Дэлгүүрийн бүтээгдэхүүн',
+  itemLabel: 'бүтээгдэхүүн',
+  idKey: 'id',
+  listKey: 'products',
+  itemKey: 'product',
+  emptyDefaults: {
+    category: 'supplements',
+    icon: 'shopping_bag',
+    gradientStart: '#0F766E',
+    gradientEnd: '#14B8A6',
+    benefits: [],
+    rating: 4.5,
+    reviewCount: 0,
+    inStock: true,
+    featured: false,
+    active: true,
+    sortOrder: 0,
+    priceMnt: 0,
+    images: [],
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true, showOnEdit: true, showOnCreate: true },
+    { key: 'name', label: 'Нэр', type: 'text', required: true },
+    { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 4 },
+    { key: 'priceMnt', label: 'Үнэ (₮)', type: 'number', required: true },
+    { key: 'category', label: 'Ангилал', type: 'select', options: categoryOptions },
+    { key: 'icon', label: 'Icon (Material name)', type: 'text', placeholder: 'fitness_center' },
+    { key: 'gradientStart', label: 'Gradient эхлэл (#hex)', type: 'text' },
+    { key: 'gradientEnd', label: 'Gradient төгсгөл (#hex)', type: 'text' },
+    { key: 'benefits', label: 'Давуу тал', type: 'string-list', placeholder: 'Давуу талыг оруулна уу...', hint: 'Давуу тал нэмэх' },
+    { key: 'rating', label: 'Rating', type: 'number' },
+    { key: 'reviewCount', label: 'Сэтгэгдэл тоо', type: 'number' },
+    { key: 'badge', label: 'Badge', type: 'text' },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'featured', label: 'Онцлох', type: 'switch' },
+    { key: 'inStock', label: 'Нөөцтэй', type: 'switch' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'name', label: 'Бүтээгдэхүүн', className: 'font-medium' },
+    {
+      key: 'category',
+      label: 'Ангилал',
+      render: (row) => categoryOptions.find((c) => c.value === row.category)?.label || row.category,
+    },
+    { key: 'priceMnt', label: 'Үнэ', align: 'center', render: (row) => formatMnt(row.priceMnt) },
+    { key: 'featured', label: 'Онцлох', align: 'center', render: (row) => (row.featured ? '✓' : '—') },
+    { key: 'inStock', label: 'Нөөц', align: 'center', render: (row) => (row.inStock ? '✓' : '—') },
+  ],
+};
+
+export const assessmentConfig: ResourceConfig<AssessmentQuestion> = {
+  title: 'Үнэлгээний асуултууд',
+  itemLabel: 'асуулт',
+  idKey: 'id',
+  listKey: 'questions',
+  itemKey: 'question',
+  emptyDefaults: {
+    step: 1,
+    totalSteps: 9,
+    options: [],
+    sortOrder: 0,
+    active: true,
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true },
+    { key: 'questionKey', label: 'Question key', type: 'text', required: true },
+    { key: 'title', label: 'Асуулт', type: 'text', required: true },
+    { key: 'helpText', label: 'Тайлбар', type: 'textarea', rows: 2 },
+    { key: 'step', label: 'Алхам', type: 'number' },
+    { key: 'totalSteps', label: 'Нийт алхам', type: 'number' },
+    {
+      key: 'options',
+      label: 'Сонголтууд (JSON)',
+      type: 'json',
+      rows: 8,
+      hint: '[{"key":"a","title":"...","description":"..."}]',
+    },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'questionKey', label: 'Key', className: 'font-mono text-xs' },
+    { key: 'title', label: 'Асуулт', className: 'max-w-md truncate' },
+    { key: 'step', label: 'Алхам', align: 'center', render: (row) => `${row.step}/${row.totalSteps}` },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+    { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+  ],
+};
+
+export const articleConfig: ResourceConfig<Article> = {
+  title: 'Нийтлэлүүд',
+  itemLabel: 'нийтлэл',
+  idKey: 'id',
+  listKey: 'articles',
+  itemKey: 'article',
+  emptyDefaults: { category: 'Сэргээлт', featured: false, premium: false, readMinutes: 5 },
+  fields: [
+    { key: 'category', label: 'Ангилал', type: 'text', required: true },
+    { key: 'title', label: 'Гарчиг', type: 'text', required: true },
+    { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
+    { key: 'body', label: 'Бүтэн агуулга', type: 'textarea', rows: 6 },
+    { key: 'author', label: 'Зохиогч', type: 'text' },
+    { key: 'readMinutes', label: 'Унших минут', type: 'number' },
+    { key: 'tag', label: 'Tag', type: 'text' },
+    { key: 'featured', label: 'Онцлох', type: 'switch' },
+    { key: 'premium', label: 'Premium', type: 'switch' },
+  ],
+  columns: [
+    { key: 'title', label: 'Гарчиг', className: 'font-medium max-w-xs truncate' },
+    { key: 'category', label: 'Ангилал' },
+    { key: 'readMinutes', label: 'Мин', align: 'center' },
+    { key: 'featured', label: 'Онцлох', align: 'center', render: (r) => (r.featured ? '✓' : '—') },
+  ],
+};
+
+export const healthBiteConfig: ResourceConfig<HealthBite> = {
+  title: 'Эрүүл мэндийн зөвлөмж',
+  itemLabel: 'зөвлөмж',
+  idKey: 'id',
+  listKey: 'healthBites',
+  itemKey: 'healthBite',
+  emptyDefaults: { icon: 'lightbulb', sortOrder: 0 },
+  fields: [
+    { key: 'title', label: 'Гарчиг', type: 'text', required: true },
+    { key: 'body', label: 'Агуулга', type: 'textarea', required: true, rows: 4 },
+    { key: 'icon', label: 'Icon', type: 'text' },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+  ],
+  columns: [
+    { key: 'title', label: 'Гарчиг', className: 'font-medium' },
+    { key: 'icon', label: 'Icon' },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+  ],
+};
+
+export const planConfig: ResourceConfig<PremiumPlan> = {
+  title: 'Premium төлөвлөгөө',
+  itemLabel: 'төлөвлөгөө',
+  idKey: 'id',
+  listKey: 'plans',
+  itemKey: 'plan',
+  emptyDefaults: {
+    features: [],
+    highlighted: false,
+    useInfinity: false,
+    buttonLabel: 'Сонгох',
+    sortOrder: 0,
+    amountMnt: 0,
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true },
+    { key: 'title', label: 'Гарчиг', type: 'text', required: true },
+    { key: 'amountMnt', label: 'Үнэ (₮)', type: 'number', required: true },
+    { key: 'periodLabel', label: 'Хугацаа', type: 'text', placeholder: '/сар' },
+    { key: 'features', label: 'Онцлогууд (JSON)', type: 'json' },
+    { key: 'badge', label: 'Badge', type: 'text' },
+    { key: 'saveText', label: 'Хэмнэлт текст', type: 'text' },
+    { key: 'buttonLabel', label: 'Товч текст', type: 'text' },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'highlighted', label: 'Онцлох', type: 'switch' },
+    { key: 'useInfinity', label: '∞ icon', type: 'switch' },
+  ],
+  columns: [
+    { key: 'title', label: 'Төлөвлөгөө', className: 'font-medium' },
+    { key: 'amountMnt', label: 'Үнэ', render: (r) => formatMnt(r.amountMnt) },
+    { key: 'periodLabel', label: 'Хугацаа' },
+    { key: 'highlighted', label: 'Онцлох', render: (r) => (r.highlighted ? '✓' : '—') },
+  ],
+};

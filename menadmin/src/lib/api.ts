@@ -1,0 +1,421 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+export type ApiResponse<T> = {
+  success: boolean;
+  message: string;
+  data: T;
+};
+
+export type User = {
+  id: string;
+  email: string;
+  name: string;
+  role: 'user' | 'admin';
+  membership: string;
+  vitalityScore: number;
+  streakDays: number;
+  totalSessions: number;
+  createdAt: string;
+};
+
+export type WorkoutExercise = {
+  id?: string;
+  name: string;
+  category: string;
+  instruction: string;
+  durationSeconds: number;
+  sets: number;
+  motion: string;
+  motionHint: string;
+  videoUrl?: string | null;
+  thumbnailUrl?: string | null;
+  sortOrder?: number;
+};
+
+export type WorkoutProgram = {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  durationMinutes: number;
+  tag: string;
+  isToday: boolean;
+  sortOrder: number;
+  exercises?: WorkoutExercise[];
+};
+
+export type Article = {
+  id: string;
+  category: string;
+  title: string;
+  excerpt: string;
+  body?: string;
+  author?: string;
+  readMinutes: number;
+  tag?: string;
+  featured: boolean;
+  premium: boolean;
+};
+
+export type HealthBite = {
+  id: string;
+  title: string;
+  body: string;
+  icon: string;
+  sortOrder: number;
+};
+
+export type PremiumPlan = {
+  id: string;
+  title: string;
+  amountMnt: number;
+  periodLabel: string;
+  features: string[];
+  highlighted: boolean;
+  badge?: string;
+  saveText?: string;
+  buttonLabel: string;
+  useInfinity: boolean;
+  sortOrder: number;
+};
+
+export type Payment = {
+  id: string;
+  invoiceId: string;
+  amountMnt: number;
+  status: 'pending' | 'paid' | 'expired' | 'cancelled';
+  planId: string;
+  createdAt: string;
+  user?: { id: string; name: string; email: string };
+  plan?: PremiumPlan;
+};
+
+export type Stats = {
+  users: number;
+  premiumUsers: number;
+  sessions: number;
+  articles: number;
+  programs: number;
+  payments: number;
+  pendingPayments: number;
+  paidRevenue: number;
+  paidRevenueLabel: string;
+  products: number;
+  orders: number;
+  pendingOrders: number;
+  orderRevenue: number;
+  orderRevenueLabel: string;
+  assessmentQuestions: number;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  description: string;
+  priceMnt: number;
+  category: 'supplements' | 'devices' | 'wellness' | 'nutrition';
+  icon: string;
+  gradientStart: string;
+  gradientEnd: string;
+  images: string[];
+  benefits: string[];
+  rating: number;
+  reviewCount: number;
+  inStock: boolean;
+  featured: boolean;
+  badge?: string;
+  sortOrder: number;
+  active: boolean;
+};
+
+export type OrderItem = {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPriceMnt: number;
+  lineTotalMnt: number;
+};
+
+export type Order = {
+  id: string;
+  orderNumber: string;
+  userId?: string;
+  status: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  totalMnt: number;
+  customerName: string;
+  customerPhone?: string;
+  customerEmail?: string;
+  shippingAddress?: string;
+  paymentMethod: string;
+  notes?: string;
+  createdAt: string;
+  items?: OrderItem[];
+  user?: { id: string; name: string; email: string };
+};
+
+export type WorkoutSession = {
+  id: string;
+  userId: string;
+  programId: string;
+  durationSeconds: number;
+  calories: number;
+  completedSets: number;
+  consistencyPercent: number;
+  createdAt: string;
+  user?: { id: string; name: string; email: string };
+  program?: { id: string; title: string };
+};
+
+export type AssessmentQuestion = {
+  id: string;
+  step: number;
+  totalSteps: number;
+  questionKey: string;
+  title: string;
+  helpText?: string;
+  options: Array<{ key: string; title: string; description?: string; icon?: string }>;
+  sortOrder: number;
+  active: boolean;
+};
+
+export type AssessmentAnswerRow = {
+  id: string;
+  userId: string;
+  step: number;
+  questionKey: string;
+  answerKey: string;
+  answerLabel?: string;
+  createdAt: string;
+  user?: { id: string; name: string; email: string };
+};
+
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('admin_token');
+}
+
+export function setToken(token: string) {
+  localStorage.setItem('admin_token', token);
+}
+
+export function clearToken() {
+  localStorage.removeItem('admin_token');
+}
+
+export function isLoggedIn(): boolean {
+  return !!getToken();
+}
+
+export type UploadResult = {
+  url: string;
+  publicId: string;
+  thumbnailUrl?: string;
+  width?: number;
+  height?: number;
+  duration?: number;
+  format?: string;
+  bytes?: number;
+};
+
+async function uploadMultipart(
+  path: string,
+  field: string,
+  file: File
+): Promise<UploadResult> {
+  const form = new FormData();
+  form.append(field, file);
+  const token = getToken();
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: form,
+  });
+  const json = (await res.json()) as ApiResponse<UploadResult>;
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || 'Файл байршуулахад алдаа');
+  }
+  return json.data;
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const json = await res.json();
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || 'Алдаа гарлаа');
+  }
+  return json;
+}
+
+export const api = {
+  login: (email: string, password: string) =>
+    request<{ token: string; user: User }>('/api/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+
+  me: () => request<{ user: User }>('/api/admin/me'),
+
+  stats: () => request<Stats>('/api/admin/stats'),
+
+  upload: {
+    image: (file: File) => uploadMultipart('/api/admin/upload/image', 'image', file),
+    video: (file: File) => uploadMultipart('/api/admin/upload/video', 'video', file),
+  },
+
+  users: {
+    list: () => request<{ users: User[] }>('/api/admin/users'),
+    update: (id: string, data: Partial<User>) =>
+      request<{ user: User }>(`/api/admin/users/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/users/${id}`, { method: 'DELETE' }),
+  },
+
+  workouts: {
+    list: () => request<{ programs: WorkoutProgram[] }>('/api/admin/workouts'),
+    create: (data: Partial<WorkoutProgram> & { exercises?: WorkoutExercise[] }) =>
+      request<{ program: WorkoutProgram }>('/api/admin/workouts', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<WorkoutProgram> & { exercises?: WorkoutExercise[] }) =>
+      request<{ program: WorkoutProgram }>(`/api/admin/workouts/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/workouts/${id}`, { method: 'DELETE' }),
+    uploadVideo: async (file: File) => {
+      const result = await uploadMultipart('/api/admin/upload/video', 'video', file);
+      return result.url;
+    },
+    uploadVideoWithMeta: (file: File) =>
+      uploadMultipart('/api/admin/upload/video', 'video', file),
+    uploadImage: (file: File) => uploadMultipart('/api/admin/upload/image', 'image', file),
+  },
+
+  articles: {
+    list: () => request<{ articles: Article[] }>('/api/admin/articles'),
+    create: (data: Partial<Article>) =>
+      request<{ article: Article }>('/api/admin/articles', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<Article>) =>
+      request<{ article: Article }>(`/api/admin/articles/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/articles/${id}`, { method: 'DELETE' }),
+  },
+
+  healthBites: {
+    list: () => request<{ healthBites: HealthBite[] }>('/api/admin/health-bites'),
+    create: (data: Partial<HealthBite>) =>
+      request<{ healthBite: HealthBite }>('/api/admin/health-bites', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<HealthBite>) =>
+      request<{ healthBite: HealthBite }>(`/api/admin/health-bites/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/health-bites/${id}`, { method: 'DELETE' }),
+  },
+
+  plans: {
+    list: () => request<{ plans: PremiumPlan[] }>('/api/admin/plans'),
+    create: (data: Partial<PremiumPlan>) =>
+      request<{ plan: PremiumPlan }>('/api/admin/plans', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<PremiumPlan>) =>
+      request<{ plan: PremiumPlan }>(`/api/admin/plans/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/plans/${id}`, { method: 'DELETE' }),
+  },
+
+  payments: {
+    list: () => request<{ payments: Payment[] }>('/api/admin/payments'),
+    updateStatus: (id: string, status: Payment['status']) =>
+      request<{ payment: Payment }>(`/api/admin/payments/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      }),
+  },
+
+  products: {
+    list: () => request<{ products: Product[] }>('/api/admin/products'),
+    create: (data: Partial<Product>) =>
+      request<{ product: Product }>('/api/admin/products', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<Product>) =>
+      request<{ product: Product }>(`/api/admin/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/products/${id}`, { method: 'DELETE' }),
+  },
+
+  orders: {
+    list: () => request<{ orders: Order[] }>('/api/admin/orders'),
+    update: (id: string, data: { status?: Order['status']; notes?: string }) =>
+      request<{ order: Order }>(`/api/admin/orders/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+  },
+
+  sessions: {
+    list: () => request<{ sessions: WorkoutSession[] }>('/api/admin/sessions'),
+  },
+
+  assessmentQuestions: {
+    list: () =>
+      request<{ questions: AssessmentQuestion[] }>('/api/admin/assessment-questions'),
+    create: (data: Partial<AssessmentQuestion>) =>
+      request<{ question: AssessmentQuestion }>('/api/admin/assessment-questions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<AssessmentQuestion>) =>
+      request<{ question: AssessmentQuestion }>(`/api/admin/assessment-questions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/assessment-questions/${id}`, { method: 'DELETE' }),
+  },
+
+  assessmentAnswers: {
+    list: () =>
+      request<{ answers: AssessmentAnswerRow[] }>('/api/admin/assessment-answers'),
+  },
+};
+
+export function formatMnt(value: number) {
+  return `${Number(value).toLocaleString('en-US')}₮`;
+}
