@@ -204,10 +204,13 @@ export default function PrivacyPage() {
 
         <footer className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} VitalMen. All rights reserved.</p>
-          <p className="mt-2">
+          <p className="mt-2 space-x-4">
             <a href="mailto:privacy@vitalmen.mn" className="text-primary hover:underline">
               privacy@vitalmen.mn
             </a>
+            <Link href="/support" className="text-primary hover:underline">
+              Support
+            </Link>
           </p>
         </footer>
       </main>
