@@ -6,6 +6,7 @@ import {
   Lightbulb,
   Star,
   CreditCard,
+  Settings,
   ShoppingBag,
   Package,
   Activity,
@@ -32,6 +33,7 @@ export const adminNav: NavItem[] = [
   { href: '/orders', label: 'Захиалгууд', icon: Package, group: 'commerce' },
   { href: '/plans', label: 'Premium төлөвлөгөө', icon: Star, group: 'commerce' },
   { href: '/payments', label: 'QPay төлбөр', icon: CreditCard, group: 'commerce' },
+  { href: '/settings', label: 'Тохиргоо', icon: Settings, group: 'commerce' },
 ];
 
 export const navGroups: { key: NavItem['group']; label: string }[] = [

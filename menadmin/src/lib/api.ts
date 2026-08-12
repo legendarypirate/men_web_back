@@ -79,6 +79,14 @@ export type PremiumPlan = {
   sortOrder: number;
 };
 
+export type PaymentSettings = {
+  qpayEnabled: boolean;
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountName: string;
+  transferNote: string;
+};
+
 export type Payment = {
   id: string;
   invoiceId: string;
@@ -413,6 +421,16 @@ export const api = {
   assessmentAnswers: {
     list: () =>
       request<{ answers: AssessmentAnswerRow[] }>('/api/admin/assessment-answers'),
+  },
+
+  settings: {
+    getPayment: () =>
+      request<{ settings: PaymentSettings }>('/api/admin/settings/payment'),
+    updatePayment: (data: Partial<PaymentSettings>) =>
+      request<{ settings: PaymentSettings }>('/api/admin/settings/payment', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
   },
 };
 

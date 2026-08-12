@@ -12,6 +12,7 @@ const {
   Order,
   OrderItem,
   AssessmentQuestion,
+  PaymentSettings,
 } = require('../models');
 
 const programs = [
@@ -567,6 +568,17 @@ async function seed() {
     lineTotalMnt: 89000,
   });
   console.log('Seeded demo order');
+
+  await PaymentSettings.create({
+    id: 'default',
+    qpayEnabled: true,
+    bankName: 'Хаан банк',
+    bankAccountNumber: '5000123456',
+    bankAccountName: 'VitalMen LLC',
+    transferNote:
+      'Гүйлгээний утга дээр имэйл хаягаа бичнэ үү. Төлбөр баталгаажмагц таны эрх идэвхжинэ.',
+  });
+  console.log('Seeded payment settings');
 
   console.log('Seed complete');
   process.exit(0);

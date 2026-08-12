@@ -20,6 +20,7 @@ const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { adminRequired, signToken } = require('../middleware/auth');
 const { uploadVideo, uploadImage } = require('../middleware/upload');
 const { handleImageUpload, handleVideoUpload } = require('./upload');
+const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
 
 const router = express.Router();
 
@@ -565,6 +566,45 @@ router.delete('/assessment-questions/:id', adminRequired, async (req, res, next)
     if (!question) return fail(res, 'Асуулт олдсонгүй', 404);
     await question.destroy();
     return ok(res, null, 'Асуулт устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Payment settings ---
+router.get('/settings/payment', adminRequired, async (req, res, next) => {
+  try {
+    const settings = await getPaymentSettings();
+    return ok(res, { settings: mapPaymentSettings(settings) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/settings/payment', adminRequired, async (req, res, next) => {
+  try {
+    const settings = await getPaymentSettings();
+    const {
+      qpayEnabled,
+      bankName,
+      bankAccountNumber,
+      bankAccountName,
+      transferNote,
+    } = req.body;
+
+    await settings.update({
+      ...(typeof qpayEnabled === 'boolean' ? { qpayEnabled } : {}),
+      ...(bankName != null ? { bankName: String(bankName).trim() } : {}),
+      ...(bankAccountNumber != null
+        ? { bankAccountNumber: String(bankAccountNumber).trim() }
+        : {}),
+      ...(bankAccountName != null
+        ? { bankAccountName: String(bankAccountName).trim() }
+        : {}),
+      ...(transferNote != null ? { transferNote: String(transferNote).trim() } : {}),
+    });
+
+    return ok(res, { settings: mapPaymentSettings(settings) }, 'Тохиргоо хадгалагдлаа');
   } catch (err) {
     next(err);
   }

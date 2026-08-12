@@ -2,6 +2,7 @@ const express = require('express');
 const { PremiumPlan, Payment } = require('../models');
 const { ok, fail, formatMnt, publicUser } = require('../utils/response');
 const { authRequired, optionalAuth } = require('../middleware/auth');
+const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
 
 const router = express.Router();
 
@@ -14,6 +15,15 @@ function mapPlan(plan) {
   };
 }
 
+router.get('/settings', optionalAuth, async (req, res, next) => {
+  try {
+    const settings = await getPaymentSettings();
+    return ok(res, { settings: mapPaymentSettings(settings) });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/plans', optionalAuth, async (req, res, next) => {
   try {
     const plans = await PremiumPlan.findAll({ order: [['sortOrder', 'ASC']] });
@@ -25,6 +35,11 @@ router.get('/plans', optionalAuth, async (req, res, next) => {
 
 router.post('/qpay/invoice', authRequired, async (req, res, next) => {
   try {
+    const settings = await getPaymentSettings();
+    if (!settings.qpayEnabled) {
+      return fail(res, 'QPay одоогоор идэвхгүй байна', 503);
+    }
+
     const { planId } = req.body;
     const plan = await PremiumPlan.findByPk(planId);
     if (!plan) return fail(res, 'Багц олдсонгүй', 404);
