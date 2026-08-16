@@ -3,8 +3,42 @@ const bcrypt = require('bcryptjs');
 const { User } = require('../models');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired, signToken } = require('../middleware/auth');
+const { verifyGoogleIdToken, isGoogleAuthConfigured } = require('../utils/googleAuth');
 
 const router = express.Router();
+
+async function upsertGoogleUser(payload) {
+  const email = payload.email?.toLowerCase();
+  if (!email) {
+    const err = new Error('Google account has no email');
+    err.status = 400;
+    throw err;
+  }
+
+  const displayName =
+    payload.name || payload.given_name || payload.family_name || 'Хэрэглэгч';
+
+  let user = await User.findOne({ where: { email } });
+  if (!user) {
+    return User.create({
+      email,
+      name: displayName,
+      avatarUrl: payload.picture || null,
+      provider: 'google',
+      passwordHash: null,
+    });
+  }
+
+  const updates = {};
+  if (!user.avatarUrl && payload.picture) updates.avatarUrl = payload.picture;
+  if (user.name === 'Хэрэглэгч' && displayName !== 'Хэрэглэгч') {
+    updates.name = displayName;
+  }
+  if (Object.keys(updates).length) {
+    await user.update(updates);
+  }
+  return user;
+}
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -54,6 +88,29 @@ router.post('/login', async (req, res, next) => {
     const token = signToken(user);
     return ok(res, { token, user: publicUser(user) }, 'Амжилттай нэвтэрлээ');
   } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/google', async (req, res, next) => {
+  try {
+    if (!isGoogleAuthConfigured()) {
+      return fail(res, 'Google нэвтрэлт сервер дээр тохируулаагүй байна', 503);
+    }
+
+    const { idToken } = req.body;
+    if (!idToken) {
+      return fail(res, 'Google idToken шаардлагатай');
+    }
+
+    const payload = await verifyGoogleIdToken(idToken);
+    const user = await upsertGoogleUser(payload);
+    const token = signToken(user);
+    return ok(res, { token, user: publicUser(user) }, 'Google-ээр амжилттай нэвтэрлээ');
+  } catch (err) {
+    if (err.status) {
+      return fail(res, err.message, err.status);
+    }
     next(err);
   }
 });
