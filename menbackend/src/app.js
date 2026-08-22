@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
-const { corsOrigins, isLocalDevOrigin, nodeEnv } = require('./config/env');
+const { corsAllowAll, corsOrigins, isLocalDevOrigin, nodeEnv } = require('./config/env');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
@@ -23,24 +23,22 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   exposedHeaders: ['Content-Length'],
   maxAge: 86400,
-  origin(origin, callback) {
-    // curl / server-to-server
-    if (!origin) return callback(null, true);
-
-    // Explicit allow-list from CORS_ORIGIN (comma-separated)
-    if (corsOrigins?.length) {
-      if (corsOrigins.includes(origin)) return callback(null, true);
-      if (nodeEnv !== 'production' && isLocalDevOrigin(origin)) {
-        return callback(null, true);
-      }
-      console.warn(`[CORS] Blocked origin: ${origin}`);
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    }
-
-    // Default: reflect any browser origin (dev-friendly, works with Authorization header)
-    return callback(null, true);
-  },
 };
+
+if (corsAllowAll) {
+  // Allow any browser origin (*). Works with Authorization header (no cookies).
+  corsOptions.origin = true;
+} else {
+  corsOptions.origin = (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (corsOrigins.includes(origin)) return callback(null, true);
+    if (nodeEnv !== 'production' && isLocalDevOrigin(origin)) {
+      return callback(null, true);
+    }
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  };
+}
 
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
