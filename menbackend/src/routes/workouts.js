@@ -24,6 +24,10 @@ function mapProgram(program) {
       motionHint: e.motionHint,
       videoUrl: e.videoUrl || null,
       thumbnailUrl: e.thumbnailUrl || null,
+      introSlides: (e.introSlides || []).sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      ),
+      phases: (e.phases || []).sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
     }));
 
   const totalSets = exercises.reduce((s, e) => s + e.sets, 0);
@@ -40,6 +44,11 @@ function mapProgram(program) {
     durationMinutes: json.durationMinutes,
     tag: json.tag,
     isToday: json.isToday,
+    videoUrl: json.videoUrl || null,
+    thumbnailUrl: json.thumbnailUrl || null,
+    introSlides: (json.introSlides || []).sort(
+      (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+    ),
     exercises,
     totalSets,
     totalSeconds,

@@ -10,6 +10,16 @@ import {
   emptyExercise,
   WorkoutExercisesEditor,
 } from '@/components/admin/workout-exercises-editor';
+import { WorkoutProgramCarouselPreview } from '@/components/admin/workout-program-carousel-preview';
+import { WorkoutProgramVideoEditor } from '@/components/admin/workout-program-video-editor';
+import { WorkoutIntroSlidesEditor } from '@/components/admin/workout-intro-slides-editor';
+import {
+  normalizeIntroSlides,
+} from '@/lib/workout-intro-slides';
+import {
+  normalizePhases,
+  phaseSequenceTotalSeconds,
+} from '@/lib/workout-phase-templates';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -35,6 +45,9 @@ export default function WorkoutsPage() {
     tag: 'ШИНЭ',
     isToday: false,
     sortOrder: 0,
+    videoUrl: null,
+    thumbnailUrl: null,
+    introSlides: [],
     exercises: [],
   };
 
@@ -62,12 +75,31 @@ export default function WorkoutsPage() {
     try {
       const payload = {
         ...editing,
-        exercises: (editing.exercises || []).map((ex, i) => ({
-          ...ex,
-          sortOrder: i,
-          videoUrl: ex.videoUrl || null,
-          thumbnailUrl: ex.thumbnailUrl || null,
+        videoUrl: editing.videoUrl || null,
+        thumbnailUrl: editing.thumbnailUrl || null,
+        introSlides: normalizeIntroSlides(editing.introSlides).map((slide, j) => ({
+          ...slide,
+          sortOrder: j,
         })),
+        exercises: (editing.exercises || []).map((ex, i) => {
+          const phases = normalizePhases(ex.phases).map((ph, j) => ({
+            ...ph,
+            sortOrder: j,
+          }));
+          const durationFromPhases = phaseSequenceTotalSeconds(phases);
+          return {
+            ...ex,
+            sortOrder: i,
+            videoUrl: ex.videoUrl || null,
+            thumbnailUrl: ex.thumbnailUrl || null,
+            introSlides: normalizeIntroSlides(ex.introSlides).map((slide, j) => ({
+              ...slide,
+              sortOrder: j,
+            })),
+            phases,
+            durationSeconds: durationFromPhases > 0 ? durationFromPhases : ex.durationSeconds,
+          };
+        }),
       };
       if (editing.id && programs.some((p) => p.id === editing.id)) {
         await api.workouts.update(editing.id, payload);
@@ -145,8 +177,11 @@ export default function WorkoutsPage() {
             label: 'Видео',
             align: 'center',
             sortable: false,
-            render: (p) =>
-              p.exercises?.filter((e) => e.videoUrl).length || 0,
+            render: (p) => {
+              const exerciseVideos = p.exercises?.filter((e) => e.videoUrl).length || 0;
+              const programVideo = p.videoUrl ? 1 : 0;
+              return exerciseVideos + programVideo;
+            },
           },
           {
             key: 'isToday',
@@ -161,7 +196,17 @@ export default function WorkoutsPage() {
         onEdit={(p) => {
           setEditing({
             ...p,
-            exercises: p.exercises?.length ? [...p.exercises] : [emptyExercise()],
+            exercises: p.exercises?.length
+              ? p.exercises.map((ex) => {
+                  const phases = normalizePhases(ex.phases);
+                  const total = phaseSequenceTotalSeconds(phases);
+                  return {
+                    ...ex,
+                    phases,
+                    durationSeconds: total > 0 ? total : ex.durationSeconds,
+                  };
+                })
+              : [emptyExercise()],
           });
           setShowForm(true);
         }}
@@ -273,7 +318,38 @@ export default function WorkoutsPage() {
           </div>
 
           {editing && (
-            <WorkoutExercisesEditor
+            <WorkoutProgramVideoEditor
+              videoUrl={editing.videoUrl}
+              thumbnailUrl={editing.thumbnailUrl}
+              onChange={(patch) => setEditing({ ...editing, ...patch })}
+              onUploadVideo={async (file) => {
+                const result = await api.workouts.uploadVideoWithMeta(file);
+                return { url: result.url, thumbnailUrl: result.thumbnailUrl };
+              }}
+            />
+          )}
+
+          {editing && (
+            <WorkoutIntroSlidesEditor
+              title="Program intro story (FB-style)"
+              description="Pelvic stretching эхлэхээс өмнөх story slides. Видео эсвэл зураг upload хийж болно."
+              slides={editing.introSlides || []}
+              onChange={(introSlides) => setEditing({ ...editing, introSlides })}
+              onUploadVideo={async (file) => {
+                const result = await api.workouts.uploadVideoWithMeta(file);
+                return { url: result.url, thumbnailUrl: result.thumbnailUrl };
+              }}
+              onUploadImage={async (file) => {
+                const result = await api.workouts.uploadImage(file);
+                return result.url;
+              }}
+            />
+          )}
+
+          {editing && (
+            <>
+              <WorkoutProgramCarouselPreview exercises={editing.exercises || []} />
+              <WorkoutExercisesEditor
               exercises={editing.exercises || []}
               onChange={(exercises) => setEditing({ ...editing, exercises })}
               onUploadVideo={async (file) => {
@@ -285,6 +361,7 @@ export default function WorkoutsPage() {
                 return result.url;
               }}
             />
+            </>
           )}
         </form>
       </AppDrawer>

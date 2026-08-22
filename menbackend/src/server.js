@@ -1,11 +1,13 @@
 const { envPath, port } = require('./config/env');
 const app = require('./app');
 const { sequelize } = require('./models');
+const { ensureWorkoutPrograms } = require('./bootstrap/ensureWorkoutPrograms');
 
 async function start() {
   try {
     await sequelize.authenticate();
-    await sequelize.sync();
+    await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
+    await ensureWorkoutPrograms();
     console.log('Database connected');
     console.log(`Loaded env from: ${envPath}`);
 

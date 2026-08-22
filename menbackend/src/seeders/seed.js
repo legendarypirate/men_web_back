@@ -14,6 +14,12 @@ const {
   AssessmentQuestion,
   PaymentSettings,
 } = require('../models');
+const {
+  defaultPhasesForMotion,
+  kegelHoldSequence,
+  breathPhases,
+  coreBracePhases,
+} = require('../data/exercisePhases');
 
 const programs = [
   {
@@ -38,6 +44,12 @@ const programs = [
         motionHint: 'Аарцгийн булчингаа чангалж барь',
         videoUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         thumbnailUrl: null,
+        phases: kegelHoldSequence('Кегелийн барих', {
+          holdBlockSec: 25,
+          relaxTabSec: 15,
+          innerHoldSec: 5,
+          innerRelaxSec: 5,
+        }),
       },
       {
         name: 'Гүн амьсгал',
@@ -48,6 +60,7 @@ const programs = [
         sets: 3,
         motion: 'breath',
         motionHint: 'Цээжээ өргөж гүн амьсгал',
+        phases: breathPhases(5, 10),
       },
       {
         name: 'Гол булчингийн идэвхжүүлэлт',
@@ -58,6 +71,7 @@ const programs = [
         sets: 3,
         motion: 'coreBrace',
         motionHint: 'Хэвлийгээ чангалж тогтворжуул',
+        phases: coreBracePhases(),
       },
       {
         name: 'Суниалт',
@@ -200,6 +214,39 @@ const programs = [
       },
     ],
   },
+  {
+    id: 'pelvic_stretching_pro',
+    title: 'Pelvic Stretching Pro',
+    description:
+      'Promotes flexibility and relaxation in the pelvic area, reducing muscle fatigue and overactivity',
+    level: 'Advanced',
+    durationMinutes: 17,
+    tag: 'PELVIC STRETCHING',
+    isToday: false,
+    sortOrder: 10,
+    videoUrl: null,
+    thumbnailUrl: null,
+    exercises: [
+      {
+        name: 'Warrior II',
+        category: 'ХОНГО БА ААРЦАГ',
+        instruction: 'Хөлөө мөрнөөс өргөн тавьж сунгалт хийнэ.',
+        durationSeconds: 80,
+        sets: 1,
+        motion: 'coreBrace',
+        motionHint: 'Урагш чиглэн тогтвортой байрлал хадгал',
+      },
+      {
+        name: 'Legs on the wall',
+        category: 'ЦУСНЫ ЭРГЭЛТ БА ТАЙВШРАЛ',
+        instruction: 'Хөлөө хана дагуулан дээш өргөнө.',
+        durationSeconds: 123,
+        sets: 1,
+        motion: 'breath',
+        motionHint: 'Гүн амьсгалж хэвлийн хэсгийг бүрэн сулла',
+      },
+    ],
+  },
 ];
 
 async function seed() {
@@ -247,6 +294,9 @@ async function seed() {
     for (let i = 0; i < exercises.length; i++) {
       await WorkoutExercise.create({
         ...exercises[i],
+        phases:
+          exercises[i].phases ??
+          defaultPhasesForMotion(exercises[i].motion),
         programId: program.id,
         sortOrder: i,
       });

@@ -18,6 +18,31 @@ export type User = {
   createdAt: string;
 };
 
+export type WorkoutExercisePhase = {
+  sortOrder?: number;
+  label: string;
+  phaseType: string;
+  durationSeconds: number;
+  vibrationEnabled: boolean;
+  vibrationIntervalMs: number;
+  holdSeconds?: number;
+  relaxSeconds?: number;
+  showInCarousel?: boolean;
+};
+
+export type WorkoutIntroSlide = {
+  sortOrder?: number;
+  title: string;
+  subtitle?: string;
+  body?: string;
+  videoUrl?: string | null;
+  imageUrl?: string | null;
+  durationSeconds?: number;
+  gradientStart?: string;
+  gradientMid?: string;
+  gradientEnd?: string;
+};
+
 export type WorkoutExercise = {
   id?: string;
   name: string;
@@ -30,6 +55,8 @@ export type WorkoutExercise = {
   videoUrl?: string | null;
   thumbnailUrl?: string | null;
   sortOrder?: number;
+  introSlides?: WorkoutIntroSlide[];
+  phases?: WorkoutExercisePhase[];
 };
 
 export type WorkoutProgram = {
@@ -41,6 +68,9 @@ export type WorkoutProgram = {
   tag: string;
   isToday: boolean;
   sortOrder: number;
+  videoUrl?: string | null;
+  thumbnailUrl?: string | null;
+  introSlides?: WorkoutIntroSlide[];
   exercises?: WorkoutExercise[];
 };
 

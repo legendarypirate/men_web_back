@@ -15,6 +15,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { WorkoutPhasesEditor } from '@/components/admin/workout-phases-editor';
+import { WorkoutIntroSlidesEditor } from '@/components/admin/workout-intro-slides-editor';
+import {
+  carouselTabLabels,
+  normalizePhases,
+  phaseSequenceTotalSeconds,
+  primaryHoldDurationSeconds,
+  primaryHoldPhaseIndex,
+  syncHoldTabDuration,
+  templateForMotion,
+} from '@/lib/workout-phase-templates';
 
 const MOTIONS = [
   'kegelHold',
@@ -36,7 +47,9 @@ export const emptyExercise = (): WorkoutExercise => ({
   motionHint: '',
   videoUrl: '',
   thumbnailUrl: '',
+  introSlides: [],
   sortOrder: 0,
+  phases: [],
 });
 
 type Props = {
@@ -59,8 +72,35 @@ export function WorkoutExercisesEditor({
   const thumbFileRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   function update(index: number, patch: Partial<WorkoutExercise>) {
-    const next = exercises.map((ex, i) => (i === index ? { ...ex, ...patch } : ex));
+    const next = exercises.map((ex, i) => {
+      if (i !== index) return ex;
+      const merged = { ...ex, ...patch };
+      if (patch.phases) {
+        const phases = normalizePhases(patch.phases);
+        merged.phases = phases;
+        merged.durationSeconds = phaseSequenceTotalSeconds(phases) || merged.durationSeconds;
+      }
+      return merged;
+    });
     onChange(next);
+  }
+
+  function updatePhases(index: number, phases: WorkoutExercise['phases']) {
+    const normalized = normalizePhases(phases);
+    update(index, {
+      phases: normalized,
+      durationSeconds: phaseSequenceTotalSeconds(normalized),
+    });
+  }
+
+  function updateHoldDuration(index: number, holdSeconds: number) {
+    const phaseList = normalizePhases(exercises[index].phases);
+    if (primaryHoldPhaseIndex(phaseList) >= 0) {
+      const synced = syncHoldTabDuration(phaseList, holdSeconds);
+      updatePhases(index, synced);
+      return;
+    }
+    update(index, { durationSeconds: holdSeconds });
   }
 
   function addExercise() {
@@ -109,6 +149,12 @@ export function WorkoutExercisesEditor({
     }
   }
 
+  function removeVideo(index: number) {
+    const videoInput = videoFileRefs.current[index];
+    if (videoInput) videoInput.value = '';
+    update(index, { videoUrl: '', thumbnailUrl: '' });
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -131,6 +177,10 @@ export function WorkoutExercisesEditor({
       ) : (
         exercises.map((exercise, index) => {
           const open = expanded === index;
+          const phaseList = normalizePhases(exercise.phases);
+          const holdDuration =
+            primaryHoldDurationSeconds(phaseList) ?? exercise.durationSeconds;
+          const tabPreview = carouselTabLabels(phaseList, exercise.name || 'Дасгал');
           return (
             <div
               key={index}
@@ -153,7 +203,13 @@ export function WorkoutExercisesEditor({
                     <p className="truncate text-xs text-[#95a5a6]">
                       {exercise.category || 'Ангилал'} · {exercise.sets} багц ·{' '}
                       {exercise.durationSeconds}с
-                      {exercise.videoUrl ? ' · 🎬 видео' : ''}
+                      {phaseList.length > 0
+                        ? ` · ${phaseList.length} таб`
+                        : ''}
+                      {tabPreview.length > 0
+                        ? ` · ${tabPreview.slice(0, 2).join(' → ')}${tabPreview.length > 2 ? '…' : ''}`
+                        : ''}
+                      {exercise.videoUrl ? ' · 🎬' : ''}
                     </p>
                   </div>
                 </button>
@@ -229,15 +285,24 @@ export function WorkoutExercisesEditor({
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Хугацаа (сек)</Label>
+                      <Label>
+                        {primaryHoldPhaseIndex(phaseList) >= 0
+                          ? 'Чангалж барих (сек)'
+                          : 'Хугацаа (сек)'}
+                      </Label>
                       <Input
                         type="number"
                         min={5}
-                        value={exercise.durationSeconds}
+                        value={holdDuration}
                         onChange={(e) =>
-                          update(index, { durationSeconds: Number(e.target.value) })
+                          updateHoldDuration(index, Number(e.target.value))
                         }
                       />
+                      <p className="text-[10px] text-[#95a5a6]">
+                        {primaryHoldPhaseIndex(phaseList) >= 0
+                          ? `Багцийн нийт: ${phaseSequenceTotalSeconds(phaseList)}с (апп дээр энэ табын ${holdDuration}с харагдана)`
+                          : `Таб нэмэхэд автоматаар тооцогдоно (одоо ${phaseSequenceTotalSeconds(phaseList)}с)`}
+                      </p>
                     </div>
                     <div className="space-y-1.5 sm:col-span-2">
                       <Label>Хөдөлгөөн</Label>
@@ -266,6 +331,22 @@ export function WorkoutExercisesEditor({
                       onChange={(e) => update(index, { motionHint: e.target.value })}
                     />
                   </div>
+
+                  <WorkoutPhasesEditor
+                    phases={phaseList}
+                    exerciseName={exercise.name}
+                    motion={exercise.motion}
+                    onChange={(phases) => updatePhases(index, phases)}
+                  />
+
+                  <WorkoutIntroSlidesEditor
+                    title={`${exercise.name || 'Дасгал'} — intro story`}
+                    description="Энэ дасгал эхлэхээс өмнөх FB-style story slides (видео/зураг)."
+                    slides={exercise.introSlides || []}
+                    onChange={(introSlides) => update(index, { introSlides })}
+                    onUploadVideo={onUploadVideo}
+                    onUploadImage={onUploadImage}
+                  />
 
                   <div className="rounded-lg border border-[#e8ecef] bg-[#fafbfc] p-3">
                     <div className="mb-2 flex items-center gap-2">
@@ -301,14 +382,26 @@ export function WorkoutExercisesEditor({
                             : 'Видео байршуулах'}
                         </Button>
                         {exercise.videoUrl && (
-                          <a
-                            href={exercise.videoUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs font-medium text-[#1abc9c] hover:underline"
-                          >
-                            Видео үзэх
-                          </a>
+                          <>
+                            <a
+                              href={exercise.videoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs font-medium text-[#1abc9c] hover:underline"
+                            >
+                              Видео үзэх
+                            </a>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => removeVideo(index)}
+                            >
+                              <Trash2 className="size-4" />
+                              Видео устгах
+                            </Button>
+                          </>
                         )}
                       </div>
                       <Input

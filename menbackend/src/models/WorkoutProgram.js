@@ -15,6 +15,13 @@ const WorkoutProgram = sequelize.define(
     tag: { type: DataTypes.STRING, defaultValue: 'ӨНӨӨДРИЙН ДАСГАЛ' },
     isToday: { type: DataTypes.BOOLEAN, defaultValue: false },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
+    videoUrl: { type: DataTypes.STRING, allowNull: true },
+    thumbnailUrl: { type: DataTypes.STRING, allowNull: true },
+    introSlides: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+    },
   },
   {
     tableName: 'workout_programs',

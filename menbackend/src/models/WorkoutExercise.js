@@ -34,6 +34,16 @@ const WorkoutExercise = sequelize.define(
     videoUrl: { type: DataTypes.STRING, allowNull: true },
     thumbnailUrl: { type: DataTypes.STRING, allowNull: true },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
+    phases: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+    },
+    introSlides: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: [],
+    },
   },
   {
     tableName: 'workout_exercises',
