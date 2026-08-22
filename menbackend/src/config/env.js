@@ -38,6 +38,28 @@ function megabytesFromEnv(name, defaultMb) {
 const uploadVideoMaxBytes = megabytesFromEnv("UPLOAD_VIDEO_MAX_MB", 512);
 const uploadImageMaxBytes = megabytesFromEnv("UPLOAD_IMAGE_MAX_MB", 20);
 
+function parseCorsOrigins() {
+  const raw = process.env.CORS_ORIGIN;
+  if (!raw || raw.trim() === "" || raw.trim() === "*") {
+    return null;
+  }
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+const corsOrigins = parseCorsOrigins();
+
+function isLocalDevOrigin(origin) {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname === "127.0.0.1";
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
   envPath,
   jwtSecret,
@@ -48,4 +70,6 @@ module.exports = {
   uploadImageMaxBytes,
   uploadVideoMaxMb: Math.round(uploadVideoMaxBytes / (1024 * 1024)),
   uploadImageMaxMb: Math.round(uploadImageMaxBytes / (1024 * 1024)),
+  corsOrigins,
+  isLocalDevOrigin,
 };

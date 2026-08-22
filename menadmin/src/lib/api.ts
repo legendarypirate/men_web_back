@@ -1,4 +1,45 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+/**
+ * Browser API base URL.
+ * - Unset NEXT_PUBLIC_API_URL → same-origin `/api` (Next.js proxy, no CORS).
+ * - Set NEXT_PUBLIC_API_URL → direct cross-origin calls (backend CORS must allow admin origin).
+ */
+function resolveApiBaseUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+  if (explicit) return explicit;
+
+  if (typeof window !== 'undefined') {
+    return '';
+  }
+
+  return (
+    process.env.API_PROXY_TARGET?.replace(/\/$/, '') ||
+    'http://127.0.0.1:3001'
+  );
+}
+
+const API_URL = resolveApiBaseUrl();
+
+async function parseApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
+  const text = await res.text();
+  try {
+    return JSON.parse(text) as ApiResponse<T>;
+  } catch {
+    if (res.status === 413) {
+      throw new Error(
+        'Файлын хэмжээ хэтэрсэн (413). Backend UPLOAD_VIDEO_MAX_MB болон nginx client_max_body_size шалгана уу.'
+      );
+    }
+    if (res.status === 0 || res.type === 'opaque') {
+      throw new Error(
+        'CORS алдаа: admin болон API өөр domain дээр байна. NEXT_PUBLIC_API_URL-ийг хоослох эсвэл backend CORS_ORIGIN-д admin URL нэмнэ үү.'
+      );
+    }
+    throw new Error(
+      text?.slice(0, 120) ||
+        `Серверийн алдаа (${res.status}). Network tab-аас бодит статус кодыг шалгана уу.`
+    );
+  }
+}
 
 export type ApiResponse<T> = {
   success: boolean;
@@ -269,7 +310,7 @@ async function uploadMultipart(
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: form,
   });
-  const json = (await res.json()) as ApiResponse<UploadResult>;
+  const json = await parseApiResponse<UploadResult>(res);
   if (!res.ok || !json.success) {
     throw new Error(json.message || 'Файл байршуулахад алдаа');
   }
@@ -288,7 +329,7 @@ async function request<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
-  const json = await res.json();
+  const json = await parseApiResponse<T>(res);
   if (!res.ok || !json.success) {
     throw new Error(json.message || 'Алдаа гарлаа');
   }
