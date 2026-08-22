@@ -1,10 +1,11 @@
 const multer = require('multer');
+const { uploadVideoMaxBytes, uploadImageMaxBytes } = require('../config/env');
 
 const memoryStorage = multer.memoryStorage();
 
 const uploadVideo = multer({
   storage: memoryStorage,
-  limits: { fileSize: 100 * 1024 * 1024 },
+  limits: { fileSize: uploadVideoMaxBytes },
   fileFilter: (_req, file, cb) => {
     const isVideo =
       file.mimetype.startsWith('video/') ||
@@ -19,7 +20,7 @@ const uploadVideo = multer({
 
 const uploadImage = multer({
   storage: memoryStorage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: uploadImageMaxBytes },
   fileFilter: (_req, file, cb) => {
     const isImage =
       file.mimetype.startsWith('image/') ||

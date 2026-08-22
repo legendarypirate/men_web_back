@@ -1,4 +1,5 @@
 const { fail } = require('../utils/response');
+const { uploadVideoMaxMb, uploadImageMaxMb } = require('../config/env');
 
 function notFound(req, res) {
   return fail(res, `Олдсонгүй: ${req.method} ${req.originalUrl}`, 404);
@@ -7,7 +8,13 @@ function notFound(req, res) {
 function errorHandler(err, req, res, next) {
   console.error(err);
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return fail(res, 'Файлын хэмжээ хэтэрсэн байна', 413);
+    const isVideo = req.path.includes('/video');
+    const maxMb = isVideo ? uploadVideoMaxMb : uploadImageMaxMb;
+    return fail(
+      res,
+      `Файлын хэмжээ хэтэрсэн байна (хамгийн ихдээ ${maxMb} MB)`,
+      413
+    );
   }
   if (err.name === 'MulterError') {
     return fail(res, err.message || 'Файл байршуулахад алдаа', 400);
