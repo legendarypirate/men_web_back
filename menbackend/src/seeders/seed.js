@@ -13,6 +13,9 @@ const {
   OrderItem,
   AssessmentQuestion,
   PaymentSettings,
+  Hospital,
+  CoachSetting,
+  CoachProgram,
 } = require('../models');
 const {
   defaultPhasesForMotion,
@@ -20,6 +23,12 @@ const {
   breathPhases,
   coreBracePhases,
 } = require('../data/exercisePhases');
+const {
+  hospitals,
+  coachSetting,
+  coachPrograms,
+  kegelDetailSections,
+} = require('../data/seedContent');
 
 const programs = [
   {
@@ -444,6 +453,7 @@ async function seed() {
         'https://picsum.photos/seed/vitalmen-kegel-trainer-2/800/800',
       ],
       benefits: ['Био-feedback хяналт', 'App интеграци', 'Эмчээр баталгаажсан'],
+      detailSections: kegelDetailSections,
       rating: 4.9,
       reviewCount: 128,
       featured: true,
@@ -629,6 +639,13 @@ async function seed() {
       'Гүйлгээний утга дээр имэйл хаягаа бичнэ үү. Төлбөр баталгаажмагц таны эрх идэвхжинэ.',
   });
   console.log('Seeded payment settings');
+
+  await Hospital.bulkCreate(hospitals);
+  console.log(`Seeded ${hospitals.length} hospitals`);
+
+  await CoachSetting.create(coachSetting);
+  await CoachProgram.bulkCreate(coachPrograms);
+  console.log(`Seeded coach settings and ${coachPrograms.length} coach programs`);
 
   console.log('Seed complete');
   process.exit(0);

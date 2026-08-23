@@ -20,6 +20,7 @@ const Product = sequelize.define(
     gradientEnd: { type: DataTypes.STRING, defaultValue: '#14B8A6' },
     images: { type: DataTypes.JSON, defaultValue: [] },
     benefits: { type: DataTypes.JSON, defaultValue: [] },
+    detailSections: { type: DataTypes.JSON, defaultValue: [] },
     rating: { type: DataTypes.DECIMAL(2, 1), defaultValue: 4.5 },
     reviewCount: { type: DataTypes.INTEGER, defaultValue: 0 },
     inStock: { type: DataTypes.BOOLEAN, defaultValue: true },

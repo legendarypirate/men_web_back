@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { api, Product } from '@/lib/api';
 import { formatMnt } from '@/lib/api';
 import { ProductImagesEditor } from '@/components/admin/product-images-editor';
+import { ProductDetailSectionsEditor } from '@/components/admin/product-detail-sections-editor';
 import { StringListEditor } from '@/components/admin/string-list-editor';
 import { AppDrawer } from '@/components/custom/app-drawer';
 import { AppTable } from '@/components/custom/app-table';
@@ -50,6 +51,7 @@ export default function ProductsPage() {
     gradientEnd: '#14B8A6',
     images: [],
     benefits: [],
+    detailSections: [],
     rating: 4.5,
     reviewCount: 0,
     inStock: true,
@@ -84,6 +86,7 @@ export default function ProductsPage() {
         ...editing,
         images: editing.images || [],
         benefits: editing.benefits || [],
+        detailSections: editing.detailSections || [],
       };
       if (editing.id && products.some((p) => p.id === editing.id)) {
         await api.products.update(editing.id, payload);
@@ -199,6 +202,7 @@ export default function ProductsPage() {
             ...p,
             images: p.images?.length ? [...p.images] : [],
             benefits: p.benefits?.length ? [...p.benefits] : [],
+            detailSections: p.detailSections?.length ? [...p.detailSections] : [],
           });
           setShowForm(true);
         }}
@@ -366,6 +370,13 @@ export default function ProductsPage() {
             onChange={(benefits) => editing && setEditing({ ...editing, benefits })}
             placeholder="Давуу талыг оруулна уу..."
             addLabel="Давуу тал нэмэх"
+          />
+
+          <ProductDetailSectionsEditor
+            sections={editing?.detailSections || []}
+            onChange={(detailSections) =>
+              editing && setEditing({ ...editing, detailSections })
+            }
           />
 
           <div className="flex flex-wrap gap-6">

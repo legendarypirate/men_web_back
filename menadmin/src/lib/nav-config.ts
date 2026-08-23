@@ -11,6 +11,8 @@ import {
   Package,
   Activity,
   ClipboardList,
+  Hospital,
+  UserCircle2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,6 +28,8 @@ export const adminNav: NavItem[] = [
   { href: '/users', label: 'Хэрэглэгчид', icon: Users, group: 'users' },
   { href: '/sessions', label: 'Дасгалын сесс', icon: Activity, group: 'users' },
   { href: '/workouts', label: 'Дасгалууд', icon: Dumbbell, group: 'content' },
+  { href: '/coach', label: 'Коуч', icon: UserCircle2, group: 'content' },
+  { href: '/hospitals', label: 'Эмнэлэг', icon: Hospital, group: 'content' },
   { href: '/articles', label: 'Нийтлэлүүд', icon: Newspaper, group: 'content' },
   { href: '/health-bites', label: 'Эрүүл мэнд', icon: Lightbulb, group: 'content' },
   { href: '/assessment', label: 'Үнэлгээ', icon: ClipboardList, group: 'content' },

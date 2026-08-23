@@ -185,6 +185,8 @@ export type Stats = {
   orderRevenue: number;
   orderRevenueLabel: string;
   assessmentQuestions: number;
+  hospitals: number;
+  coachPrograms: number;
 };
 
 export type Product = {
@@ -198,11 +200,77 @@ export type Product = {
   gradientEnd: string;
   images: string[];
   benefits: string[];
+  detailSections?: ProductDetailSection[];
   rating: number;
   reviewCount: number;
   inStock: boolean;
   featured: boolean;
   badge?: string;
+  sortOrder: number;
+  active: boolean;
+};
+
+export type ProductDetailSection = {
+  title: string;
+  description: string;
+  dosage?: string;
+  ingredients?: string;
+  sortOrder?: number;
+};
+
+export type HospitalDoctor = {
+  id: string;
+  name: string;
+  specialty: string;
+  experienceYears?: number;
+  bio?: string;
+};
+
+export type HospitalService = {
+  id: string;
+  name: string;
+  priceMnt: number;
+  category?: string;
+  doctorId?: string;
+  description?: string;
+};
+
+export type Hospital = {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  imageUrl?: string;
+  openHours?: string;
+  description: string;
+  tags: string[];
+  doctors: HospitalDoctor[];
+  services: HospitalService[];
+  sortOrder: number;
+  active: boolean;
+};
+
+export type CoachSetting = {
+  id: string;
+  screenTitle: string;
+  bannerTitle: string;
+  bannerSubtitle: string;
+  coachName: string;
+  coachRole: string;
+  coachImageUrl?: string;
+  learnMoreLabel: string;
+  active: boolean;
+};
+
+export type CoachProgram = {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  duration: string;
+  exerciseCount: number;
+  imageUrl?: string;
+  section: 'main' | 'recommended' | 'courses';
   sortOrder: number;
   active: boolean;
 };
@@ -502,6 +570,46 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+  },
+
+  hospitals: {
+    list: () => request<{ hospitals: Hospital[] }>('/api/admin/hospitals'),
+    create: (data: Partial<Hospital>) =>
+      request<{ hospital: Hospital }>('/api/admin/hospitals', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<Hospital>) =>
+      request<{ hospital: Hospital }>(`/api/admin/hospitals/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/hospitals/${id}`, { method: 'DELETE' }),
+  },
+
+  coach: {
+    getSettings: () =>
+      request<{ settings: CoachSetting }>('/api/admin/coach/settings'),
+    updateSettings: (data: Partial<CoachSetting>) =>
+      request<{ settings: CoachSetting }>('/api/admin/coach/settings', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    listPrograms: () =>
+      request<{ programs: CoachProgram[] }>('/api/admin/coach/programs'),
+    createProgram: (data: Partial<CoachProgram>) =>
+      request<{ program: CoachProgram }>('/api/admin/coach/programs', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    updateProgram: (id: string, data: Partial<CoachProgram>) =>
+      request<{ program: CoachProgram }>(`/api/admin/coach/programs/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    removeProgram: (id: string) =>
+      request<null>(`/api/admin/coach/programs/${id}`, { method: 'DELETE' }),
   },
 };
 

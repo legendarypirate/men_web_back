@@ -1,5 +1,5 @@
 import { ResourceConfig } from '@/lib/types/fields';
-import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan } from '@/lib/api';
+import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan, Hospital, CoachProgram } from '@/lib/api';
 import { formatMnt } from '@/lib/api';
 import { StatusBadge } from '@/components/page-ui';
 
@@ -179,5 +179,103 @@ export const planConfig: ResourceConfig<PremiumPlan> = {
     { key: 'amountMnt', label: 'Үнэ', render: (r) => formatMnt(r.amountMnt) },
     { key: 'periodLabel', label: 'Хугацаа' },
     { key: 'highlighted', label: 'Онцлох', render: (r) => (r.highlighted ? '✓' : '—') },
+  ],
+};
+
+const coachSectionOptions = [
+  { label: 'Main program', value: 'main' },
+  { label: 'Recommended', value: 'recommended' },
+  { label: 'Courses', value: 'courses' },
+];
+
+export const hospitalConfig: ResourceConfig<Hospital> = {
+  title: 'Эмнэлгүүд',
+  itemLabel: 'эмнэлэг',
+  idKey: 'id',
+  listKey: 'hospitals',
+  itemKey: 'hospital',
+  emptyDefaults: {
+    tags: [],
+    doctors: [],
+    services: [],
+    sortOrder: 0,
+    active: true,
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true },
+    { key: 'name', label: 'Нэр', type: 'text', required: true },
+    { key: 'address', label: 'Хаяг', type: 'textarea', required: true, rows: 2 },
+    { key: 'phone', label: 'Утас', type: 'text', required: true },
+    { key: 'imageUrl', label: 'Зураг URL', type: 'text' },
+    { key: 'openHours', label: 'Ажиллах цаг', type: 'text' },
+    { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
+    { key: 'tags', label: 'Tag-ууд', type: 'string-list', placeholder: 'Tag...', hint: 'Tag нэмэх' },
+    {
+      key: 'doctors',
+      label: 'Эмч нар (JSON)',
+      type: 'json',
+      rows: 8,
+      hint: '[{"id":"d1","name":"...","specialty":"..."}]',
+    },
+    {
+      key: 'services',
+      label: 'Үйлчилгээ (JSON)',
+      type: 'json',
+      rows: 10,
+      hint: '[{"id":"s1","name":"...","priceMnt":45000,"category":"...","doctorId":"d1"}]',
+    },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'name', label: 'Эмнэлэг', className: 'font-medium' },
+    { key: 'phone', label: 'Утас' },
+    {
+      key: 'services',
+      label: 'Үйлчилгээ',
+      align: 'center',
+      render: (row) => row.services?.length || 0,
+    },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+    { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+  ],
+};
+
+export const coachProgramConfig: ResourceConfig<CoachProgram> = {
+  title: 'Коуч хөтөлбөрүүд',
+  itemLabel: 'хөтөлбөр',
+  idKey: 'id',
+  listKey: 'programs',
+  itemKey: 'program',
+  emptyDefaults: {
+    section: 'recommended',
+    exerciseCount: 0,
+    sortOrder: 0,
+    active: true,
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true },
+    { key: 'title', label: 'Гарчиг', type: 'text', required: true },
+    { key: 'category', label: 'Ангилал', type: 'text', required: true },
+    { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
+    { key: 'duration', label: 'Хугацаа', type: 'text', placeholder: '6 weeks' },
+    { key: 'exerciseCount', label: 'Дасгал тоо', type: 'number' },
+    { key: 'imageUrl', label: 'Зураг URL', type: 'text' },
+    { key: 'section', label: 'Хэсэг', type: 'select', options: coachSectionOptions },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'title', label: 'Гарчиг', className: 'font-medium' },
+    {
+      key: 'section',
+      label: 'Хэсэг',
+      render: (row) =>
+        coachSectionOptions.find((option) => option.value === row.section)?.label ||
+        row.section,
+    },
+    { key: 'category', label: 'Ангилал' },
+    { key: 'duration', label: 'Хугацаа', align: 'center' },
+    { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
   ],
 };

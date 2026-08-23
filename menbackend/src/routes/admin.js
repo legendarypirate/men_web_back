@@ -15,6 +15,9 @@ const {
   OrderItem,
   AssessmentQuestion,
   AssessmentAnswer,
+  Hospital,
+  CoachProgram,
+  CoachSetting,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { adminRequired, signToken } = require('../middleware/auth');
@@ -68,6 +71,8 @@ router.get('/stats', adminRequired, async (req, res, next) => {
       pendingOrders,
       orderRevenue,
       assessmentQuestions,
+      hospitals,
+      coachPrograms,
     ] = await Promise.all([
       User.count(),
       WorkoutSession.count(),
@@ -83,6 +88,8 @@ router.get('/stats', adminRequired, async (req, res, next) => {
         where: { status: { [Op.in]: ['paid', 'processing', 'shipped', 'delivered'] } },
       }),
       AssessmentQuestion.count({ where: { active: true } }),
+      Hospital.count({ where: { active: true } }),
+      CoachProgram.count({ where: { active: true } }),
     ]);
 
     const premiumUsers = await User.count({
@@ -105,6 +112,8 @@ router.get('/stats', adminRequired, async (req, res, next) => {
       orderRevenue: orderRevenue || 0,
       orderRevenueLabel: formatMnt(orderRevenue || 0),
       assessmentQuestions,
+      hospitals,
+      coachPrograms,
     });
   } catch (err) {
     next(err);
@@ -605,6 +614,125 @@ router.patch('/settings/payment', adminRequired, async (req, res, next) => {
     });
 
     return ok(res, { settings: mapPaymentSettings(settings) }, 'Тохиргоо хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Hospitals ---
+router.get('/hospitals', adminRequired, async (req, res, next) => {
+  try {
+    const hospitals = await Hospital.findAll({
+      order: [['sortOrder', 'ASC'], ['name', 'ASC']],
+    });
+    return ok(res, { hospitals });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/hospitals', adminRequired, async (req, res, next) => {
+  try {
+    if (!req.body.id || !req.body.name) {
+      return fail(res, 'id болон name шаардлагатай');
+    }
+    const hospital = await Hospital.create(req.body);
+    return ok(res, { hospital }, 'Эмнэлэг нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/hospitals/:id', adminRequired, async (req, res, next) => {
+  try {
+    const hospital = await Hospital.findByPk(req.params.id);
+    if (!hospital) return fail(res, 'Эмнэлэг олдсонгүй', 404);
+    await hospital.update(req.body);
+    return ok(res, { hospital }, 'Эмнэлэг шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/hospitals/:id', adminRequired, async (req, res, next) => {
+  try {
+    const hospital = await Hospital.findByPk(req.params.id);
+    if (!hospital) return fail(res, 'Эмнэлэг олдсонгүй', 404);
+    await hospital.destroy();
+    return ok(res, null, 'Эмнэлэг устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Coach settings ---
+router.get('/coach/settings', adminRequired, async (req, res, next) => {
+  try {
+    let settings = await CoachSetting.findByPk('default');
+    if (!settings) {
+      settings = await CoachSetting.create({ id: 'default' });
+    }
+    return ok(res, { settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/coach/settings', adminRequired, async (req, res, next) => {
+  try {
+    let settings = await CoachSetting.findByPk('default');
+    if (!settings) {
+      settings = await CoachSetting.create({ id: 'default', ...req.body });
+    } else {
+      await settings.update(req.body);
+    }
+    return ok(res, { settings }, 'Коуч тохиргоо хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Coach programs ---
+router.get('/coach/programs', adminRequired, async (req, res, next) => {
+  try {
+    const programs = await CoachProgram.findAll({
+      order: [['section', 'ASC'], ['sortOrder', 'ASC']],
+    });
+    return ok(res, { programs });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/coach/programs', adminRequired, async (req, res, next) => {
+  try {
+    if (!req.body.id || !req.body.title || !req.body.section) {
+      return fail(res, 'id, title, section шаардлагатай');
+    }
+    const program = await CoachProgram.create(req.body);
+    return ok(res, { program }, 'Коуч хөтөлбөр нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/coach/programs/:id', adminRequired, async (req, res, next) => {
+  try {
+    const program = await CoachProgram.findByPk(req.params.id);
+    if (!program) return fail(res, 'Хөтөлбөр олдсонгүй', 404);
+    await program.update(req.body);
+    return ok(res, { program }, 'Хөтөлбөр шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/coach/programs/:id', adminRequired, async (req, res, next) => {
+  try {
+    const program = await CoachProgram.findByPk(req.params.id);
+    if (!program) return fail(res, 'Хөтөлбөр олдсонгүй', 404);
+    await program.destroy();
+    return ok(res, null, 'Хөтөлбөр устгагдлаа');
   } catch (err) {
     next(err);
   }
