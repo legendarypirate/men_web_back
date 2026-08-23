@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { ResourceManager } from '@/components/admin/resource-manager';
-import { api, CoachSetting } from '@/lib/api';
+import { api, CoachProgram, CoachSetting } from '@/lib/api';
 import { coachProgramConfig } from '@/lib/resource-configs';
 import { ErrorState, LoadingState, PageHeader } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
@@ -162,7 +162,7 @@ export default function CoachPage() {
       <ResourceManager
         config={coachProgramConfig}
         api={coachProgramsApi}
-        getNewItem={() => ({
+        getNewItem={(): Partial<CoachProgram> => ({
           id: `coach_${Date.now()}`,
           section: 'recommended',
         })}
