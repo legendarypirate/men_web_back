@@ -105,7 +105,7 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       {
         order: full,
         totalLabel: formatMnt(totalMnt),
-        qrPayload: `VitalMen|${orderNumber}|${totalMnt}`,
+        qrPayload: `Tenkhee|${orderNumber}|${totalMnt}`,
       },
       'Захиалга үүслээ',
       201

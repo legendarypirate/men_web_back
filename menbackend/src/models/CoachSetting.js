@@ -16,7 +16,7 @@ const CoachSetting = sequelize.define(
     },
     bannerSubtitle: {
       type: DataTypes.TEXT,
-      defaultValue: 'Expert 1:1 support is now available inside VitalMen.',
+      defaultValue: 'Expert 1:1 support is now available inside Tenkhee.',
     },
     coachName: { type: DataTypes.STRING, defaultValue: 'Dr. Sarah Chen' },
     coachRole: { type: DataTypes.STRING, defaultValue: 'Sexual Health Coach' },

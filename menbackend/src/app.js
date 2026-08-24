@@ -50,7 +50,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'VitalMen API is running',
+    message: 'Tenkhee API is running',
     time: new Date().toISOString(),
   });
 });
@@ -58,7 +58,7 @@ app.get('/health', (req, res) => {
 app.get('/api', (req, res) => {
   res.json({
     success: true,
-    name: 'VitalMen API',
+    name: 'Tenkhee API',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',

@@ -265,12 +265,12 @@ async function seed() {
   console.log('Database synced (force)');
 
   const passwordHash = await bcrypt.hash('password123', 10);
-  const adminHash = await bcrypt.hash('VitalMen@2026', 10);
+  const adminHash = await bcrypt.hash('Tenkhee@2026', 10);
 
   const demoUser = await User.create({
-    email: 'admin@vitalmen.mn',
+    email: 'admin@tenkhee.mn',
     passwordHash: adminHash,
-    name: 'VitalMen Админ',
+    name: 'Tenkhee Админ',
     role: 'admin',
     membership: 'platinum',
     darkMode: true,
@@ -278,12 +278,12 @@ async function seed() {
   });
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('  DEMO ADMIN LOGIN');
-  console.log('  Email:    admin@vitalmen.mn');
-  console.log('  Password: VitalMen@2026');
+  console.log('  Email:    admin@tenkhee.mn');
+  console.log('  Password: Tenkhee@2026');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   const demoAppUser = await User.create({
-    email: 'demo@vitalmen.mn',
+    email: 'demo@tenkhee.mn',
     passwordHash,
     name: 'Доктор Жеймс Стерлинг',
     membership: 'platinum',
@@ -297,7 +297,7 @@ async function seed() {
     darkMode: true,
     language: 'mn',
   });
-  console.log('Demo app user: demo@vitalmen.mn / password123');
+  console.log('Demo app user: demo@tenkhee.mn / password123');
 
   for (const program of programs) {
     const { exercises, ...programData } = program;
@@ -429,9 +429,9 @@ async function seed() {
       gradientStart: '#0F766E',
       gradientEnd: '#14B8A6',
       images: [
-        'https://picsum.photos/seed/vitalmen-mag-glycinate-1/800/800',
-        'https://picsum.photos/seed/vitalmen-mag-glycinate-2/800/800',
-        'https://picsum.photos/seed/vitalmen-mag-glycinate-3/800/800',
+        'https://picsum.photos/seed/tenkhee-mag-glycinate-1/800/800',
+        'https://picsum.photos/seed/tenkhee-mag-glycinate-2/800/800',
+        'https://picsum.photos/seed/tenkhee-mag-glycinate-3/800/800',
       ],
       benefits: ['Нойрны чанарыг сайжруулна', 'Булчингийн сэргээлтийг дэмжинэ', 'Стрессийн түвшинг бууруулна'],
       rating: 4.8,
@@ -451,8 +451,8 @@ async function seed() {
       gradientStart: '#1E3A5F',
       gradientEnd: '#2563EB',
       images: [
-        'https://picsum.photos/seed/vitalmen-kegel-trainer-1/800/800',
-        'https://picsum.photos/seed/vitalmen-kegel-trainer-2/800/800',
+        'https://picsum.photos/seed/tenkhee-kegel-trainer-1/800/800',
+        'https://picsum.photos/seed/tenkhee-kegel-trainer-2/800/800',
       ],
       benefits: ['Био-feedback хяналт', 'App интеграци', 'Эмчээр баталгаажсан'],
       detailSections: kegelDetailSections,
@@ -472,9 +472,9 @@ async function seed() {
       gradientStart: '#92400E',
       gradientEnd: '#F59E0B',
       images: [
-        'https://picsum.photos/seed/vitalmen-testo-support-1/800/800',
-        'https://picsum.photos/seed/vitalmen-testo-support-2/800/800',
-        'https://picsum.photos/seed/vitalmen-testo-support-3/800/800',
+        'https://picsum.photos/seed/tenkhee-testo-support-1/800/800',
+        'https://picsum.photos/seed/tenkhee-testo-support-2/800/800',
+        'https://picsum.photos/seed/tenkhee-testo-support-3/800/800',
       ],
       benefits: ['Эрчим хүчийг нэмэгдүүлнэ', 'Гормоны тэнцвэрийг дэмжинэ', '90 хоногийн хөтөлбөр'],
       rating: 4.6,
@@ -491,8 +491,8 @@ async function seed() {
       gradientStart: '#166534',
       gradientEnd: '#22C55E',
       images: [
-        'https://picsum.photos/seed/vitalmen-prostate-formula-1/800/800',
-        'https://picsum.photos/seed/vitalmen-prostate-formula-2/800/800',
+        'https://picsum.photos/seed/tenkhee-prostate-formula-1/800/800',
+        'https://picsum.photos/seed/tenkhee-prostate-formula-2/800/800',
       ],
       benefits: ['Простат эрүүл мэндийг дэмжинэ', '40+ насны эрчүүдэд', 'GMP баталгаажсан'],
       rating: 4.7,
@@ -509,8 +509,8 @@ async function seed() {
       gradientStart: '#312E81',
       gradientEnd: '#6366F1',
       images: [
-        'https://picsum.photos/seed/vitalmen-sleep-recovery-1/800/800',
-        'https://picsum.photos/seed/vitalmen-sleep-recovery-2/800/800',
+        'https://picsum.photos/seed/tenkhee-sleep-recovery-1/800/800',
+        'https://picsum.photos/seed/tenkhee-sleep-recovery-2/800/800',
       ],
       benefits: ['REM нойрыг дэмжинэ', 'HRV сайжруулна', 'Өглөө сэргэлтэй'],
       rating: 4.5,
@@ -527,9 +527,9 @@ async function seed() {
       gradientStart: '#0C4A6E',
       gradientEnd: '#0EA5E9',
       images: [
-        'https://picsum.photos/seed/vitalmen-omega3-men-1/800/800',
-        'https://picsum.photos/seed/vitalmen-omega3-men-2/800/800',
-        'https://picsum.photos/seed/vitalmen-omega3-men-3/800/800',
+        'https://picsum.photos/seed/tenkhee-omega3-men-1/800/800',
+        'https://picsum.photos/seed/tenkhee-omega3-men-2/800/800',
+        'https://picsum.photos/seed/tenkhee-omega3-men-3/800/800',
       ],
       benefits: ['Зүрхний эрүүл мэнд', 'Тархины функц', '60 капсул'],
       rating: 4.4,
@@ -546,8 +546,8 @@ async function seed() {
       gradientStart: '#7C2D12',
       gradientEnd: '#EA580C',
       images: [
-        'https://picsum.photos/seed/vitalmen-protein-recovery-1/800/800',
-        'https://picsum.photos/seed/vitalmen-protein-recovery-2/800/800',
+        'https://picsum.photos/seed/tenkhee-protein-recovery-1/800/800',
+        'https://picsum.photos/seed/tenkhee-protein-recovery-2/800/800',
       ],
       benefits: ['25г уураг/анги', 'BCAA + creatine', 'Шоколад амт'],
       rating: 4.6,
@@ -564,9 +564,9 @@ async function seed() {
       gradientStart: '#374151',
       gradientEnd: '#6B7280',
       images: [
-        'https://picsum.photos/seed/vitalmen-tens-massager-1/800/800',
-        'https://picsum.photos/seed/vitalmen-tens-massager-2/800/800',
-        'https://picsum.photos/seed/vitalmen-tens-massager-3/800/800',
+        'https://picsum.photos/seed/tenkhee-tens-massager-1/800/800',
+        'https://picsum.photos/seed/tenkhee-tens-massager-2/800/800',
+        'https://picsum.photos/seed/tenkhee-tens-massager-3/800/800',
       ],
       benefits: ['6 массажны горим', 'Утасгүй, 8 цаг ажиллана', 'Эмчийн зөвлөмжтэй'],
       rating: 4.3,
@@ -617,7 +617,7 @@ async function seed() {
     totalMnt: 89000,
     customerName: 'Доктор Жеймс Стерлинг',
     customerPhone: '99112233',
-    customerEmail: 'demo@vitalmen.mn',
+    customerEmail: 'demo@tenkhee.mn',
     shippingAddress: 'Улаанбаатар, СБД',
     paymentMethod: 'qpay',
   });
@@ -636,7 +636,7 @@ async function seed() {
     qpayEnabled: true,
     bankName: 'Хаан банк',
     bankAccountNumber: '5000123456',
-    bankAccountName: 'VitalMen LLC',
+    bankAccountName: 'Tenkhee LLC',
     transferNote:
       'Гүйлгээний утга дээр имэйл хаягаа бичнэ үү. Төлбөр баталгаажмагц таны эрх идэвхжинэ.',
   });

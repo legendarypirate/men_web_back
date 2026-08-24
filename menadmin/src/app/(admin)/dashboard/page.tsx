@@ -28,7 +28,7 @@ export default function DashboardPage() {
     <div>
       <PageHeader
         title="Хяналтын самбар"
-        subtitle="VitalMen аппын бүх модулийг эндээс удирдана"
+        subtitle="Tenkhee аппын бүх модулийг эндээс удирдана"
       />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Хэрэглэгч" value={stats.users} hint={`${stats.premiumUsers} premium`} />

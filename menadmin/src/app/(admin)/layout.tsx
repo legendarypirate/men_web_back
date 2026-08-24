@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               V
             </div>
             <div>
-              <p className="font-semibold">VitalMen</p>
+              <p className="font-semibold">Tenkhee</p>
               <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
-          <span className="text-sm text-muted-foreground">VitalMen апп бүрэн удирдлага</span>
+          <span className="text-sm text-muted-foreground">Tenkhee апп бүрэн удирдлага</span>
           <div className="ml-auto">
             <ThemeSwitcher />
           </div>

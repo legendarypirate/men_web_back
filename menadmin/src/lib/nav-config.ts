@@ -48,6 +48,6 @@ export const navGroups: { key: NavItem['group']; label: string }[] = [
 ];
 
 export const DEMO_ADMIN = {
-  email: 'admin@vitalmen.mn',
-  password: 'VitalMen@2026',
+  email: 'admin@tenkhee.mn',
+  password: 'Tenkhee@2026',
 };

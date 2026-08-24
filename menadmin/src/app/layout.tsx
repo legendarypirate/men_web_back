@@ -12,8 +12,8 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'VitalMen Admin',
-  description: 'VitalMen удирдлагын самбар',
+  title: 'Tenkhee Admin',
+  description: 'Tenkhee удирдлагын самбар',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

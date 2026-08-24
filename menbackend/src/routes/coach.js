@@ -17,7 +17,7 @@ router.get('/', async (req, res, next) => {
     const banner = settings || {
       screenTitle: 'Explore',
       bannerTitle: 'Private Coaching Is Now Available',
-      bannerSubtitle: 'Expert 1:1 support is now available inside VitalMen.',
+      bannerSubtitle: 'Expert 1:1 support is now available inside Tenkhee.',
       coachName: 'Dr. Sarah Chen',
       coachRole: 'Sexual Health Coach',
       coachImageUrl: null,

@@ -1,6 +1,6 @@
-# VitalMen Admin
+# Tenkhee Admin
 
-Next.js admin panel for managing VitalMen content and users.
+Next.js admin panel for managing Tenkhee content and users.
 
 Built with **shadcn/ui** (Tailwind v4, dark theme, M-Bank green accent).
 
@@ -21,7 +21,7 @@ npm run dev
 
 Open http://localhost:3000 and login with:
 
-- **Email:** `admin@vitalmen.mn`
+- **Email:** `admin@tenkhee.mn`
 - **Password:** `admin123`
 
 ## Features

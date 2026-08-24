@@ -7,7 +7,7 @@ const DEFAULTS = {
   qpayEnabled: true,
   bankName: 'Хаан банк',
   bankAccountNumber: '5000123456',
-  bankAccountName: 'VitalMen LLC',
+  bankAccountName: 'Tenkhee LLC',
   transferNote:
     'Гүйлгээний утга дээр имэйл хаягаа бичнэ үү. Төлбөр баталгаажмагц таны эрх идэвхжинэ.',
 };

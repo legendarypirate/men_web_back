@@ -27,7 +27,7 @@ const PaymentSettings = sequelize.define(
     bankAccountName: {
       type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: 'VitalMen LLC',
+      defaultValue: 'Tenkhee LLC',
     },
     transferNote: {
       type: DataTypes.TEXT,

@@ -1,7 +1,7 @@
 const hospitals = [
   {
-    id: 'vitalmen-urology',
-    name: 'VitalMen Аарцгийн эмнэлэг',
+    id: 'tenkhee-urology',
+    name: 'Tenkhee Аарцгийн эмнэлэг',
     address: 'СБД, 1-р хороо, Чингисийн өргөн чөлөө 15',
     phone: '7700-1234',
     imageUrl:
@@ -230,7 +230,7 @@ const coachSetting = {
   id: 'default',
   screenTitle: 'Explore',
   bannerTitle: 'Private Coaching Is Now Available',
-  bannerSubtitle: 'Expert 1:1 support is now available inside VitalMen.',
+  bannerSubtitle: 'Expert 1:1 support is now available inside Tenkhee.',
   coachName: 'Dr. Sarah Chen',
   coachRole: 'Sexual Health Coach',
   coachImageUrl:

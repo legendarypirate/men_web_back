@@ -49,7 +49,7 @@ export default function LoginPage() {
             <div className="mx-auto mb-2 flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-2xl font-bold text-primary">
               V
             </div>
-            <CardTitle className="text-2xl">VitalMen Admin</CardTitle>
+            <CardTitle className="text-2xl">Tenkhee Admin</CardTitle>
             <CardDescription>Апп бүрэн удирдах самбар</CardDescription>
           </CardHeader>
           <CardContent>

@@ -75,7 +75,7 @@ function mapPayment(payment, plan, extra = {}) {
     expiresAt: payment.expiresAt,
     paidAt: payment.paidAt,
     plan: plan ? mapPlan(plan) : null,
-    merchant: 'VitalMen LLC',
+    merchant: 'Tenkhee LLC',
     ...extra,
   };
 }
@@ -207,7 +207,7 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
     const stamp = Date.now();
     const senderInvoiceNo = `VM-${plan.id.toUpperCase()}-${stamp}`;
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-    const description = `VitalMen Premium — ${plan.title}`;
+    const description = `Tenkhee Premium — ${plan.title}`;
 
     if (!requireQPayConfigured(res)) return;
 
@@ -226,7 +226,7 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
     const invoiceId = qpayInvoice.invoiceId;
     const qrImage = qpayInvoice.qrImage;
     const qrText = qpayInvoice.qrText;
-    const qrPayload = qrText || `QPAY|VITALMEN|INVOICE=${invoiceId}|amount=${amountMnt}`;
+    const qrPayload = qrText || `QPAY|TENKHEE|INVOICE=${invoiceId}|amount=${amountMnt}`;
     const bankUrls = qpayInvoice.bankUrls;
 
     console.log('[QPay] Invoice created', {

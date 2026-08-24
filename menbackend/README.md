@@ -1,6 +1,6 @@
-# VitalMen Backend
+# Tenkhee Backend
 
-Express + Sequelize + PostgreSQL API for the VitalMen Flutter app.
+Express + Sequelize + PostgreSQL API for the Tenkhee Flutter app.
 
 ## Setup
 
@@ -29,8 +29,8 @@ npm run dev
 
 ## Credentials
 
-- **Admin:** `admin@vitalmen.mn` / `admin123`
-- **Demo user:** `demo@vitalmen.mn` / `password123`
+- **Admin:** `admin@tenkhee.mn` / `admin123`
+- **Demo user:** `demo@tenkhee.mn` / `password123`
 
 ## API
 

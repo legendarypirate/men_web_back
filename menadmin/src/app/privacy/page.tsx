@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — VitalMen',
+  title: 'Privacy Policy — Tenkhee',
   description:
-    'VitalMen mobile application privacy policy. Learn how we collect, use, and protect your personal information.',
+    'Tenkhee mobile application privacy policy. Learn how we collect, use, and protect your personal information.',
   robots: { index: true, follow: true },
 };
 
@@ -13,12 +13,12 @@ const sections = [
     title: '1. Introduction',
     titleMn: '1. Оршил',
     body: [
-      'VitalMen (“we”, “our”, or “us”) operates the VitalMen mobile application and related services (the “Service”). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our app.',
-      'By using VitalMen, you agree to the collection and use of information in accordance with this policy. If you do not agree, please do not use the Service.',
+      'Tenkhee (“we”, “our”, or “us”) operates the Tenkhee mobile application and related services (the “Service”). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our app.',
+      'By using Tenkhee, you agree to the collection and use of information in accordance with this policy. If you do not agree, please do not use the Service.',
     ],
     bodyMn: [
-      'VitalMen (“бид”) нь VitalMen гар утасны апп болон холбогдох үйлчилгээг (“Үйлчилгээ”) үзүүлдэг. Энэхүү Нууцлалын бодлого нь та манай аппыг ашиглах үед таны мэдээллийг хэрхэн цуглуулж, ашиглаж, хамгаалдаг талаар тайлбарлана.',
-      'VitalMen-ийг ашигласнаар та энэ бодлогын дагуу мэдээлэл цуглуулж, ашиглахыг зөвшөөрч байна. Хэрэв та зөвшөөрөхгүй бол Үйлчилгээг ашиглахгүй байна уу.',
+      'Tenkhee (“бид”) нь Tenkhee гар утасны апп болон холбогдох үйлчилгээг (“Үйлчилгээ”) үзүүлдэг. Энэхүү Нууцлалын бодлого нь та манай аппыг ашиглах үед таны мэдээллийг хэрхэн цуглуулж, ашиглаж, хамгаалдаг талаар тайлбарлана.',
+      'Tenkhee-ийг ашигласнаар та энэ бодлогын дагуу мэдээлэл цуглуулж, ашиглахыг зөвшөөрч байна. Хэрэв та зөвшөөрөхгүй бол Үйлчилгээг ашиглахгүй байна уу.',
     ],
   },
   {
@@ -43,7 +43,7 @@ const sections = [
     title: '3. How We Use Your Information',
     titleMn: '3. Мэдээллийг хэрхэн ашигладаг вэ',
     body: [
-      'Provide, maintain, and improve the VitalMen app and personalized workout experiences.',
+      'Provide, maintain, and improve the Tenkhee app and personalized workout experiences.',
       'Process subscriptions, in-app purchases, and shop orders.',
       'Track your fitness progress and display relevant content.',
       'Send important service notifications and respond to support requests.',
@@ -51,7 +51,7 @@ const sections = [
       'Comply with applicable laws and regulations.',
     ],
     bodyMn: [
-      'VitalMen апп болон хувийн дасгалын туршлагыг үзүүлж, сайжруулах.',
+      'Tenkhee апп болон хувийн дасгалын туршлагыг үзүүлж, сайжруулах.',
       'Гишүүнчлэл, дэлгүүрийн захиалга, төлбөрийг боловсруулах.',
       'Таны фитнесийн явцыг хадгалж, холбогдох контент харуулах.',
       'Чухал мэдэгдэл илгээх, дэмжлэгийн хүсэлтэд хариулах.',
@@ -65,12 +65,12 @@ const sections = [
     body: [
       'We do not sell your personal information.',
       'We may share data with trusted service providers who help us operate the Service (hosting, payment processors, cloud storage for media assets), subject to confidentiality obligations.',
-      'We may disclose information if required by law, court order, or to protect the rights, safety, and security of VitalMen and our users.',
+      'We may disclose information if required by law, court order, or to protect the rights, safety, and security of Tenkhee and our users.',
     ],
     bodyMn: [
       'Бид таны хувийн мэдээллийг худалдаж, борлуулдаггүй.',
       'Үйлчилгээ ажиллуулахад туслах найдвартай үйлчилгээ үзүүлэгчидтэй (hosting, төлбөр, медиа хадгалалт) нууцлалын үүрэгтэйгээр хуваалцаж болно.',
-      'Хууль, шүүхийн шийдвэрээр шаардлагатай бол, эсвэл VitalMen болон хэрэглэгчдийн эрх, аюулгүй байдлыг хамгаалах зорилгоор илчлэж болно.',
+      'Хууль, шүүхийн шийдвэрээр шаардлагатай бол, эсвэл Tenkhee болон хэрэглэгчдийн эрх, аюулгүй байдлыг хамгаалах зорилгоор илчлэж болно.',
     ],
   },
   {
@@ -107,10 +107,10 @@ const sections = [
     title: "7. Children's Privacy",
     titleMn: '7. Хүүхдийн нууцлал',
     body: [
-      'VitalMen is intended for adults (18 years and older). We do not knowingly collect personal information from children under 13 (or under 16 in certain regions). If you believe we have collected such data, please contact us and we will delete it promptly.',
+      'Tenkhee is intended for adults (18 years and older). We do not knowingly collect personal information from children under 13 (or under 16 in certain regions). If you believe we have collected such data, please contact us and we will delete it promptly.',
     ],
     bodyMn: [
-      'VitalMen нь насанд хүрэгчдэд (18+) зориулагдсан. Бид 13-аас доош (зарим бүс нутагт 16-аас доош) насны хүүхдээс мэдээлэл цуглуулдаггүй. Ийм мэдээлэл цугласан гэж үзвэл бидэнтэй холбогдоод устгуулна уу.',
+      'Tenkhee нь насанд хүрэгчдэд (18+) зориулагдсан. Бид 13-аас доош (зарим бүс нутагт 16-аас доош) насны хүүхдээс мэдээлэл цуглуулдаггүй. Ийм мэдээлэл цугласан гэж үзвэл бидэнтэй холбогдоод устгуулна уу.',
     ],
   },
   {
@@ -138,15 +138,15 @@ const sections = [
     titleMn: '10. Холбоо барих',
     body: [
       'If you have questions about this Privacy Policy or your personal data, contact us at:',
-      'Email: privacy@vitalmen.mn',
-      'App name: VitalMen',
-      'Developer: VitalMen',
+      'Email: privacy@tenkhee.mn',
+      'App name: Tenkhee',
+      'Developer: Tenkhee',
     ],
     bodyMn: [
       'Энэ бодлого эсвэл хувийн мэдээллийн талаар асуулт байвал холбогдоно уу:',
-      'И-мэйл: privacy@vitalmen.mn',
-      'Апп: VitalMen',
-      'Хөгжүүлэгч: VitalMen',
+      'И-мэйл: privacy@tenkhee.mn',
+      'Апп: Tenkhee',
+      'Хөгжүүлэгч: Tenkhee',
     ],
   },
 ];
@@ -159,7 +159,7 @@ export default function PrivacyPage() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
           <div>
-            <p className="text-sm font-semibold text-primary">VitalMen</p>
+            <p className="text-sm font-semibold text-primary">Tenkhee</p>
             <h1 className="text-2xl font-bold tracking-tight">Privacy Policy</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Нууцлалын бодлого · Last updated: {lastUpdated}
@@ -176,7 +176,7 @@ export default function PrivacyPage() {
 
       <main className="mx-auto max-w-3xl px-6 py-10">
         <p className="mb-8 rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
-          This page is the official privacy policy URL for the VitalMen mobile app,
+          This page is the official privacy policy URL for the Tenkhee mobile app,
           submitted to Google Play and Apple App Store. It is available publicly at{' '}
           <strong className="text-foreground">/privacy</strong>.
         </p>
@@ -203,10 +203,10 @@ export default function PrivacyPage() {
         </div>
 
         <footer className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} VitalMen. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Tenkhee. All rights reserved.</p>
           <p className="mt-2 space-x-4">
-            <a href="mailto:privacy@vitalmen.mn" className="text-primary hover:underline">
-              privacy@vitalmen.mn
+            <a href="mailto:privacy@tenkhee.mn" className="text-primary hover:underline">
+              privacy@tenkhee.mn
             </a>
             <Link href="/support" className="text-primary hover:underline">
               Support

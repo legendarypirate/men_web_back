@@ -14,7 +14,7 @@ async function start() {
     console.log(`Loaded env from: ${envPath}`);
 
     app.listen(port, '0.0.0.0', () => {
-      console.log(`VitalMen API listening on http://0.0.0.0:${port}`);
+      console.log(`Tenkhee API listening on http://0.0.0.0:${port}`);
       console.log(`Health: http://localhost:${port}/health`);
       console.log(`API map: http://localhost:${port}/api`);
     });

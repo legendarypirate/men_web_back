@@ -1,6 +1,6 @@
-# VitalMen — Backend & Admin
+# Tenkhee — Backend & Admin
 
-Monorepo for VitalMen API and admin panel.
+Monorepo for Tenkhee API and admin panel.
 
 | Project | Port | Stack |
 |---------|------|-------|
@@ -13,10 +13,10 @@ After running seed:
 
 | | |
 |---|---|
-| **Email** | `admin@vitalmen.mn` |
-| **Password** | `VitalMen@2026` |
+| **Email** | `admin@tenkhee.mn` |
+| **Password** | `Tenkhee@2026` |
 
-Demo app user: `demo@vitalmen.mn` / `password123`
+Demo app user: `demo@tenkhee.mn` / `password123`
 
 ## Quick start
 

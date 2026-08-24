@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Light mode (default) — VitalMen teal #1ABC9C inspired */
+/* Light mode (default) — Tenkhee teal #1ABC9C inspired */
 :root {
   --font-heading: var(--font-sans);
   --background: #f4f6f8;

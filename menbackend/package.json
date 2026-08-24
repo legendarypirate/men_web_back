@@ -1,7 +1,7 @@
 {
   "name": "menbackend",
   "version": "1.0.0",
-  "description": "VitalMen API — Express + Sequelize backend for the Flutter app",
+  "description": "Tenkhee API — Express + Sequelize backend for the Flutter app",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

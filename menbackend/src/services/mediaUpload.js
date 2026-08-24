@@ -20,7 +20,7 @@ function videoThumbnailUrl(publicId) {
   });
 }
 
-async function uploadImage(file, { folder = 'vitalmen/images' } = {}) {
+async function uploadImage(file, { folder = 'tenkhee/images' } = {}) {
   const result = await uploadBuffer(file.buffer, {
     folder,
     resource_type: 'image',
@@ -37,7 +37,7 @@ async function uploadImage(file, { folder = 'vitalmen/images' } = {}) {
   };
 }
 
-async function uploadVideo(file, { folder = 'vitalmen/videos' } = {}) {
+async function uploadVideo(file, { folder = 'tenkhee/videos' } = {}) {
   const result = await uploadBuffer(file.buffer, {
     folder,
     resource_type: 'video',
