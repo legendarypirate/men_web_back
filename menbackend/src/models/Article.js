@@ -16,8 +16,12 @@ const Article = sequelize.define(
     author: { type: DataTypes.STRING, allowNull: true },
     readMinutes: { type: DataTypes.INTEGER, defaultValue: 5 },
     tag: { type: DataTypes.STRING, allowNull: true },
+    imageUrl: { type: DataTypes.STRING, allowNull: true },
     featured: { type: DataTypes.BOOLEAN, defaultValue: false },
     premium: { type: DataTypes.BOOLEAN, defaultValue: false },
+    isNew: { type: DataTypes.BOOLEAN, defaultValue: false },
+    sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
+    published: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
   {
     tableName: 'articles',

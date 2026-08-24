@@ -14,6 +14,7 @@ const CoachProgram = sequelize.define(
     duration: { type: DataTypes.STRING, allowNull: false },
     exerciseCount: { type: DataTypes.INTEGER, defaultValue: 0 },
     imageUrl: { type: DataTypes.STRING, allowNull: true },
+    promoCode: { type: DataTypes.STRING, allowNull: true },
     section: {
       type: DataTypes.ENUM('main', 'recommended', 'courses'),
       allowNull: false,

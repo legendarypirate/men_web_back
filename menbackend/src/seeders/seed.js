@@ -16,6 +16,7 @@ const {
   Hospital,
   CoachSetting,
   CoachProgram,
+  PromoCode,
 } = require('../models');
 const {
   defaultPhasesForMotion,
@@ -28,6 +29,7 @@ const {
   coachSetting,
   coachPrograms,
   kegelDetailSections,
+  promoCodes,
 } = require('../data/seedContent');
 
 const programs = [
@@ -645,7 +647,10 @@ async function seed() {
 
   await CoachSetting.create(coachSetting);
   await CoachProgram.bulkCreate(coachPrograms);
-  console.log(`Seeded coach settings and ${coachPrograms.length} coach programs`);
+  await PromoCode.bulkCreate(promoCodes);
+  console.log(
+    `Seeded coach settings, ${coachPrograms.length} coach programs, ${promoCodes.length} promo codes`
+  );
 
   console.log('Seed complete');
   process.exit(0);

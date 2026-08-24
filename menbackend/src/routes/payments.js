@@ -3,6 +3,11 @@ const { PremiumPlan, Payment } = require('../models');
 const { ok, fail, formatMnt, publicUser } = require('../utils/response');
 const { authRequired, optionalAuth } = require('../middleware/auth');
 const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
+const {
+  validatePromoCode,
+  incrementPromoUsage,
+  normalizeCode,
+} = require('../utils/promoCode');
 
 const router = express.Router();
 
@@ -33,6 +38,34 @@ router.get('/plans', optionalAuth, async (req, res, next) => {
   }
 });
 
+router.post('/promo/validate', authRequired, async (req, res, next) => {
+  try {
+    const { code, planId } = req.body;
+    if (!code || !planId) {
+      return fail(res, 'Promo код болон багц шаардлагатай');
+    }
+
+    const plan = await PremiumPlan.findByPk(planId);
+    if (!plan) return fail(res, 'Багц олдсонгүй', 404);
+
+    const result = await validatePromoCode(code, plan.id, plan.amountMnt);
+    if (!result.valid) {
+      return fail(res, result.message || 'Promo код хүчингүй');
+    }
+
+    return ok(res, {
+      promo: {
+        ...result,
+        originalAmountLabel: formatMnt(result.originalAmountMnt),
+        discountAmountLabel: formatMnt(result.discountMnt),
+        finalAmountLabel: formatMnt(result.finalAmountMnt),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/qpay/invoice', authRequired, async (req, res, next) => {
   try {
     const settings = await getPaymentSettings();
@@ -40,20 +73,39 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
       return fail(res, 'QPay одоогоор идэвхгүй байна', 503);
     }
 
-    const { planId } = req.body;
+    const { planId, promoCode } = req.body;
     const plan = await PremiumPlan.findByPk(planId);
     if (!plan) return fail(res, 'Багц олдсонгүй', 404);
+
+    let amountMnt = plan.amountMnt;
+    let originalAmountMnt = plan.amountMnt;
+    let discountMnt = 0;
+    let appliedPromoCode = null;
+
+    if (promoCode) {
+      const promo = await validatePromoCode(promoCode, plan.id, plan.amountMnt);
+      if (!promo.valid) {
+        return fail(res, promo.message || 'Promo код хүчингүй');
+      }
+      amountMnt = promo.finalAmountMnt;
+      originalAmountMnt = promo.originalAmountMnt;
+      discountMnt = promo.discountMnt;
+      appliedPromoCode = normalizeCode(promo.code);
+    }
 
     const stamp = Date.now();
     const invoiceId = `VM-${plan.id.toUpperCase()}-${stamp}`;
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-    const qrPayload = `QPAY|MERCHANT=VITALMEN|INVOICE=${invoiceId}|amount=${plan.amountMnt}|currency=MNT|desc=${plan.title}`;
+    const qrPayload = `QPAY|MERCHANT=VITALMEN|INVOICE=${invoiceId}|amount=${amountMnt}|currency=MNT|desc=${plan.title}`;
 
     const payment = await Payment.create({
       userId: req.user.id,
       planId: plan.id,
       invoiceId,
-      amountMnt: plan.amountMnt,
+      amountMnt,
+      originalAmountMnt,
+      discountMnt,
+      promoCode: appliedPromoCode,
       currency: 'MNT',
       status: 'pending',
       qrPayload,
@@ -68,6 +120,14 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
           invoiceId: payment.invoiceId,
           amountMnt: payment.amountMnt,
           amountLabel: formatMnt(payment.amountMnt),
+          originalAmountMnt: payment.originalAmountMnt,
+          originalAmountLabel: payment.originalAmountMnt
+            ? formatMnt(payment.originalAmountMnt)
+            : null,
+          discountMnt: payment.discountMnt,
+          discountAmountLabel:
+            payment.discountMnt > 0 ? formatMnt(payment.discountMnt) : null,
+          promoCode: payment.promoCode,
           currency: payment.currency,
           status: payment.status,
           qrPayload: payment.qrPayload,
@@ -115,6 +175,14 @@ router.get('/qpay/:invoiceId', authRequired, async (req, res, next) => {
         invoiceId: payment.invoiceId,
         amountMnt: payment.amountMnt,
         amountLabel: formatMnt(payment.amountMnt),
+        originalAmountMnt: payment.originalAmountMnt,
+        originalAmountLabel: payment.originalAmountMnt
+          ? formatMnt(payment.originalAmountMnt)
+          : null,
+        discountMnt: payment.discountMnt,
+        discountAmountLabel:
+          payment.discountMnt > 0 ? formatMnt(payment.discountMnt) : null,
+        promoCode: payment.promoCode,
         status: payment.status,
         qrPayload: payment.qrPayload,
         expiresAt: payment.expiresAt,
@@ -127,7 +195,6 @@ router.get('/qpay/:invoiceId', authRequired, async (req, res, next) => {
   }
 });
 
-// Demo: mark invoice paid (simulates QPay callback / "Төлбөр шалгах")
 router.post('/qpay/:invoiceId/confirm', authRequired, async (req, res, next) => {
   try {
     const payment = await Payment.findOne({
@@ -144,6 +211,10 @@ router.post('/qpay/:invoiceId/confirm', authRequired, async (req, res, next) => 
     payment.status = 'paid';
     payment.paidAt = new Date();
     await payment.save();
+
+    if (payment.promoCode) {
+      await incrementPromoUsage(payment.promoCode);
+    }
 
     const user = req.user;
     user.membership = payment.planId === 'lifetime' ? 'lifetime' : payment.planId;

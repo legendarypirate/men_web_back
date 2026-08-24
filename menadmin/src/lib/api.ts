@@ -124,8 +124,12 @@ export type Article = {
   author?: string;
   readMinutes: number;
   tag?: string;
+  imageUrl?: string;
   featured: boolean;
   premium: boolean;
+  isNew: boolean;
+  sortOrder: number;
+  published: boolean;
 };
 
 export type HealthBite = {
@@ -259,6 +263,19 @@ export type CoachSetting = {
   coachRole: string;
   coachImageUrl?: string;
   learnMoreLabel: string;
+  promoCode?: string;
+  active: boolean;
+};
+
+export type PromoCode = {
+  code: string;
+  label: string;
+  discountPercent: number;
+  coachProgramId?: string;
+  planIds: string[];
+  maxUses?: number;
+  usedCount: number;
+  expiresAt?: string;
   active: boolean;
 };
 
@@ -270,6 +287,7 @@ export type CoachProgram = {
   duration: string;
   exerciseCount: number;
   imageUrl?: string;
+  promoCode?: string;
   section: 'main' | 'recommended' | 'courses';
   sortOrder: number;
   active: boolean;
@@ -610,6 +628,22 @@ export const api = {
       }),
     removeProgram: (id: string) =>
       request<null>(`/api/admin/coach/programs/${id}`, { method: 'DELETE' }),
+  },
+
+  promoCodes: {
+    list: () => request<{ promoCodes: PromoCode[] }>('/api/admin/promo-codes'),
+    create: (data: Partial<PromoCode>) =>
+      request<{ promoCode: PromoCode }>('/api/admin/promo-codes', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (code: string, data: Partial<PromoCode>) =>
+      request<{ promoCode: PromoCode }>(`/api/admin/promo-codes/${code}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (code: string) =>
+      request<null>(`/api/admin/promo-codes/${code}`, { method: 'DELETE' }),
   },
 };
 

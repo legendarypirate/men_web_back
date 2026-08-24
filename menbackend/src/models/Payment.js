@@ -13,6 +13,9 @@ const Payment = sequelize.define(
     planId: { type: DataTypes.STRING, allowNull: false },
     invoiceId: { type: DataTypes.STRING, allowNull: false, unique: true },
     amountMnt: { type: DataTypes.INTEGER, allowNull: false },
+    originalAmountMnt: { type: DataTypes.INTEGER, allowNull: true },
+    discountMnt: { type: DataTypes.INTEGER, defaultValue: 0 },
+    promoCode: { type: DataTypes.STRING, allowNull: true },
     currency: { type: DataTypes.STRING, defaultValue: 'MNT' },
     status: {
       type: DataTypes.ENUM('pending', 'paid', 'expired', 'cancelled'),

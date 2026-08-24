@@ -3,12 +3,16 @@ const {
   CoachProgram,
   CoachSetting,
   Product,
+  PromoCode,
+  Article,
 } = require('../models');
 const {
   hospitals,
   coachSetting,
   coachPrograms,
   kegelDetailSections,
+  promoCodes,
+  articles,
 } = require('../data/seedContent');
 
 async function ensureHospitals() {
@@ -43,10 +47,26 @@ async function ensureProductDetailSections() {
   console.log('Seeded kegel-trainer detail sections');
 }
 
+async function ensurePromoCodes() {
+  const count = await PromoCode.count();
+  if (count > 0) return;
+  await PromoCode.bulkCreate(promoCodes);
+  console.log(`Seeded ${promoCodes.length} promo codes`);
+}
+
+async function ensureArticles() {
+  const count = await Article.count();
+  if (count > 0) return;
+  await Article.bulkCreate(articles);
+  console.log(`Seeded ${articles.length} articles`);
+}
+
 async function ensureContent() {
   await ensureHospitals();
+  await ensurePromoCodes();
   await ensureCoachContent();
   await ensureProductDetailSections();
+  await ensureArticles();
 }
 
 module.exports = { ensureContent };

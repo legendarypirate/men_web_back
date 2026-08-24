@@ -1,5 +1,5 @@
 import { ResourceConfig } from '@/lib/types/fields';
-import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan, Hospital, CoachProgram } from '@/lib/api';
+import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan, Hospital, CoachProgram, PromoCode } from '@/lib/api';
 import { formatMnt } from '@/lib/api';
 import { StatusBadge } from '@/components/page-ui';
 
@@ -101,29 +101,51 @@ export const assessmentConfig: ResourceConfig<AssessmentQuestion> = {
   ],
 };
 
+const articleCategoryOptions = [
+  { label: 'Шилдэг сонголтууд', value: 'Шилдэг сонголтууд' },
+  { label: 'Бэлгийн эрүүл мэнд', value: 'Бэлгийн эрүүл мэнд' },
+  { label: 'Сэргээлт', value: 'Сэргээлт' },
+  { label: 'Хоол тэжээл', value: 'Хоол тэжээл' },
+  { label: 'Шинжлэх ухаан', value: 'Шинжлэх ухаан' },
+];
+
 export const articleConfig: ResourceConfig<Article> = {
   title: 'Нийтлэлүүд',
   itemLabel: 'нийтлэл',
   idKey: 'id',
   listKey: 'articles',
   itemKey: 'article',
-  emptyDefaults: { category: 'Сэргээлт', featured: false, premium: false, readMinutes: 5 },
+  emptyDefaults: {
+    category: 'Сэргээлт',
+    featured: false,
+    premium: false,
+    isNew: false,
+    readMinutes: 5,
+    sortOrder: 0,
+    published: true,
+  },
   fields: [
-    { key: 'category', label: 'Ангилал', type: 'text', required: true },
+    { key: 'category', label: 'Ангилал', type: 'select', options: articleCategoryOptions, required: true },
     { key: 'title', label: 'Гарчиг', type: 'text', required: true },
     { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
-    { key: 'body', label: 'Бүтэн агуулга', type: 'textarea', rows: 6 },
+    { key: 'body', label: 'Бүтэн агуулга (story slides)', type: 'textarea', rows: 8, hint: 'Мөр бүр нэг story slide болно' },
+    { key: 'imageUrl', label: 'Зураг URL', type: 'text', placeholder: 'https://...' },
     { key: 'author', label: 'Зохиогч', type: 'text' },
     { key: 'readMinutes', label: 'Унших минут', type: 'number' },
     { key: 'tag', label: 'Tag', type: 'text' },
-    { key: 'featured', label: 'Онцлох', type: 'switch' },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'featured', label: 'Онцлох (Шилдэг сонголтууд)', type: 'switch' },
+    { key: 'isNew', label: 'Шинэ', type: 'switch' },
     { key: 'premium', label: 'Premium', type: 'switch' },
+    { key: 'published', label: 'Нийтлэх', type: 'switch' },
   ],
   columns: [
     { key: 'title', label: 'Гарчиг', className: 'font-medium max-w-xs truncate' },
     { key: 'category', label: 'Ангилал' },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
     { key: 'readMinutes', label: 'Мин', align: 'center' },
     { key: 'featured', label: 'Онцлох', align: 'center', render: (r) => (r.featured ? '✓' : '—') },
+    { key: 'published', label: 'Нийтлэсэн', align: 'center', render: (r) => (r.published ? '✓' : '—') },
   ],
 };
 
@@ -261,6 +283,7 @@ export const coachProgramConfig: ResourceConfig<CoachProgram> = {
     { key: 'duration', label: 'Хугацаа', type: 'text', placeholder: '6 weeks' },
     { key: 'exerciseCount', label: 'Дасгал тоо', type: 'number' },
     { key: 'imageUrl', label: 'Зураг URL', type: 'text' },
+    { key: 'promoCode', label: 'Promo код', type: 'text', placeholder: 'LASTLONGER30' },
     { key: 'section', label: 'Хэсэг', type: 'select', options: coachSectionOptions },
     { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
     { key: 'active', label: 'Идэвхтэй', type: 'switch' },
@@ -276,6 +299,54 @@ export const coachProgramConfig: ResourceConfig<CoachProgram> = {
     },
     { key: 'category', label: 'Ангилал' },
     { key: 'duration', label: 'Хугацаа', align: 'center' },
+    { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+  ],
+};
+
+export const promoCodeConfig: ResourceConfig<PromoCode> = {
+  title: 'Promo код',
+  itemLabel: 'promo код',
+  idKey: 'code',
+  listKey: 'promoCodes',
+  itemKey: 'promoCode',
+  emptyDefaults: {
+    discountPercent: 10,
+    planIds: [],
+    usedCount: 0,
+    active: true,
+  },
+  fields: [
+    { key: 'code', label: 'Код', type: 'text', required: true },
+    { key: 'label', label: 'Тайлбар', type: 'text', required: true },
+    { key: 'discountPercent', label: 'Хөнгөлөлт (%)', type: 'number', required: true },
+    { key: 'coachProgramId', label: 'Coach program ID', type: 'text' },
+    {
+      key: 'planIds',
+      label: 'Багц ID-ууд (JSON, хоосон = бүгд)',
+      type: 'json',
+      rows: 4,
+      hint: '["yearly","monthly"]',
+    },
+    { key: 'maxUses', label: 'Дээд ашиглалт', type: 'number' },
+    { key: 'expiresAt', label: 'Дуусах огноо (ISO)', type: 'text' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'code', label: 'Код', className: 'font-mono font-semibold' },
+    { key: 'label', label: 'Тайлбар', className: 'max-w-xs truncate' },
+    {
+      key: 'discountPercent',
+      label: 'Хөнгөлөлт',
+      align: 'center',
+      render: (row) => `${row.discountPercent}%`,
+    },
+    {
+      key: 'usedCount',
+      label: 'Ашигласан',
+      align: 'center',
+      render: (row) =>
+        row.maxUses != null ? `${row.usedCount}/${row.maxUses}` : `${row.usedCount}`,
+    },
     { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
   ],
 };

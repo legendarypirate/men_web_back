@@ -236,8 +236,42 @@ const coachSetting = {
   coachImageUrl:
     'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop',
   learnMoreLabel: 'Learn More',
+  promoCode: 'COACHVIP20',
   active: true,
 };
+
+const promoCodes = [
+  {
+    code: 'COACHVIP20',
+    label: 'Coach VIP — 20% off premium',
+    discountPercent: 20,
+    coachProgramId: null,
+    planIds: [],
+    maxUses: 500,
+    usedCount: 0,
+    active: true,
+  },
+  {
+    code: 'LASTLONGER30',
+    label: 'Last Longer training — 30% off',
+    discountPercent: 30,
+    coachProgramId: 'coach_main_last_longer',
+    planIds: ['yearly', 'monthly'],
+    maxUses: 200,
+    usedCount: 0,
+    active: true,
+  },
+  {
+    code: 'WELLBEING15',
+    label: 'Well-being course — 15% off',
+    discountPercent: 15,
+    coachProgramId: 'coach_rec_overall_health',
+    planIds: ['yearly'],
+    maxUses: 150,
+    usedCount: 0,
+    active: true,
+  },
+];
 
 const coachPrograms = [
   {
@@ -251,6 +285,7 @@ const coachPrograms = [
     imageUrl:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&h=600&fit=crop',
     section: 'main',
+    promoCode: 'LASTLONGER30',
     sortOrder: 0,
     active: true,
   },
@@ -264,6 +299,7 @@ const coachPrograms = [
     imageUrl:
       'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop',
     section: 'recommended',
+    promoCode: 'WELLBEING15',
     sortOrder: 0,
     active: true,
   },
@@ -366,9 +402,99 @@ const kegelDetailSections = [
   },
 ];
 
+const articles = [
+  {
+    category: 'Шилдэг сонголтууд',
+    title: 'Илүү сайн унтах 13 зөвлөгөө',
+    excerpt: 'Гүн, сэргэг унтах энгийн дадал.',
+    body:
+      'Тогтмол цаг. Өдөр бүр ижил цагт унтаж, сэрэх дадал барь.\n' +
+      'Давхарга. Өрөөгөө харанхуй, чимээгүй, сэрүүн байлга.\n' +
+      'Дэлгэц. Унтахаас 1 цагийн өмнө утас, TV-ээс зайлсхий.\n' +
+      'Кофe. Үдээс хойш кофe, улаан цай уухгүй бай.\n' +
+      'Дасгал. Өдөрт 20–30 мин алхах нь гүн унтахад тусална.',
+    readMinutes: 6,
+    featured: true,
+    isNew: false,
+    sortOrder: 0,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&w=560&h=720',
+  },
+  {
+    category: 'Шилдэг сонголтууд',
+    title: 'Хэмжээ үнэхээр чухал уу?',
+    excerpt: 'Өөртөө итгэлтэй байдал болон сэтгэл ханамжийн талаар шинжлэх ухаан юу хэлдэг вэ.',
+    body:
+      'Өөртөө итгэх. Сэтгэл ханамж хэмжээнээс илүү сэтгэл зүйтэй холбоотой.\n' +
+      'Харилцаа. Нээлттэй ярилцах нь физик хэмжээнээс чухал.\n' +
+      'Стресс. Стресс бэлгийн хүчийг илүү их нөлөөлдөг.',
+    readMinutes: 5,
+    featured: true,
+    sortOrder: 1,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=560&h=720',
+  },
+  {
+    category: 'Бэлгийн эрүүл мэнд',
+    title: 'Либидогоо буулгах зүйлс',
+    excerpt: 'Хүсэл хоромлон бууруулдаг өдөр тутмын дадал.',
+    body:
+      'Стресс. Урт хугацааны стресс либидог буулгадаг.\n' +
+      'Нойр. Дутуу нойр бэлгийн хүчийг буулгана.\n' +
+      'Алcohol. Илүү их архи хэрэглэлт либидог буулгана.',
+    readMinutes: 7,
+    sortOrder: 2,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=560&h=720',
+  },
+  {
+    category: 'Сэргээлт',
+    title: 'Урт наслалтад зориулсан гүн сэргээлтийн шинжлэх ухаан',
+    excerpt: 'Гүн сэргээлт болон урт наслалтын холбоо.',
+    author: 'Доктор Жулиен Торн',
+    readMinutes: 8,
+    tag: 'ГҮЙЦЭТГЭЛИЙН АХИСАН ТҮВШИН',
+    featured: true,
+    isNew: true,
+    sortOrder: 3,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=560&h=720',
+  },
+  {
+    category: 'Хоол тэжээл',
+    title: 'Төвлөрлийг хадгалах өглөөний цайны хамгийн тохиромжтой макро шим тэжээл',
+    excerpt:
+      'Өглөөний уураг, өөх тосны тодорхой харьцаа нь инсулиныг хэрхэн тогтворжуулж, танин мэдэхүйг сайжруулдгийг мэдэж аваарай.',
+    readMinutes: 5,
+    tag: 'Хоол тэжээл',
+    sortOrder: 4,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=560&h=720',
+  },
+  {
+    category: 'Шинжлэх ухаан',
+    title: 'VO2 Max-ийг эрүүл мэндийн үзүүлэлт болгон ойлгох нь',
+    excerpt:
+      'Шинэ судалгаагаар таны зүрх судасны үйл ажиллагаа нь хамгийн чухал үзүүлэлт болохыг харуулж байна.',
+    readMinutes: 12,
+    tag: 'Шинжлэх ухаан',
+    sortOrder: 5,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=560&h=720',
+  },
+];
+
 module.exports = {
   hospitals,
   coachSetting,
   coachPrograms,
   kegelDetailSections,
+  promoCodes,
+  articles,
 };

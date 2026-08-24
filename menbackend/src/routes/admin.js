@@ -18,6 +18,7 @@ const {
   Hospital,
   CoachProgram,
   CoachSetting,
+  PromoCode,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { adminRequired, signToken } = require('../middleware/auth');
@@ -268,7 +269,12 @@ router.delete('/workouts/:id', adminRequired, async (req, res, next) => {
 // --- Articles ---
 router.get('/articles', adminRequired, async (req, res, next) => {
   try {
-    const articles = await Article.findAll({ order: [['createdAt', 'DESC']] });
+    const articles = await Article.findAll({
+      order: [
+        ['sortOrder', 'ASC'],
+        ['createdAt', 'DESC'],
+      ],
+    });
     return ok(res, { articles });
   } catch (err) {
     next(err);
@@ -733,6 +739,55 @@ router.delete('/coach/programs/:id', adminRequired, async (req, res, next) => {
     if (!program) return fail(res, 'Хөтөлбөр олдсонгүй', 404);
     await program.destroy();
     return ok(res, null, 'Хөтөлбөр устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Promo codes ---
+router.get('/promo-codes', adminRequired, async (req, res, next) => {
+  try {
+    const promoCodes = await PromoCode.findAll({
+      order: [['code', 'ASC']],
+    });
+    return ok(res, { promoCodes });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/promo-codes', adminRequired, async (req, res, next) => {
+  try {
+    const code = String(req.body.code || '')
+      .trim()
+      .toUpperCase();
+    if (!code || !req.body.label) {
+      return fail(res, 'code болон label шаардлагатай');
+    }
+    const promoCode = await PromoCode.create({ ...req.body, code });
+    return ok(res, { promoCode }, 'Promo код нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/promo-codes/:code', adminRequired, async (req, res, next) => {
+  try {
+    const promoCode = await PromoCode.findByPk(req.params.code);
+    if (!promoCode) return fail(res, 'Promo код олдсонгүй', 404);
+    await promoCode.update(req.body);
+    return ok(res, { promoCode }, 'Promo код шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/promo-codes/:code', adminRequired, async (req, res, next) => {
+  try {
+    const promoCode = await PromoCode.findByPk(req.params.code);
+    if (!promoCode) return fail(res, 'Promo код олдсонгүй', 404);
+    await promoCode.destroy();
+    return ok(res, null, 'Promo код устгагдлаа');
   } catch (err) {
     next(err);
   }

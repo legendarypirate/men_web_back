@@ -1,6 +1,7 @@
 const express = require('express');
 const { Op } = require('sequelize');
 const { Article, HealthBite } = require('../models');
+const sequelize = require('../config/database');
 const { ok, fail } = require('../utils/response');
 const { optionalAuth } = require('../middleware/auth');
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router.get('/articles', optionalAuth, async (req, res, next) => {
   try {
     const { category, q } = req.query;
-    const where = {};
+    const where = { published: true };
     if (category && category !== 'all' && category !== 'Бүх нийтлэл') {
       where.category = category;
     }
@@ -23,6 +24,7 @@ router.get('/articles', optionalAuth, async (req, res, next) => {
     const articles = await Article.findAll({
       where,
       order: [
+        ['sortOrder', 'ASC'],
         ['featured', 'DESC'],
         ['createdAt', 'DESC'],
       ],
@@ -30,8 +32,18 @@ router.get('/articles', optionalAuth, async (req, res, next) => {
 
     const featured = articles.find((a) => a.featured) || articles[0] || null;
 
+    const categoryRows = await Article.findAll({
+      attributes: [[sequelize.fn('DISTINCT', sequelize.col('category')), 'category']],
+      where: { published: true },
+      raw: true,
+    });
+    const dbCategories = categoryRows
+      .map((row) => row.category)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'mn'));
+
     return ok(res, {
-      categories: ['Бүх нийтлэл', 'Сэргээлт', 'Хоол тэжээл', 'Шинжлэх ухаан'],
+      categories: ['Бүх нийтлэл', ...dbCategories],
       featured,
       articles,
     });
