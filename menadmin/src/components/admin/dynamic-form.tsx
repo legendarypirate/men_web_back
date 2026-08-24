@@ -2,6 +2,7 @@
 
 import { FieldDef } from '@/lib/types/fields';
 import { StringListEditor } from '@/components/admin/string-list-editor';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { DatePicker } from '@/components/custom/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
@@ -15,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { api } from '@/lib/api';
 
 type Props = {
   fields: FieldDef[];
@@ -34,11 +36,22 @@ export function DynamicForm({ fields, values, onChange, mode }: Props) {
         <div key={field.key} className="space-y-2">
           {field.type !== 'checkbox' &&
             field.type !== 'switch' &&
-            field.type !== 'string-list' && (
+            field.type !== 'string-list' &&
+            field.type !== 'image-upload' && (
             <Label htmlFor={field.key}>{field.label}</Label>
           )}
 
-          {field.type === 'string-list' ? (
+          {field.type === 'image-upload' ? (
+            <ImageUploadField
+              label={field.label}
+              value={typeof values[field.key] === 'string' ? values[field.key] as string : null}
+              onChange={(url) => onChange(field.key, url)}
+              onUpload={async (file) => {
+                const result = await api.upload.image(file);
+                return result.url;
+              }}
+            />
+          ) : field.type === 'string-list' ? (
             <StringListEditor
               label={field.label}
               items={Array.isArray(values[field.key]) ? (values[field.key] as string[]) : []}
@@ -130,7 +143,8 @@ export function DynamicForm({ fields, values, onChange, mode }: Props) {
           {field.hint &&
             field.type !== 'checkbox' &&
             field.type !== 'switch' &&
-            field.type !== 'string-list' && (
+            field.type !== 'string-list' &&
+            field.type !== 'image-upload' && (
             <p className="text-xs text-muted-foreground">{field.hint}</p>
           )}
         </div>

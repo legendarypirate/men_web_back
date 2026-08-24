@@ -8,7 +8,8 @@ export type FieldType =
   | 'json'
   | 'string-list'
   | 'date'
-  | 'readonly';
+  | 'readonly'
+  | 'image-upload';
 
 export type FieldOption = { label: string; value: string };
 

@@ -282,7 +282,7 @@ export const coachProgramConfig: ResourceConfig<CoachProgram> = {
     { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
     { key: 'duration', label: 'Хугацаа', type: 'text', placeholder: '6 weeks' },
     { key: 'exerciseCount', label: 'Дасгал тоо', type: 'number' },
-    { key: 'imageUrl', label: 'Зураг URL', type: 'text' },
+    { key: 'imageUrl', label: 'Зураг', type: 'image-upload' },
     { key: 'promoCode', label: 'Promo код', type: 'text', placeholder: 'LASTLONGER30' },
     { key: 'section', label: 'Хэсэг', type: 'select', options: coachSectionOptions },
     { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },

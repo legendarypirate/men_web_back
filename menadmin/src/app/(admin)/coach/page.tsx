@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { ResourceManager } from '@/components/admin/resource-manager';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { api, CoachProgram, CoachSetting } from '@/lib/api';
 import { coachProgramConfig, promoCodeConfig } from '@/lib/resource-configs';
 import { ErrorState, LoadingState, PageHeader } from '@/components/page-ui';
@@ -134,15 +135,17 @@ export default function CoachPage() {
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label>Коучийн зураг URL</Label>
-            <Input
-              value={settings.coachImageUrl || ''}
-              onChange={(e) =>
-                setSettings({ ...settings, coachImageUrl: e.target.value })
-              }
-            />
-          </div>
+          <ImageUploadField
+            label="Коучийн зураг"
+            value={settings.coachImageUrl}
+            onChange={(url) =>
+              setSettings({ ...settings, coachImageUrl: url || undefined })
+            }
+            onUpload={async (file) => {
+              const result = await api.upload.image(file);
+              return result.url;
+            }}
+          />
           <div className="space-y-2">
             <Label>Banner promo код</Label>
             <Input
