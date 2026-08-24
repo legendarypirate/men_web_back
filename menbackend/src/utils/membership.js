@@ -23,21 +23,19 @@ function mapPlanToMembership(planId) {
   return planId;
 }
 
+function isAdminGrantedPremium(user) {
+  if (!user || !membershipIsPremium(user.membership)) return false;
+  // Admin panel always sets an explicit start date; fake/QPay-bypass rows do not.
+  return Boolean(user.membershipStartedAt);
+}
+
 function hasActivePremium(user) {
   if (!user || !membershipIsPremium(user.membership)) return false;
+  if (!user.membershipStartedAt) return false;
   if (user.membershipExpiresAt && user.membershipExpiresAt < new Date()) {
     return false;
   }
   return true;
-}
-
-function isAdminGrantedPremium(user) {
-  if (!membershipIsPremium(user.membership)) return false;
-  if (user.membershipStartedAt || user.membershipExpiresAt) return true;
-  if (user.membership === 'platinum' || user.membership === 'lifetime') {
-    return true;
-  }
-  return false;
 }
 
 async function resolveUserMembership(user) {
