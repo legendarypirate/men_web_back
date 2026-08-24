@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Upload, Video } from 'lucide-react';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +12,7 @@ type Props = {
   thumbnailUrl?: string | null;
   onChange: (patch: { videoUrl?: string | null; thumbnailUrl?: string | null }) => void;
   onUploadVideo: (file: File) => Promise<{ url: string; thumbnailUrl?: string | null }>;
+  onUploadImage: (file: File) => Promise<string>;
 };
 
 export function WorkoutProgramVideoEditor({
@@ -18,6 +20,7 @@ export function WorkoutProgramVideoEditor({
   thumbnailUrl,
   onChange,
   onUploadVideo,
+  onUploadImage,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -92,9 +95,12 @@ export function WorkoutProgramVideoEditor({
             </>
           )}
         </div>
-        {thumbnailUrl && (
-          <p className="text-xs text-muted-foreground">Thumbnail: {thumbnailUrl}</p>
-        )}
+        <ImageUploadField
+          label="Thumbnail зураг"
+          value={thumbnailUrl}
+          onChange={(url) => onChange({ thumbnailUrl: url })}
+          onUpload={onUploadImage}
+        />
         {videoUrl && (
           <video
             src={videoUrl}

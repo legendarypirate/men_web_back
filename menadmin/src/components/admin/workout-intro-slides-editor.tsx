@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, Plus, Trash2, Upload, Video } from 'lucide-react';
 import { WorkoutIntroSlide } from '@/lib/api';
 import { emptyIntroSlide } from '@/lib/workout-intro-slides';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,9 +29,7 @@ export function WorkoutIntroSlidesEditor({
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(slides.length ? 0 : null);
   const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
-  const [uploadingImageIndex, setUploadingImageIndex] = useState<number | null>(null);
   const videoRefs = useRef<Record<number, HTMLInputElement | null>>({});
-  const imageRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   function update(index: number, patch: Partial<WorkoutIntroSlide>) {
     onChange(slides.map((slide, i) => (i === index ? { ...slide, ...patch } : slide)));
@@ -66,16 +65,6 @@ export function WorkoutIntroSlidesEditor({
       });
     } finally {
       setUploadingVideoIndex(null);
-    }
-  }
-
-  async function handleImageUpload(index: number, file: File) {
-    setUploadingImageIndex(index);
-    try {
-      const url = await onUploadImage(file);
-      update(index, { imageUrl: url });
-    } finally {
-      setUploadingImageIndex(null);
     }
   }
 
@@ -217,39 +206,12 @@ export function WorkoutIntroSlidesEditor({
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Story зураг URL</Label>
-                    <Input
-                      value={slide.imageUrl || ''}
-                      onChange={(e) => update(index, { imageUrl: e.target.value })}
-                      placeholder="Cloudinary image URL"
-                    />
-                    <div className="flex gap-2">
-                      <input
-                        ref={(el) => {
-                          imageRefs.current[index] = el;
-                        }}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) void handleImageUpload(index, file);
-                          e.target.value = '';
-                        }}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={uploadingImageIndex === index}
-                        onClick={() => imageRefs.current[index]?.click()}
-                      >
-                        <Upload className="mr-1 h-4 w-4" />
-                        {uploadingImageIndex === index ? 'Upload...' : 'Зураг upload'}
-                      </Button>
-                    </div>
-                  </div>
+                  <ImageUploadField
+                    label="Story зураг"
+                    value={slide.imageUrl}
+                    onChange={(url) => update(index, { imageUrl: url })}
+                    onUpload={onUploadImage}
+                  />
                 </div>
 
                 {(slide.videoUrl || slide.imageUrl) && (

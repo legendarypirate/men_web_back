@@ -326,6 +326,10 @@ export default function WorkoutsPage() {
                 const result = await api.workouts.uploadVideoWithMeta(file);
                 return { url: result.url, thumbnailUrl: result.thumbnailUrl };
               }}
+              onUploadImage={async (file) => {
+                const result = await api.workouts.uploadImage(file);
+                return result.url;
+              }}
             />
           )}
 

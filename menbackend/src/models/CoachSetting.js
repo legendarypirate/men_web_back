@@ -22,7 +22,6 @@ const CoachSetting = sequelize.define(
     coachRole: { type: DataTypes.STRING, defaultValue: 'Sexual Health Coach' },
     coachImageUrl: { type: DataTypes.STRING, allowNull: true },
     learnMoreLabel: { type: DataTypes.STRING, defaultValue: 'Learn More' },
-    promoCode: { type: DataTypes.STRING, allowNull: true },
     active: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
   {

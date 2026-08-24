@@ -128,8 +128,8 @@ export const articleConfig: ResourceConfig<Article> = {
     { key: 'category', label: 'Ангилал', type: 'select', options: articleCategoryOptions, required: true },
     { key: 'title', label: 'Гарчиг', type: 'text', required: true },
     { key: 'excerpt', label: 'Товч', type: 'textarea', required: true },
-    { key: 'body', label: 'Бүтэн агуулга (story slides)', type: 'textarea', rows: 8, hint: 'Мөр бүр нэг story slide болно' },
-    { key: 'imageUrl', label: 'Зураг URL', type: 'text', placeholder: 'https://...' },
+    { key: 'body', label: 'Body (fallback)', type: 'textarea', rows: 4, hint: 'Story slides байхгүй үед ашиглана' },
+    { key: 'imageUrl', label: 'Cover зураг', type: 'image-upload' },
     { key: 'author', label: 'Зохиогч', type: 'text' },
     { key: 'readMinutes', label: 'Унших минут', type: 'number' },
     { key: 'tag', label: 'Tag', type: 'text' },
@@ -228,7 +228,7 @@ export const hospitalConfig: ResourceConfig<Hospital> = {
     { key: 'name', label: 'Нэр', type: 'text', required: true },
     { key: 'address', label: 'Хаяг', type: 'textarea', required: true, rows: 2 },
     { key: 'phone', label: 'Утас', type: 'text', required: true },
-    { key: 'imageUrl', label: 'Зураг URL', type: 'text' },
+    { key: 'imageUrl', label: 'Зураг', type: 'image-upload' },
     { key: 'openHours', label: 'Ажиллах цаг', type: 'text' },
     { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
     { key: 'tags', label: 'Tag-ууд', type: 'string-list', placeholder: 'Tag...', hint: 'Tag нэмэх' },
@@ -283,7 +283,6 @@ export const coachProgramConfig: ResourceConfig<CoachProgram> = {
     { key: 'duration', label: 'Хугацаа', type: 'text', placeholder: '6 weeks' },
     { key: 'exerciseCount', label: 'Дасгал тоо', type: 'number' },
     { key: 'imageUrl', label: 'Зураг', type: 'image-upload' },
-    { key: 'promoCode', label: 'Promo код', type: 'text', placeholder: 'LASTLONGER30' },
     { key: 'section', label: 'Хэсэг', type: 'select', options: coachSectionOptions },
     { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
     { key: 'active', label: 'Идэвхтэй', type: 'switch' },
@@ -304,7 +303,7 @@ export const coachProgramConfig: ResourceConfig<CoachProgram> = {
 };
 
 export const promoCodeConfig: ResourceConfig<PromoCode> = {
-  title: 'Promo код',
+  title: 'Subscription promo код',
   itemLabel: 'promo код',
   idKey: 'code',
   listKey: 'promoCodes',
@@ -319,7 +318,6 @@ export const promoCodeConfig: ResourceConfig<PromoCode> = {
     { key: 'code', label: 'Код', type: 'text', required: true },
     { key: 'label', label: 'Тайлбар', type: 'text', required: true },
     { key: 'discountPercent', label: 'Хөнгөлөлт (%)', type: 'number', required: true },
-    { key: 'coachProgramId', label: 'Coach program ID', type: 'text' },
     {
       key: 'planIds',
       label: 'Багц ID-ууд (JSON, хоосон = бүгд)',

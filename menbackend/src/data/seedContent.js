@@ -236,37 +236,33 @@ const coachSetting = {
   coachImageUrl:
     'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop',
   learnMoreLabel: 'Learn More',
-  promoCode: 'COACHVIP20',
   active: true,
 };
 
 const promoCodes = [
   {
-    code: 'COACHVIP20',
-    label: 'Coach VIP — 20% off premium',
+    code: 'WELCOME20',
+    label: 'Premium — 20% off',
     discountPercent: 20,
-    coachProgramId: null,
     planIds: [],
     maxUses: 500,
     usedCount: 0,
     active: true,
   },
   {
-    code: 'LASTLONGER30',
-    label: 'Last Longer training — 30% off',
+    code: 'YEARLY30',
+    label: 'Yearly plan — 30% off',
     discountPercent: 30,
-    coachProgramId: 'coach_main_last_longer',
-    planIds: ['yearly', 'monthly'],
+    planIds: ['yearly'],
     maxUses: 200,
     usedCount: 0,
     active: true,
   },
   {
-    code: 'WELLBEING15',
-    label: 'Well-being course — 15% off',
+    code: 'MONTHLY15',
+    label: 'Monthly plan — 15% off',
     discountPercent: 15,
-    coachProgramId: 'coach_rec_overall_health',
-    planIds: ['yearly'],
+    planIds: ['monthly'],
     maxUses: 150,
     usedCount: 0,
     active: true,
@@ -285,7 +281,6 @@ const coachPrograms = [
     imageUrl:
       'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&h=600&fit=crop',
     section: 'main',
-    promoCode: 'LASTLONGER30',
     sortOrder: 0,
     active: true,
   },
@@ -299,7 +294,6 @@ const coachPrograms = [
     imageUrl:
       'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&h=800&fit=crop',
     section: 'recommended',
-    promoCode: 'WELLBEING15',
     sortOrder: 0,
     active: true,
   },
@@ -463,6 +457,32 @@ const articles = [
     published: true,
     imageUrl:
       'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=560&h=720',
+    storySlides: [
+      {
+        isCover: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&h=1400',
+        accentLine: 'УРТ',
+        line2: 'НАСЛАЛТАД ЗОРИУЛСАН',
+        line3: 'ГҮН СЭРГЭЭЛТИЙН ШИНЖЛЭХ УХААН',
+      },
+      {
+        isCover: false,
+        imageUrl:
+          'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '1',
+        line2: 'Гүн нойр',
+        body: 'Гүн сэргээлт болон урт наслалтын холбоог ойлгоорой.',
+      },
+      {
+        isCover: false,
+        imageUrl:
+          'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '2',
+        line2: 'HRV хяналт',
+        body: 'Зүрхний цохилтын хэлбэлзэл (HRV) сэргээлтийн чанарыг хэмжих гол үзүүлэлт.',
+      },
+    ],
   },
   {
     category: 'Хоол тэжээл',

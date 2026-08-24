@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { ResourceManager } from '@/components/admin/resource-manager';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { api, CoachProgram, CoachSetting } from '@/lib/api';
-import { coachProgramConfig, promoCodeConfig } from '@/lib/resource-configs';
+import { coachProgramConfig } from '@/lib/resource-configs';
 import { ErrorState, LoadingState, PageHeader } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -146,16 +146,6 @@ export default function CoachPage() {
               return result.url;
             }}
           />
-          <div className="space-y-2">
-            <Label>Banner promo код</Label>
-            <Input
-              value={settings.promoCode || ''}
-              onChange={(e) =>
-                setSettings({ ...settings, promoCode: e.target.value.toUpperCase() })
-              }
-              placeholder="COACHVIP20"
-            />
-          </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <Label htmlFor="coach-active">Идэвхтэй</Label>
             <Switch
@@ -181,14 +171,6 @@ export default function CoachPage() {
         })}
       />
 
-      <ResourceManager
-        config={promoCodeConfig}
-        api={api.promoCodes}
-        getNewItem={() => ({
-          code: `PROMO${Date.now().toString().slice(-6)}`,
-          discountPercent: 10,
-        })}
-      />
     </div>
   );
 }

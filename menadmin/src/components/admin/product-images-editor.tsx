@@ -1,9 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ChevronDown, ChevronUp, ImagePlus, Trash2, Upload } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 type Props = {
@@ -14,13 +13,10 @@ type Props = {
 
 export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) {
   const [uploading, setUploading] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-
-  function update(index: number, url: string) {
-    const next = images.map((img, i) => (i === index ? url : img));
-    onChange(next);
-  }
+  const replaceRef = useRef<HTMLInputElement>(null);
+  const replaceTargetRef = useRef<number | null>(null);
 
   function remove(index: number) {
     onChange(images.filter((_, i) => i !== index));
@@ -34,14 +30,7 @@ export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) 
     onChange(next);
   }
 
-  function addUrl() {
-    const url = urlInput.trim();
-    if (!url) return;
-    onChange([...images, url]);
-    setUrlInput('');
-  }
-
-  async function handleFile(file: File | undefined) {
+  async function handleAddFile(file: File | undefined) {
     if (!file) return;
     setUploading(true);
     try {
@@ -51,6 +40,26 @@ export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) 
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
     }
+  }
+
+  async function handleReplaceFile(file: File | undefined) {
+    const index = replaceTargetRef.current;
+    if (!file || index == null) return;
+    setReplacingIndex(index);
+    try {
+      const url = await onUploadImage(file);
+      const next = images.map((img, i) => (i === index ? url : img));
+      onChange(next);
+    } finally {
+      setReplacingIndex(null);
+      replaceTargetRef.current = null;
+      if (replaceRef.current) replaceRef.current.value = '';
+    }
+  }
+
+  function startReplace(index: number) {
+    replaceTargetRef.current = index;
+    replaceRef.current?.click();
   }
 
   return (
@@ -64,7 +73,7 @@ export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) 
 
       {images.length === 0 ? (
         <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-          Зураг байхгүй — Cloudinary-аар байршуулна уу
+          Зураг байхгүй — файл байршуулна уу
         </div>
       ) : (
         <div className="space-y-2">
@@ -89,12 +98,20 @@ export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) 
                   </span>
                 )}
               </div>
-              <Input
-                value={url}
-                onChange={(e) => update(index, e.target.value)}
-                className="h-9 flex-1 text-xs"
-                placeholder="https://..."
-              />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs text-muted-foreground">Зураг {index + 1}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-1 h-8"
+                  disabled={replacingIndex === index}
+                  onClick={() => startReplace(index)}
+                >
+                  <Upload className="mr-2 h-3.5 w-3.5" />
+                  {replacingIndex === index ? 'Солж байна...' : 'Солих'}
+                </Button>
+              </div>
               <div className="flex shrink-0 flex-col gap-0.5">
                 <Button
                   type="button"
@@ -131,44 +148,30 @@ export function ProductImagesEditor({ images, onChange, onUploadImage }: Props) 
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => handleFile(e.target.files?.[0])}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={uploading}
-          onClick={() => fileRef.current?.click()}
-        >
-          <Upload className="mr-2 h-4 w-4" />
-          {uploading ? 'Байршуулж байна...' : 'Зураг байршуулах'}
-        </Button>
-      </div>
-
-      <div className="flex gap-2">
-        <Input
-          value={urlInput}
-          onChange={(e) => setUrlInput(e.target.value)}
-          placeholder="URL-ээр нэмэх..."
-          className="h-9"
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              addUrl();
-            }
-          }}
-        />
-        <Button type="button" variant="secondary" size="sm" onClick={addUrl}>
-          <ImagePlus className="mr-2 h-4 w-4" />
-          Нэмэх
-        </Button>
-      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => void handleAddFile(e.target.files?.[0])}
+      />
+      <input
+        ref={replaceRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => void handleReplaceFile(e.target.files?.[0])}
+      />
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={uploading}
+        onClick={() => fileRef.current?.click()}
+      >
+        <Upload className="mr-2 h-4 w-4" />
+        {uploading ? 'Байршуулж байна...' : 'Зураг байршуулах'}
+      </Button>
     </div>
   );
 }

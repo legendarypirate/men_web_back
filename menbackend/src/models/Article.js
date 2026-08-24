@@ -22,6 +22,7 @@ const Article = sequelize.define(
     isNew: { type: DataTypes.BOOLEAN, defaultValue: false },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
     published: { type: DataTypes.BOOLEAN, defaultValue: true },
+    storySlides: { type: DataTypes.JSON, defaultValue: [] },
   },
   {
     tableName: 'articles',

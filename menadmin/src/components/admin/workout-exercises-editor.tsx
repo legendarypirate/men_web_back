@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { WorkoutPhasesEditor } from '@/components/admin/workout-phases-editor';
 import { WorkoutIntroSlidesEditor } from '@/components/admin/workout-intro-slides-editor';
 import {
@@ -67,9 +68,7 @@ export function WorkoutExercisesEditor({
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(0);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
-  const [uploadingThumbIndex, setUploadingThumbIndex] = useState<number | null>(null);
   const videoFileRefs = useRef<Record<number, HTMLInputElement | null>>({});
-  const thumbFileRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   function update(index: number, patch: Partial<WorkoutExercise>) {
     const next = exercises.map((ex, i) => {
@@ -135,17 +134,6 @@ export function WorkoutExercisesEditor({
       });
     } finally {
       setUploadingIndex(null);
-    }
-  }
-
-  async function handleThumbnailFile(index: number, file: File | undefined) {
-    if (!file) return;
-    setUploadingThumbIndex(index);
-    try {
-      const url = await onUploadImage(file);
-      update(index, { thumbnailUrl: url });
-    } finally {
-      setUploadingThumbIndex(null);
     }
   }
 
@@ -404,36 +392,12 @@ export function WorkoutExercisesEditor({
                           </>
                         )}
                       </div>
-                      <Input
-                        value={exercise.thumbnailUrl || ''}
-                        onChange={(e) => update(index, { thumbnailUrl: e.target.value })}
-                        placeholder="Thumbnail URL (Cloudinary эсвэл гаднах холбоос)"
+                      <ImageUploadField
+                        label="Thumbnail"
+                        value={exercise.thumbnailUrl}
+                        onChange={(url) => update(index, { thumbnailUrl: url || '' })}
+                        onUpload={onUploadImage}
                       />
-                      <div className="flex flex-wrap items-center gap-2">
-                        <input
-                          ref={(el) => {
-                            thumbFileRefs.current[index] = el;
-                          }}
-                          type="file"
-                          accept="image/jpeg,image/png,image/webp,image/gif"
-                          className="hidden"
-                          onChange={(e) =>
-                            handleThumbnailFile(index, e.target.files?.[0])
-                          }
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={uploadingThumbIndex === index}
-                          onClick={() => thumbFileRefs.current[index]?.click()}
-                        >
-                          <Upload className="size-4" />
-                          {uploadingThumbIndex === index
-                            ? 'Cloudinary руу...'
-                            : 'Thumbnail байршуулах'}
-                        </Button>
-                      </div>
                     </div>
                     {exercise.videoUrl && (
                       <video

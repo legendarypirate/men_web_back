@@ -115,6 +115,15 @@ export type WorkoutProgram = {
   exercises?: WorkoutExercise[];
 };
 
+export type ArticleStorySlide = {
+  imageUrl?: string | null;
+  accentLine?: string | null;
+  line2?: string | null;
+  line3?: string | null;
+  body?: string | null;
+  isCover?: boolean;
+};
+
 export type Article = {
   id: string;
   category: string;
@@ -125,6 +134,7 @@ export type Article = {
   readMinutes: number;
   tag?: string;
   imageUrl?: string;
+  storySlides?: ArticleStorySlide[];
   featured: boolean;
   premium: boolean;
   isNew: boolean;
@@ -263,7 +273,6 @@ export type CoachSetting = {
   coachRole: string;
   coachImageUrl?: string;
   learnMoreLabel: string;
-  promoCode?: string;
   active: boolean;
 };
 
@@ -287,7 +296,6 @@ export type CoachProgram = {
   duration: string;
   exerciseCount: number;
   imageUrl?: string;
-  promoCode?: string;
   section: 'main' | 'recommended' | 'courses';
   sortOrder: number;
   active: boolean;
