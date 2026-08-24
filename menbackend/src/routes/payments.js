@@ -12,6 +12,19 @@ const qpayService = require('../services/qpayService');
 
 const router = express.Router();
 
+function requireQPayConfigured(res) {
+  if (qpayService.isConfigured()) return true;
+  console.error(
+    '[QPay] Missing merchant env: QPAY_LOGIN, QPAY_PASSWORD, QPAY_INVOICE_CODE, QPAY_RECEIVER_CODE'
+  );
+  fail(
+    res,
+    'QPay merchant тохиргоо дутуу байна. QPAY_* env хувьсагчуудыг backend дээр тохируулна уу.',
+    503
+  );
+  return false;
+}
+
 function mapPlan(plan) {
   const json = plan.toJSON();
   return {
@@ -117,7 +130,12 @@ async function syncPaymentWithQPay(payment, user) {
 router.get('/settings', optionalAuth, async (req, res, next) => {
   try {
     const settings = await getPaymentSettings();
-    return ok(res, { settings: mapPaymentSettings(settings) });
+    return ok(res, {
+      settings: {
+        ...mapPaymentSettings(settings),
+        qpayConfigured: qpayService.isConfigured(),
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -192,24 +210,32 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
     const description = `VitalMen Premium — ${plan.title}`;
 
-    let invoiceId = senderInvoiceNo;
-    let qrPayload = `QPAY|MERCHANT=VITALMEN|INVOICE=${senderInvoiceNo}|amount=${amountMnt}|currency=MNT|desc=${plan.title}`;
-    let qrImage = null;
-    let qrText = null;
-    let bankUrls = [];
+    if (!requireQPayConfigured(res)) return;
 
-    if (qpayService.isConfigured()) {
-      const qpayInvoice = await qpayService.createInvoice({
-        amount: amountMnt,
-        description,
-        senderInvoiceNo,
-      });
-      invoiceId = qpayInvoice.invoiceId;
-      qrImage = qpayInvoice.qrImage;
-      qrText = qpayInvoice.qrText;
-      qrPayload = qrText || qrPayload;
-      bankUrls = qpayInvoice.bankUrls;
-    }
+    console.log('[QPay] Creating invoice', {
+      planId: plan.id,
+      amountMnt,
+      senderInvoiceNo,
+    });
+
+    const qpayInvoice = await qpayService.createInvoice({
+      amount: amountMnt,
+      description,
+      senderInvoiceNo,
+    });
+
+    const invoiceId = qpayInvoice.invoiceId;
+    const qrImage = qpayInvoice.qrImage;
+    const qrText = qpayInvoice.qrText;
+    const qrPayload = qrText || `QPAY|VITALMEN|INVOICE=${invoiceId}|amount=${amountMnt}`;
+    const bankUrls = qpayInvoice.bankUrls;
+
+    console.log('[QPay] Invoice created', {
+      invoiceId,
+      banks: bankUrls.length,
+      hasQrImage: Boolean(qrImage),
+      hasQrText: Boolean(qrText),
+    });
 
     const payment = await Payment.create({
       userId: req.user.id,
@@ -282,11 +308,11 @@ router.post('/qpay/:invoiceId/confirm', authRequired, async (req, res, next) => 
       return fail(res, 'Нэхэмжлэхийн хугацаа дууссан');
     }
 
-    if (qpayService.isConfigured()) {
-      const result = await qpayService.checkInvoicePayment(payment.invoiceId);
-      if (!result.isPaid) {
-        return fail(res, 'Төлбөр хараахан баталгаажаагүй байна');
-      }
+    if (!requireQPayConfigured(res)) return;
+
+    const result = await qpayService.checkInvoicePayment(payment.invoiceId);
+    if (!result.isPaid) {
+      return fail(res, 'Төлбөр хараахан баталгаажаагүй байна');
     }
 
     const payload = await markPaymentPaid(payment, req.user);
