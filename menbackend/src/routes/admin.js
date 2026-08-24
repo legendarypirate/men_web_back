@@ -25,6 +25,13 @@ const { adminRequired, signToken } = require('../middleware/auth');
 const { uploadVideo, uploadImage } = require('../middleware/upload');
 const { handleImageUpload, handleVideoUpload } = require('./upload');
 const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
+const {
+  applyAdminMembershipUpdate,
+  computeMembershipExpiry,
+  mapPlanToMembership,
+  enrichPublicUser,
+  hasActivePremium,
+} = require('../utils/membership');
 
 const router = express.Router();
 
@@ -128,7 +135,12 @@ router.get('/users', adminRequired, async (req, res, next) => {
       order: [['createdAt', 'DESC']],
       attributes: { exclude: ['passwordHash'] },
     });
-    return ok(res, { users });
+    const mapped = users.map((user) => {
+      const json = user.toJSON();
+      json.hasActivePremium = hasActivePremium(user);
+      return json;
+    });
+    return ok(res, { users: mapped });
   } catch (err) {
     next(err);
   }
@@ -141,19 +153,31 @@ router.patch('/users/:id', adminRequired, async (req, res, next) => {
 
     const allowed = [
       'name',
-      'membership',
       'vitalityScore',
       'streakDays',
       'role',
       'darkMode',
       'primaryGoal',
+      'membershipStartedAt',
+      'membershipExpiresAt',
     ];
-    const updates = {};
-    for (const key of allowed) {
-      if (req.body[key] !== undefined) updates[key] = req.body[key];
+
+    if (req.body.membership !== undefined) {
+      applyAdminMembershipUpdate(user, req.body.membership, req.body);
     }
-    await user.update(updates);
-    return ok(res, { user: publicUser(user) }, 'Хэрэглэгч шинэчлэгдлээ');
+
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) {
+        if (key === 'membershipStartedAt' || key === 'membershipExpiresAt') {
+          user[key] = req.body[key] ? new Date(req.body[key]) : null;
+        } else {
+          user[key] = req.body[key];
+        }
+      }
+    }
+
+    await user.save();
+    return ok(res, { user: await enrichPublicUser(user) }, 'Хэрэглэгч шинэчлэгдлээ');
   } catch (err) {
     next(err);
   }
@@ -421,13 +445,23 @@ router.patch('/payments/:id', adminRequired, async (req, res, next) => {
     }
 
     const updates = { status };
-    if (status === 'paid') updates.paidAt = new Date();
+    if (status === 'paid') {
+      updates.paidAt = payment.paidAt || new Date();
+      updates.verifiedByQpay = true;
+    }
     await payment.update(updates);
 
     if (status === 'paid') {
       const user = await User.findByPk(payment.userId);
       if (user) {
-        await user.update({ membership: payment.planId });
+        const startedAt = payment.paidAt || new Date();
+        user.membership = mapPlanToMembership(payment.planId);
+        user.membershipStartedAt = startedAt;
+        user.membershipExpiresAt = computeMembershipExpiry(
+          payment.planId,
+          startedAt
+        );
+        await user.save();
       }
     }
 

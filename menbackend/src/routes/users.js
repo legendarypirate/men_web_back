@@ -1,13 +1,12 @@
 const express = require('express');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
-const { syncUserMembership } = require('../utils/membership');
+const { enrichPublicUser } = require('../utils/membership');
 
 const router = express.Router();
 
 router.get('/profile', authRequired, async (req, res) => {
-  await syncUserMembership(req.user);
-  return ok(res, { user: publicUser(req.user) });
+  return ok(res, { user: await enrichPublicUser(req.user) });
 });
 
 router.patch('/profile', authRequired, async (req, res, next) => {

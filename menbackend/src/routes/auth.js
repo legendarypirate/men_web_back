@@ -4,7 +4,7 @@ const { User } = require('../models');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired, signToken } = require('../middleware/auth');
 const { verifyGoogleIdToken, isGoogleAuthConfigured } = require('../utils/googleAuth');
-const { syncUserMembership } = require('../utils/membership');
+const { enrichPublicUser } = require('../utils/membership');
 
 const router = express.Router();
 
@@ -145,8 +145,7 @@ router.post('/social', async (req, res, next) => {
 });
 
 router.get('/me', authRequired, async (req, res) => {
-  await syncUserMembership(req.user);
-  return ok(res, { user: publicUser(req.user) });
+  return ok(res, { user: await enrichPublicUser(req.user) });
 });
 
 module.exports = router;

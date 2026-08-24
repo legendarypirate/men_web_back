@@ -53,6 +53,9 @@ export type User = {
   name: string;
   role: 'user' | 'admin';
   membership: string;
+  membershipStartedAt?: string | null;
+  membershipExpiresAt?: string | null;
+  hasActivePremium?: boolean;
   vitalityScore: number;
   streakDays: number;
   totalSessions: number;

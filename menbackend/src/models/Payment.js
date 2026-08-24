@@ -27,6 +27,7 @@ const Payment = sequelize.define(
     bankUrls: { type: DataTypes.JSON, allowNull: true },
     expiresAt: { type: DataTypes.DATE, allowNull: false },
     paidAt: { type: DataTypes.DATE, allowNull: true },
+    verifiedByQpay: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   {
     tableName: 'payments',

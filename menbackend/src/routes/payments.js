@@ -9,6 +9,11 @@ const {
   normalizeCode,
 } = require('../utils/promoCode');
 const qpayService = require('../services/qpayService');
+const {
+  computeMembershipExpiry,
+  mapPlanToMembership,
+  enrichPublicUser,
+} = require('../utils/membership');
 
 const router = express.Router();
 
@@ -76,23 +81,16 @@ function mapPayment(payment, plan, extra = {}) {
 }
 
 async function unlockMembership(user, payment) {
-  user.membership = payment.planId === 'lifetime' ? 'lifetime' : payment.planId;
-  if (payment.planId === 'monthly') {
-    user.membershipExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  } else if (payment.planId === 'yearly') {
-    user.membershipExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-  } else {
-    user.membershipExpiresAt = null;
-  }
-  if (payment.planId === 'lifetime' || payment.planId === 'yearly') {
-    user.membership = payment.planId === 'lifetime' ? 'platinum' : 'yearly';
-  }
+  const startedAt = payment.paidAt || new Date();
+  user.membership = mapPlanToMembership(payment.planId);
+  user.membershipStartedAt = startedAt;
+  user.membershipExpiresAt = computeMembershipExpiry(payment.planId, startedAt);
   await user.save();
 }
 
 async function markPaymentPaid(payment, user) {
   if (payment.status === 'paid') {
-    return { payment, user: publicUser(user) };
+    return { payment, user: await enrichPublicUser(user) };
   }
   if (payment.status === 'expired') {
     throw new Error('Нэхэмжлэхийн хугацаа дууссан');
@@ -100,6 +98,7 @@ async function markPaymentPaid(payment, user) {
 
   payment.status = 'paid';
   payment.paidAt = new Date();
+  payment.verifiedByQpay = true;
   await payment.save();
 
   if (payment.promoCode) {
@@ -107,7 +106,7 @@ async function markPaymentPaid(payment, user) {
   }
 
   await unlockMembership(user, payment);
-  return { payment, user: publicUser(user) };
+  return { payment, user: await enrichPublicUser(user) };
 }
 
 async function syncPaymentWithQPay(payment, user) {

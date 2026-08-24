@@ -40,6 +40,10 @@ const User = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    membershipStartedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     vitalityScore: {
       type: DataTypes.INTEGER,
       defaultValue: 50,

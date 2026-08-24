@@ -15,6 +15,10 @@ const membershipLabels: Record<string, string> = {
   platinum: 'Platinum',
 };
 
+  if (!value) return '';
+  return new Date(value).toISOString().slice(0, 10);
+}
+
 export default function UsersPage() {
   const confirm = useConfirm();
   const [users, setUsers] = useState<User[]>([]);
@@ -40,6 +44,17 @@ export default function UsersPage() {
 
   async function handleMembership(id: string, membership: string) {
     await api.users.update(id, { membership } as Partial<User>);
+    load();
+  }
+
+  async function handleDate(
+    id: string,
+    field: 'membershipStartedAt' | 'membershipExpiresAt',
+    value: string
+  ) {
+    await api.users.update(id, {
+      [field]: value ? new Date(`${value}T00:00:00`).toISOString() : null,
+    } as Partial<User>);
     load();
   }
 
@@ -86,6 +101,47 @@ export default function UsersPage() {
                   value: m,
                   label: membershipLabels[m] || m,
                 }))}
+              />
+            ),
+          },
+          {
+            key: 'membershipStartedAt',
+            label: 'Эхлэх',
+            render: (u) => (
+              <input
+                type="date"
+                className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50]"
+                value={toDateInput(u.membershipStartedAt)}
+                onChange={(e) =>
+                  handleDate(u.id, 'membershipStartedAt', e.target.value)
+                }
+              />
+            ),
+          },
+          {
+            key: 'membershipExpiresAt',
+            label: 'Дуусах',
+            render: (u) =>
+              u.membership === 'platinum' || u.membership === 'lifetime' ? (
+                <span className="text-[12px] text-[#95a5a6]">Насан турш</span>
+              ) : (
+                <input
+                  type="date"
+                  className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50]"
+                  value={toDateInput(u.membershipExpiresAt)}
+                  onChange={(e) =>
+                    handleDate(u.id, 'membershipExpiresAt', e.target.value)
+                  }
+                />
+              ),
+          },
+          {
+            key: 'hasActivePremium',
+            label: 'Premium',
+            align: 'center',
+            render: (u) => (
+              <StatusBadge
+                status={u.hasActivePremium ? 'paid' : 'free'}
               />
             ),
           },
