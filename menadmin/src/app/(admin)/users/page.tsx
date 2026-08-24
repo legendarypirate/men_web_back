@@ -15,6 +15,7 @@ const membershipLabels: Record<string, string> = {
   platinum: 'Platinum',
 };
 
+function toDateInput(value?: string | null) {
   if (!value) return '';
   return new Date(value).toISOString().slice(0, 10);
 }
