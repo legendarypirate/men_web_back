@@ -161,6 +161,17 @@ export type HomeProTip = {
   active: boolean;
 };
 
+export type Feedback = {
+  id: string;
+  userId: string;
+  message: string;
+  status: 'new' | 'reviewed' | 'resolved';
+  adminNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; name: string; email: string };
+};
+
 export type PremiumPlan = {
   id: string;
   title: string;
@@ -706,6 +717,17 @@ export const api = {
       }),
     remove: (code: string) =>
       request<null>(`/api/admin/promo-codes/${code}`, { method: 'DELETE' }),
+  },
+
+  feedback: {
+    list: () => request<{ feedback: Feedback[] }>('/api/admin/feedback'),
+    update: (id: string, data: Partial<Feedback>) =>
+      request<{ feedback: Feedback }>(`/api/admin/feedback/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/feedback/${id}`, { method: 'DELETE' }),
   },
 };
 

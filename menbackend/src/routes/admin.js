@@ -21,6 +21,7 @@ const {
   CoachProgram,
   CoachSetting,
   PromoCode,
+  Feedback,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { adminRequired, signToken } = require('../middleware/auth');
@@ -415,6 +416,62 @@ router.delete('/home-pro-tips/:id', adminRequired, async (req, res, next) => {
     if (!proTip) return fail(res, 'Зөвлөмж олдсонгүй', 404);
     await proTip.destroy();
     return ok(res, null, 'Зөвлөмж устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- User feedback ---
+router.get('/feedback', adminRequired, async (req, res, next) => {
+  try {
+    const feedback = await Feedback.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+    return ok(res, { feedback });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/feedback/:id', adminRequired, async (req, res, next) => {
+  try {
+    const item = await Feedback.findByPk(req.params.id);
+    if (!item) return fail(res, 'Санал хүсэлт олдсонгүй', 404);
+
+    const { status, adminNotes } = req.body;
+    const updates = {};
+    if (status != null) updates.status = status;
+    if (adminNotes !== undefined) updates.adminNotes = adminNotes;
+
+    await item.update(updates);
+    const feedback = await Feedback.findByPk(item.id, {
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email'],
+        },
+      ],
+    });
+    return ok(res, { feedback }, 'Санал хүсэлт шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/feedback/:id', adminRequired, async (req, res, next) => {
+  try {
+    const item = await Feedback.findByPk(req.params.id);
+    if (!item) return fail(res, 'Санал хүсэлт олдсонгүй', 404);
+    await item.destroy();
+    return ok(res, null, 'Санал хүсэлт устгагдлаа');
   } catch (err) {
     next(err);
   }
