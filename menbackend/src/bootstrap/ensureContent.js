@@ -5,14 +5,18 @@ const {
   Product,
   PromoCode,
   Article,
+  HomeProTip,
+  HospitalCategory,
 } = require('../models');
 const {
   hospitals,
+  hospitalCategories,
   coachSetting,
   coachPrograms,
   kegelDetailSections,
   promoCodes,
   articles,
+  homeProTips,
 } = require('../data/seedContent');
 
 async function ensureHospitals() {
@@ -61,12 +65,28 @@ async function ensureArticles() {
   console.log(`Seeded ${articles.length} articles`);
 }
 
+async function ensureHomeProTips() {
+  const count = await HomeProTip.count();
+  if (count > 0) return;
+  await HomeProTip.bulkCreate(homeProTips);
+  console.log(`Seeded ${homeProTips.length} home pro tips`);
+}
+
+async function ensureHospitalCategories() {
+  const count = await HospitalCategory.count();
+  if (count > 0) return;
+  await HospitalCategory.bulkCreate(hospitalCategories);
+  console.log(`Seeded ${hospitalCategories.length} hospital categories`);
+}
+
 async function ensureContent() {
+  await ensureHospitalCategories();
   await ensureHospitals();
   await ensurePromoCodes();
   await ensureCoachContent();
   await ensureProductDetailSections();
   await ensureArticles();
+  await ensureHomeProTips();
 }
 
 module.exports = { ensureContent };

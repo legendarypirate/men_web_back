@@ -16,6 +16,7 @@ const assessmentRoutes = require('./routes/assessment');
 const shopRoutes = require('./routes/shop');
 const hospitalRoutes = require('./routes/hospitals');
 const coachRoutes = require('./routes/coach');
+const homeRoutes = require('./routes/home');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
@@ -72,6 +73,7 @@ app.get('/api', (req, res) => {
       shop: '/api/shop',
       hospitals: '/api/hospitals',
       coach: '/api/coach',
+      home: '/api/home',
       admin: '/api/admin',
     },
   });
@@ -88,6 +90,7 @@ app.use('/api/assessment', assessmentRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/coach', coachRoutes);
+app.use('/api/home', homeRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use(notFound);

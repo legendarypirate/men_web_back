@@ -15,6 +15,7 @@ const Hospital = sequelize.define(
     openHours: { type: DataTypes.STRING, allowNull: true },
     description: { type: DataTypes.TEXT, allowNull: false },
     tags: { type: DataTypes.JSON, defaultValue: [] },
+    categoryIds: { type: DataTypes.JSON, defaultValue: [] },
     doctors: { type: DataTypes.JSON, defaultValue: [] },
     services: { type: DataTypes.JSON, defaultValue: [] },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },

@@ -7,6 +7,7 @@ export type FieldType =
   | 'select'
   | 'json'
   | 'string-list'
+  | 'multi-select'
   | 'date'
   | 'readonly'
   | 'image-upload';

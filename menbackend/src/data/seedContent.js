@@ -9,7 +9,8 @@ const hospitals = [
     openHours: 'Даваа–Баасан 09:00–18:00',
     description:
       'Эрчим хүчний эмгэг, аарцгийн ёроол, урологийн асуудалд мэргэшсэн эмнэлэг.',
-    tags: ['Уrologi', 'Kegel', 'Зөвлөгөө'],
+    tags: ['Андрологи', 'Kegel', 'БЗДХ', 'Урологи'],
+    categoryIds: ['urology', 'andrology', 'kegel', 'std'],
     doctors: [
       {
         id: 'd1',
@@ -77,7 +78,8 @@ const hospitals = [
     openHours: 'Даваа–Ням 10:00–20:00',
     description:
       'Эрэгтэйчүүдийн эрүүл мэнд, бэлгийн эрүүл мэнд, сэтгэл зүйн дэмжлэг.',
-    tags: ['Бэлгийн эрүүл мэнд', 'Зөвлөгөө'],
+    tags: ['БЗДХ', 'Сэтгэл засал', 'Ерөнхий үзлэг'],
+    categoryIds: ['std', 'psychology', 'general'],
     doctors: [
       {
         id: 'd3',
@@ -129,7 +131,8 @@ const hospitals = [
     openHours: 'Даваа–Баасан 08:00–17:00',
     description:
       'Төрийн албан ёсны эрүүл эрхийн үзлэг, мэдрэмж, Kegel сургалт.',
-    tags: ['Төрийн', 'Kegel', 'Реабилитаци'],
+    tags: ['Kegel', 'Урологи'],
+    categoryIds: ['kegel', 'urology'],
     doctors: [
       {
         id: 'd5',
@@ -174,7 +177,8 @@ const hospitals = [
     openHours: 'Даваа–Бямба 09:00–19:00',
     description:
       'Дээд зэрэглэлийн эрүүл эрхийн үйлчилгээ, хурдан шинжилгээ, VIP зөвлөгөө.',
-    tags: ['VIP', 'Хурдан шинжилгээ'],
+    tags: ['Урологи', 'VIP'],
+    categoryIds: ['urology', 'andrology'],
     doctors: [
       {
         id: 'd6',
@@ -510,11 +514,94 @@ const articles = [
   },
 ];
 
+const homeProTips = [
+  {
+    text: 'Төлөвлөгөөний талаар асуулт байвал "FAQ"-ийг уншина уу.',
+    actionLabel: 'FAQ',
+    sortOrder: 0,
+    active: true,
+  },
+  {
+    text: 'Өдөр бүр ижил цагт дасгал хийвэл илүү хурдан үр дүн гарна.',
+    sortOrder: 1,
+    active: true,
+  },
+  {
+    text: 'Дасгалын дараа 2-3 минут гүн амьсгал авч булчингaа тайвшруул.',
+    sortOrder: 2,
+    active: true,
+  },
+  {
+    text: 'Дасгалын явцад гүн, тогтвортой амьсгал хадгалах чухал.',
+    sortOrder: 3,
+    active: true,
+  },
+  {
+    text: 'Мэдлэг хэсэгт шинэ нийтлэлүүдийг тогтмол шалгаарай.',
+    actionLabel: 'Мэдлэг',
+    sortOrder: 4,
+    active: true,
+  },
+];
+
+const hospitalCategories = [
+  {
+    id: 'urology',
+    title: 'Урологи',
+    description: 'Бөөр, давсаг, шээсний зам, түрүү булчирхай',
+    icon: 'water_drop_outlined',
+    sortOrder: 0,
+    active: true,
+  },
+  {
+    id: 'andrology',
+    title: 'Андрологи',
+    description: 'Эрекц, хурдан гадагшлалт, үргүйдэл, тестостерон',
+    icon: 'male_outlined',
+    sortOrder: 1,
+    active: true,
+  },
+  {
+    id: 'std',
+    title: 'БЗДХ шинжилгээ',
+    description: 'Заг хүйтэн, тэмбүү зэрэг халдварын оношилгоо',
+    icon: 'verified_user_outlined',
+    sortOrder: 2,
+    active: true,
+  },
+  {
+    id: 'psychology',
+    title: 'Сэтгэл засал',
+    description: 'Бэлгийн сулралын сэтгэл зүйн зөвлөгөө',
+    icon: 'chat_bubble_outline_rounded',
+    sortOrder: 3,
+    active: true,
+  },
+  {
+    id: 'kegel',
+    title: 'Kegel / Аарцагны булчин',
+    description: 'Аарцагны ёроолын сургалт, biofeedback эмчилгээ',
+    icon: 'adjust_outlined',
+    sortOrder: 4,
+    active: true,
+  },
+  {
+    id: 'general',
+    title: 'Ерөнхий үзлэг',
+    description: 'Ерөнхий эрүүл мэндийн үзлэг, зөвлөгөө',
+    icon: 'medical_services_outlined',
+    sortOrder: 5,
+    active: true,
+  },
+];
+
 module.exports = {
   hospitals,
+  hospitalCategories,
   coachSetting,
   coachPrograms,
   kegelDetailSections,
   promoCodes,
   articles,
+  homeProTips,
 };

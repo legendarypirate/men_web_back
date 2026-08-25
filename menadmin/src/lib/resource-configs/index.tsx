@@ -1,5 +1,6 @@
 import { ResourceConfig } from '@/lib/types/fields';
-import { Product, AssessmentQuestion, Article, HealthBite, PremiumPlan, Hospital, CoachProgram, PromoCode } from '@/lib/api';
+import { Product, AssessmentQuestion, Article, HealthBite, HomeProTip, PremiumPlan, Hospital, HospitalCategoryRecord, CoachProgram, PromoCode } from '@/lib/api';
+import { FieldOption, ResourceConfig } from '@/lib/types/fields';
 import { formatMnt } from '@/lib/api';
 import { StatusBadge } from '@/components/page-ui';
 
@@ -169,6 +170,38 @@ export const healthBiteConfig: ResourceConfig<HealthBite> = {
   ],
 };
 
+export const homeProTipConfig: ResourceConfig<HomeProTip> = {
+  title: 'Нүүр зөвлөмж',
+  itemLabel: 'зөвлөмж',
+  idKey: 'id',
+  listKey: 'proTips',
+  itemKey: 'proTip',
+  emptyDefaults: { sortOrder: 0, active: true },
+  fields: [
+    { key: 'text', label: 'Зөвлөмжийн текст', type: 'textarea', required: true, rows: 3 },
+    {
+      key: 'actionLabel',
+      label: 'Товч текст',
+      type: 'text',
+      placeholder: 'FAQ, Мэдлэг',
+      hint: 'Хоосон бол товч харагдахгүй',
+    },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    {
+      key: 'text',
+      label: 'Зөвлөмж',
+      className: 'font-medium max-w-md truncate',
+      render: (row) => row.text,
+    },
+    { key: 'actionLabel', label: 'Товч', render: (row) => row.actionLabel || '—' },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+    { key: 'active', label: 'Төлөв', render: (row) => (row.active ? '✓' : '—') },
+  ],
+};
+
 export const planConfig: ResourceConfig<PremiumPlan> = {
   title: 'Premium төлөвлөгөө',
   itemLabel: 'төлөвлөгөө',
@@ -210,58 +243,114 @@ const coachSectionOptions = [
   { label: 'Courses', value: 'courses' },
 ];
 
-export const hospitalConfig: ResourceConfig<Hospital> = {
-  title: 'Эмнэлгүүд',
-  itemLabel: 'эмнэлэг',
+const hospitalIconOptions = [
+  { label: 'Урологи (ус)', value: 'water_drop_outlined' },
+  { label: 'Андрологи (♂)', value: 'male_outlined' },
+  { label: 'БЗДХ (хамгаалалт)', value: 'verified_user_outlined' },
+  { label: 'Сэтгэл засал', value: 'chat_bubble_outline_rounded' },
+  { label: 'Kegel', value: 'adjust_outlined' },
+  { label: 'Ерөнхий үзлэг', value: 'medical_services_outlined' },
+];
+
+export const hospitalCategoryConfig: ResourceConfig<HospitalCategoryRecord> = {
+  title: 'Эмнэлгийн төрөл',
+  itemLabel: 'төрөл',
   idKey: 'id',
-  listKey: 'hospitals',
-  itemKey: 'hospital',
+  listKey: 'categories',
+  itemKey: 'category',
   emptyDefaults: {
-    tags: [],
-    doctors: [],
-    services: [],
+    icon: 'medical_services_outlined',
     sortOrder: 0,
     active: true,
   },
   fields: [
-    { key: 'id', label: 'ID', type: 'text', required: true },
-    { key: 'name', label: 'Нэр', type: 'text', required: true },
-    { key: 'address', label: 'Хаяг', type: 'textarea', required: true, rows: 2 },
-    { key: 'phone', label: 'Утас', type: 'text', required: true },
-    { key: 'imageUrl', label: 'Зураг', type: 'image-upload' },
-    { key: 'openHours', label: 'Ажиллах цаг', type: 'text' },
-    { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
-    { key: 'tags', label: 'Tag-ууд', type: 'string-list', placeholder: 'Tag...', hint: 'Tag нэмэх' },
-    {
-      key: 'doctors',
-      label: 'Эмч нар (JSON)',
-      type: 'json',
-      rows: 8,
-      hint: '[{"id":"d1","name":"...","specialty":"..."}]',
-    },
-    {
-      key: 'services',
-      label: 'Үйлчилгээ (JSON)',
-      type: 'json',
-      rows: 10,
-      hint: '[{"id":"s1","name":"...","priceMnt":45000,"category":"...","doctorId":"d1"}]',
-    },
+    { key: 'id', label: 'ID', type: 'text', required: true, placeholder: 'urology' },
+    { key: 'title', label: 'Гарчиг', type: 'text', required: true },
+    { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 2 },
+    { key: 'icon', label: 'Icon', type: 'select', options: hospitalIconOptions },
     { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
     { key: 'active', label: 'Идэвхтэй', type: 'switch' },
   ],
   columns: [
-    { key: 'name', label: 'Эмнэлэг', className: 'font-medium' },
-    { key: 'phone', label: 'Утас' },
-    {
-      key: 'services',
-      label: 'Үйлчилгээ',
-      align: 'center',
-      render: (row) => row.services?.length || 0,
-    },
+    { key: 'title', label: 'Төрөл', className: 'font-medium' },
+    { key: 'icon', label: 'Icon' },
     { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
-    { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+    { key: 'active', label: 'Төлөв', render: (row) => (row.active ? '✓' : '—') },
   ],
 };
+
+export function buildHospitalConfig(
+  categoryOptions: FieldOption[]
+): ResourceConfig<Hospital> {
+  return {
+    title: 'Эмнэлгүүд',
+    itemLabel: 'эмнэлэг',
+    idKey: 'id',
+    listKey: 'hospitals',
+    itemKey: 'hospital',
+    emptyDefaults: {
+      tags: [],
+      categoryIds: [],
+      doctors: [],
+      services: [],
+      sortOrder: 0,
+      active: true,
+    },
+    fields: [
+      { key: 'id', label: 'ID', type: 'text', required: true },
+      { key: 'name', label: 'Нэр', type: 'text', required: true },
+      { key: 'address', label: 'Хаяг', type: 'textarea', required: true, rows: 2 },
+      { key: 'phone', label: 'Утас', type: 'text', required: true },
+      { key: 'imageUrl', label: 'Зураг', type: 'image-upload' },
+      { key: 'openHours', label: 'Ажиллах цаг', type: 'text' },
+      { key: 'description', label: 'Тайлбар', type: 'textarea', required: true, rows: 3 },
+      {
+        key: 'categoryIds',
+        label: 'Эмнэлгийн төрөл',
+        type: 'multi-select',
+        options: categoryOptions,
+        hint: 'Апп дээр харагдах ангилал',
+      },
+      { key: 'tags', label: 'Tag-ууд', type: 'string-list', placeholder: 'Tag...', hint: 'Tag нэмэх' },
+      {
+        key: 'doctors',
+        label: 'Эмч нар (JSON)',
+        type: 'json',
+        rows: 8,
+        hint: '[{"id":"d1","name":"...","specialty":"..."}]',
+      },
+      {
+        key: 'services',
+        label: 'Үйлчилгээ (JSON)',
+        type: 'json',
+        rows: 10,
+        hint: '[{"id":"s1","name":"...","priceMnt":45000,"category":"...","doctorId":"d1"}]',
+      },
+      { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+      { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+    ],
+    columns: [
+      { key: 'name', label: 'Эмнэлэг', className: 'font-medium' },
+      { key: 'phone', label: 'Утас' },
+      {
+        key: 'categoryIds',
+        label: 'Төрөл',
+        render: (row) => row.categoryIds?.length || 0,
+        align: 'center',
+      },
+      {
+        key: 'services',
+        label: 'Үйлчилгээ',
+        align: 'center',
+        render: (row) => row.services?.length || 0,
+      },
+      { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+      { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+    ],
+  };
+}
+
+export const hospitalConfig: ResourceConfig<Hospital> = buildHospitalConfig([]);
 
 export const coachProgramConfig: ResourceConfig<CoachProgram> = {
   title: 'Коуч хөтөлбөрүүд',

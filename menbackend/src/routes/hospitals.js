@@ -1,8 +1,21 @@
 const express = require('express');
-const { Hospital } = require('../models');
+const { Hospital, HospitalCategory } = require('../models');
 const { ok, fail } = require('../utils/response');
 
 const router = express.Router();
+
+router.get('/categories', async (req, res, next) => {
+  try {
+    const categories = await HospitalCategory.findAll({
+      where: { active: true },
+      order: [['sortOrder', 'ASC'], ['title', 'ASC']],
+      attributes: ['id', 'title', 'description', 'icon', 'sortOrder'],
+    });
+    return ok(res, { categories });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (req, res, next) => {
   try {

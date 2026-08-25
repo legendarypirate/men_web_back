@@ -14,9 +14,11 @@ const OrderItem = require('./OrderItem');
 const AssessmentQuestion = require('./AssessmentQuestion');
 const PaymentSettings = require('./PaymentSettings');
 const Hospital = require('./Hospital');
+const HospitalCategory = require('./HospitalCategory');
 const CoachSetting = require('./CoachSetting');
 const CoachProgram = require('./CoachProgram');
 const PromoCode = require('./PromoCode');
+const HomeProTip = require('./HomeProTip');
 
 WorkoutProgram.hasMany(WorkoutExercise, {
   foreignKey: 'programId',
@@ -65,7 +67,9 @@ module.exports = {
   AssessmentQuestion,
   PaymentSettings,
   Hospital,
+  HospitalCategory,
   CoachSetting,
   CoachProgram,
   PromoCode,
+  HomeProTip,
 };

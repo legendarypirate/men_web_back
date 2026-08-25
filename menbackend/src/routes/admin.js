@@ -8,6 +8,7 @@ const {
   WorkoutSession,
   Article,
   HealthBite,
+  HomeProTip,
   PremiumPlan,
   Payment,
   Product,
@@ -16,6 +17,7 @@ const {
   AssessmentQuestion,
   AssessmentAnswer,
   Hospital,
+  HospitalCategory,
   CoachProgram,
   CoachSetting,
   PromoCode,
@@ -377,6 +379,47 @@ router.delete('/health-bites/:id', adminRequired, async (req, res, next) => {
   }
 });
 
+// --- Home pro tips (Нүүр зөвлөмж) ---
+router.get('/home-pro-tips', adminRequired, async (req, res, next) => {
+  try {
+    const proTips = await HomeProTip.findAll({ order: [['sortOrder', 'ASC']] });
+    return ok(res, { proTips });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/home-pro-tips', adminRequired, async (req, res, next) => {
+  try {
+    const proTip = await HomeProTip.create(req.body);
+    return ok(res, { proTip }, 'Зөвлөмж нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/home-pro-tips/:id', adminRequired, async (req, res, next) => {
+  try {
+    const proTip = await HomeProTip.findByPk(req.params.id);
+    if (!proTip) return fail(res, 'Зөвлөмж олдсонгүй', 404);
+    await proTip.update(req.body);
+    return ok(res, { proTip }, 'Зөвлөмж шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/home-pro-tips/:id', adminRequired, async (req, res, next) => {
+  try {
+    const proTip = await HomeProTip.findByPk(req.params.id);
+    if (!proTip) return fail(res, 'Зөвлөмж олдсонгүй', 404);
+    await proTip.destroy();
+    return ok(res, null, 'Зөвлөмж устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
 // --- Premium plans ---
 router.get('/plans', adminRequired, async (req, res, next) => {
   try {
@@ -654,6 +697,52 @@ router.patch('/settings/payment', adminRequired, async (req, res, next) => {
     });
 
     return ok(res, { settings: mapPaymentSettings(settings) }, 'Тохиргоо хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Hospital categories ---
+router.get('/hospital-categories', adminRequired, async (req, res, next) => {
+  try {
+    const categories = await HospitalCategory.findAll({
+      order: [['sortOrder', 'ASC'], ['title', 'ASC']],
+    });
+    return ok(res, { categories });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/hospital-categories', adminRequired, async (req, res, next) => {
+  try {
+    if (!req.body.id || !req.body.title) {
+      return fail(res, 'id болон title шаардлагатай');
+    }
+    const category = await HospitalCategory.create(req.body);
+    return ok(res, { category }, 'Төрөл нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/hospital-categories/:id', adminRequired, async (req, res, next) => {
+  try {
+    const category = await HospitalCategory.findByPk(req.params.id);
+    if (!category) return fail(res, 'Төрөл олдсонгүй', 404);
+    await category.update(req.body);
+    return ok(res, { category }, 'Төрөл шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/hospital-categories/:id', adminRequired, async (req, res, next) => {
+  try {
+    const category = await HospitalCategory.findByPk(req.params.id);
+    if (!category) return fail(res, 'Төрөл олдсонгүй', 404);
+    await category.destroy();
+    return ok(res, null, 'Төрөл устгагдлаа');
   } catch (err) {
     next(err);
   }

@@ -14,9 +14,11 @@ const {
   AssessmentQuestion,
   PaymentSettings,
   Hospital,
+  HospitalCategory,
   CoachSetting,
   CoachProgram,
   PromoCode,
+  HomeProTip,
 } = require('../models');
 const {
   defaultPhasesForMotion,
@@ -26,10 +28,12 @@ const {
 } = require('../data/exercisePhases');
 const {
   hospitals,
+  hospitalCategories,
   coachSetting,
   coachPrograms,
   kegelDetailSections,
   promoCodes,
+  homeProTips,
 } = require('../data/seedContent');
 
 const programs = [
@@ -417,6 +421,9 @@ async function seed() {
   ]);
   console.log('Seeded health bites');
 
+  await HomeProTip.bulkCreate(homeProTips);
+  console.log('Seeded home pro tips');
+
   await Product.bulkCreate([
     {
       id: 'mag-glycinate',
@@ -641,6 +648,9 @@ async function seed() {
       'Гүйлгээний утга дээр имэйл хаягаа бичнэ үү. Төлбөр баталгаажмагц таны эрх идэвхжинэ.',
   });
   console.log('Seeded payment settings');
+
+  await HospitalCategory.bulkCreate(hospitalCategories);
+  console.log(`Seeded ${hospitalCategories.length} hospital categories`);
 
   await Hospital.bulkCreate(hospitals);
   console.log(`Seeded ${hospitals.length} hospitals`);

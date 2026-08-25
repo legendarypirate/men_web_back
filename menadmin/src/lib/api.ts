@@ -153,6 +153,14 @@ export type HealthBite = {
   sortOrder: number;
 };
 
+export type HomeProTip = {
+  id: string;
+  text: string;
+  actionLabel?: string | null;
+  sortOrder: number;
+  active: boolean;
+};
+
 export type PremiumPlan = {
   id: string;
   title: string;
@@ -261,8 +269,18 @@ export type Hospital = {
   openHours?: string;
   description: string;
   tags: string[];
+  categoryIds: string[];
   doctors: HospitalDoctor[];
   services: HospitalService[];
+  sortOrder: number;
+  active: boolean;
+};
+
+export type HospitalCategoryRecord = {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
   sortOrder: number;
   active: boolean;
 };
@@ -515,6 +533,22 @@ export const api = {
       request<null>(`/api/admin/health-bites/${id}`, { method: 'DELETE' }),
   },
 
+  homeProTips: {
+    list: () => request<{ proTips: HomeProTip[] }>('/api/admin/home-pro-tips'),
+    create: (data: Partial<HomeProTip>) =>
+      request<{ proTip: HomeProTip }>('/api/admin/home-pro-tips', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<HomeProTip>) =>
+      request<{ proTip: HomeProTip }>(`/api/admin/home-pro-tips/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/home-pro-tips/${id}`, { method: 'DELETE' }),
+  },
+
   plans: {
     list: () => request<{ plans: PremiumPlan[] }>('/api/admin/plans'),
     create: (data: Partial<PremiumPlan>) =>
@@ -599,6 +633,23 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+  },
+
+  hospitalCategories: {
+    list: () =>
+      request<{ categories: HospitalCategoryRecord[] }>('/api/admin/hospital-categories'),
+    create: (data: Partial<HospitalCategoryRecord>) =>
+      request<{ category: HospitalCategoryRecord }>('/api/admin/hospital-categories', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<HospitalCategoryRecord>) =>
+      request<{ category: HospitalCategoryRecord }>(`/api/admin/hospital-categories/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/hospital-categories/${id}`, { method: 'DELETE' }),
   },
 
   hospitals: {
