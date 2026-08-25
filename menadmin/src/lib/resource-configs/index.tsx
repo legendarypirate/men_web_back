@@ -1,6 +1,5 @@
-import { ResourceConfig } from '@/lib/types/fields';
-import { Product, AssessmentQuestion, Article, HealthBite, HomeProTip, PremiumPlan, Hospital, HospitalCategoryRecord, CoachProgram, PromoCode } from '@/lib/api';
 import { FieldOption, ResourceConfig } from '@/lib/types/fields';
+import { Product, AssessmentQuestion, Article, HealthBite, HomeProTip, PremiumPlan, Hospital, HospitalCategoryRecord, CoachProgram, PromoCode } from '@/lib/api';
 import { formatMnt } from '@/lib/api';
 import { StatusBadge } from '@/components/page-ui';
 
