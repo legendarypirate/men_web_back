@@ -3,6 +3,7 @@
 import { FieldDef } from '@/lib/types/fields';
 import { StringListEditor } from '@/components/admin/string-list-editor';
 import { MultiSelectEditor } from '@/components/admin/multi-select-editor';
+import { ObjectListEditor, normalizeObjectListItems } from '@/components/admin/object-list-editor';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { DatePicker } from '@/components/custom/date-picker';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -39,6 +40,7 @@ export function DynamicForm({ fields, values, onChange, mode }: Props) {
             field.type !== 'switch' &&
             field.type !== 'string-list' &&
             field.type !== 'multi-select' &&
+            field.type !== 'object-list' &&
             field.type !== 'image-upload' && (
             <Label htmlFor={field.key}>{field.label}</Label>
           )}
@@ -58,6 +60,20 @@ export function DynamicForm({ fields, values, onChange, mode }: Props) {
               label={field.label}
               options={field.options || []}
               values={Array.isArray(values[field.key]) ? (values[field.key] as string[]) : []}
+              onChange={(items) => onChange(field.key, items)}
+            />
+          ) : field.type === 'object-list' ? (
+            <ObjectListEditor
+              label={field.label}
+              hint={field.hint}
+              addLabel={field.addLabel}
+              items={
+                Array.isArray(values[field.key])
+                  ? (values[field.key] as Record<string, unknown>[])
+                  : []
+              }
+              itemFields={field.itemFields || []}
+              allValues={values}
               onChange={(items) => onChange(field.key, items)}
             />
           ) : field.type === 'string-list' ? (
@@ -154,6 +170,7 @@ export function DynamicForm({ fields, values, onChange, mode }: Props) {
             field.type !== 'switch' &&
             field.type !== 'string-list' &&
             field.type !== 'multi-select' &&
+            field.type !== 'object-list' &&
             field.type !== 'image-upload' && (
             <p className="text-xs text-muted-foreground">{field.hint}</p>
           )}
@@ -174,6 +191,9 @@ export function serializeFormValues(
       out[field.key] = Array.isArray(raw)
         ? raw.map((item) => String(item).trim()).filter(Boolean)
         : [];
+    }
+    if (field.type === 'object-list') {
+      out[field.key] = normalizeObjectListItems(values[field.key], field.itemFields || []);
     }
     if (field.type === 'json') {
       try {
@@ -199,6 +219,9 @@ export function prepareEditValues(
   const out: Record<string, unknown> = { ...item };
   for (const field of fields) {
     if (field.type === 'string-list' || field.type === 'multi-select') {
+      out[field.key] = Array.isArray(out[field.key]) ? out[field.key] : [];
+    }
+    if (field.type === 'object-list') {
       out[field.key] = Array.isArray(out[field.key]) ? out[field.key] : [];
     }
     if (field.type === 'json' && out[field.key] != null) {

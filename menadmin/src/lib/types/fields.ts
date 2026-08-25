@@ -8,11 +8,24 @@ export type FieldType =
   | 'json'
   | 'string-list'
   | 'multi-select'
+  | 'object-list'
   | 'date'
   | 'readonly'
   | 'image-upload';
 
 export type FieldOption = { label: string; value: string };
+
+export type ObjectListFieldDef = {
+  key: string;
+  label: string;
+  type: 'text' | 'textarea' | 'number' | 'select';
+  placeholder?: string;
+  required?: boolean;
+  options?: FieldOption[];
+  optionsFromField?: string;
+  optionsFromFieldValueKey?: string;
+  optionsFromFieldLabelKey?: string;
+};
 
 export type FieldDef = {
   key: string;
@@ -21,6 +34,8 @@ export type FieldDef = {
   required?: boolean;
   placeholder?: string;
   options?: FieldOption[];
+  itemFields?: ObjectListFieldDef[];
+  addLabel?: string;
   rows?: number;
   hint?: string;
   showOnCreate?: boolean;
