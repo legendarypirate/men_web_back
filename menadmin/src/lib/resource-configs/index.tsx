@@ -105,7 +105,7 @@ export const assessmentConfig: ResourceConfig<AssessmentQuestion> = {
   ],
 };
 
-const articleCategoryOptions = [
+export const articleCategoryOptions = [
   { label: 'Шилдэг сонголтууд', value: 'Шилдэг сонголтууд' },
   { label: 'Бэлгийн эрүүл мэнд', value: 'Бэлгийн эрүүл мэнд' },
   { label: 'Сэргээлт', value: 'Сэргээлт' },
