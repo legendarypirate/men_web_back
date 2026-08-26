@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api, clearToken, isLoggedIn } from '@/lib/api';
+import { SITE } from '@/lib/site-config';
 import { adminNav, navGroups } from '@/lib/nav-config';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,6 +26,7 @@ import {
 } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 import { ThemeSwitcher } from '@/components/custom/theme-switcher';
+import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -60,11 +62,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <Sidebar>
         <SidebarHeader className="border-b border-sidebar-border p-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/15 font-bold text-primary">
-              V
-            </div>
+            <TenkheeLogo size="md" />
             <div>
-              <p className="font-semibold">Tenkhee</p>
+              <p className="font-semibold">{SITE.name}</p>
               <p className="text-xs text-muted-foreground">Admin Panel</p>
             </div>
           </div>
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
-          <span className="text-sm text-muted-foreground">Tenkhee апп бүрэн удирдлага</span>
+          <span className="text-sm text-muted-foreground">{SITE.name} апп бүрэн удирдлага</span>
           <div className="ml-auto">
             <ThemeSwitcher />
           </div>

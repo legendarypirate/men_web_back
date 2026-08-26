@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { LegalPageShell } from '@/components/landing/legal-page-shell';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Tenkhee',
+  title: 'Privacy Policy — Tenkhee Plus',
   description:
-    'Tenkhee mobile application privacy policy. Learn how we collect, use, and protect your personal information.',
+    'Tenkhee Plus mobile application privacy policy. Learn how we collect, use, and protect your personal information.',
   robots: { index: true, follow: true },
 };
 
@@ -13,12 +14,12 @@ const sections = [
     title: '1. Introduction',
     titleMn: '1. Оршил',
     body: [
-      'Tenkhee (“we”, “our”, or “us”) operates the Tenkhee mobile application and related services (the “Service”). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our app.',
-      'By using Tenkhee, you agree to the collection and use of information in accordance with this policy. If you do not agree, please do not use the Service.',
+      'Tenkhee Plus (“we”, “our”, or “us”) operates the Tenkhee Plus mobile application and related services (the “Service”). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our app.',
+      'By using Tenkhee Plus, you agree to the collection and use of information in accordance with this policy. If you do not agree, please do not use the Service.',
     ],
     bodyMn: [
-      'Tenkhee (“бид”) нь Tenkhee гар утасны апп болон холбогдох үйлчилгээг (“Үйлчилгээ”) үзүүлдэг. Энэхүү Нууцлалын бодлого нь та манай аппыг ашиглах үед таны мэдээллийг хэрхэн цуглуулж, ашиглаж, хамгаалдаг талаар тайлбарлана.',
-      'Tenkhee-ийг ашигласнаар та энэ бодлогын дагуу мэдээлэл цуглуулж, ашиглахыг зөвшөөрч байна. Хэрэв та зөвшөөрөхгүй бол Үйлчилгээг ашиглахгүй байна уу.',
+      'Tenkhee Plus (“бид”) нь Tenkhee Plus гар утасны апп болон холбогдох үйлчилгээг (“Үйлчилгээ”) үзүүлдэг. Энэхүү Нууцлалын бодлого нь та манай аппыг ашиглах үед таны мэдээллийг хэрхэн цуглуулж, ашиглаж, хамгаалдаг талаар тайлбарлана.',
+      'Tenkhee Plus-ийг ашигласнаар та энэ бодлогын дагуу мэдээлэл цуглуулж, ашиглахыг зөвшөөрч байна. Хэрэв та зөвшөөрөхгүй бол Үйлчилгээг ашиглахгүй байна уу.',
     ],
   },
   {
@@ -43,7 +44,7 @@ const sections = [
     title: '3. How We Use Your Information',
     titleMn: '3. Мэдээллийг хэрхэн ашигладаг вэ',
     body: [
-      'Provide, maintain, and improve the Tenkhee app and personalized workout experiences.',
+      'Provide, maintain, and improve the Tenkhee Plus app and personalized workout experiences.',
       'Process subscriptions, in-app purchases, and shop orders.',
       'Track your fitness progress and display relevant content.',
       'Send important service notifications and respond to support requests.',
@@ -51,7 +52,7 @@ const sections = [
       'Comply with applicable laws and regulations.',
     ],
     bodyMn: [
-      'Tenkhee апп болон хувийн дасгалын туршлагыг үзүүлж, сайжруулах.',
+      'Tenkhee Plus апп болон хувийн дасгалын туршлагыг үзүүлж, сайжруулах.',
       'Гишүүнчлэл, дэлгүүрийн захиалга, төлбөрийг боловсруулах.',
       'Таны фитнесийн явцыг хадгалж, холбогдох контент харуулах.',
       'Чухал мэдэгдэл илгээх, дэмжлэгийн хүсэлтэд хариулах.',
@@ -65,12 +66,12 @@ const sections = [
     body: [
       'We do not sell your personal information.',
       'We may share data with trusted service providers who help us operate the Service (hosting, payment processors, cloud storage for media assets), subject to confidentiality obligations.',
-      'We may disclose information if required by law, court order, or to protect the rights, safety, and security of Tenkhee and our users.',
+      'We may disclose information if required by law, court order, or to protect the rights, safety, and security of Tenkhee Plus and our users.',
     ],
     bodyMn: [
       'Бид таны хувийн мэдээллийг худалдаж, борлуулдаггүй.',
       'Үйлчилгээ ажиллуулахад туслах найдвартай үйлчилгээ үзүүлэгчидтэй (hosting, төлбөр, медиа хадгалалт) нууцлалын үүрэгтэйгээр хуваалцаж болно.',
-      'Хууль, шүүхийн шийдвэрээр шаардлагатай бол, эсвэл Tenkhee болон хэрэглэгчдийн эрх, аюулгүй байдлыг хамгаалах зорилгоор илчлэж болно.',
+      'Хууль, шүүхийн шийдвэрээр шаардлагатай бол, эсвэл Tenkhee Plus болон хэрэглэгчдийн эрх, аюулгүй байдлыг хамгаалах зорилгоор илчлэж болно.',
     ],
   },
   {
@@ -107,10 +108,10 @@ const sections = [
     title: "7. Children's Privacy",
     titleMn: '7. Хүүхдийн нууцлал',
     body: [
-      'Tenkhee is intended for adults (18 years and older). We do not knowingly collect personal information from children under 13 (or under 16 in certain regions). If you believe we have collected such data, please contact us and we will delete it promptly.',
+      'Tenkhee Plus is intended for adults (18 years and older). We do not knowingly collect personal information from children under 13 (or under 16 in certain regions). If you believe we have collected such data, please contact us and we will delete it promptly.',
     ],
     bodyMn: [
-      'Tenkhee нь насанд хүрэгчдэд (18+) зориулагдсан. Бид 13-аас доош (зарим бүс нутагт 16-аас доош) насны хүүхдээс мэдээлэл цуглуулдаггүй. Ийм мэдээлэл цугласан гэж үзвэл бидэнтэй холбогдоод устгуулна уу.',
+      'Tenkhee Plus нь насанд хүрэгчдэд (18+) зориулагдсан. Бид 13-аас доош (зарим бүс нутагт 16-аас доош) насны хүүхдээс мэдээлэл цуглуулдаггүй. Ийм мэдээлэл цугласан гэж үзвэл бидэнтэй холбогдоод устгуулна уу.',
     ],
   },
   {
@@ -139,14 +140,14 @@ const sections = [
     body: [
       'If you have questions about this Privacy Policy or your personal data, contact us at:',
       'Email: privacy@tenkhee.mn',
-      'App name: Tenkhee',
-      'Developer: Tenkhee',
+      'App name: Tenkhee Plus',
+      'Developer: Tenkhee Plus',
     ],
     bodyMn: [
       'Энэ бодлого эсвэл хувийн мэдээллийн талаар асуулт байвал холбогдоно уу:',
       'И-мэйл: privacy@tenkhee.mn',
-      'Апп: Tenkhee',
-      'Хөгжүүлэгч: Tenkhee',
+      'Апп: Tenkhee Plus',
+      'Хөгжүүлэгч: Tenkhee Plus',
     ],
   },
 ];
@@ -155,65 +156,45 @@ export default function PrivacyPage() {
   const lastUpdated = 'August 12, 2026';
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-5">
-          <div>
-            <p className="text-sm font-semibold text-primary">Tenkhee</p>
-            <h1 className="text-2xl font-bold tracking-tight">Privacy Policy</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Нууцлалын бодлого · Last updated: {lastUpdated}
-            </p>
-          </div>
-          <Link
-            href="/login"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            Admin
+    <LegalPageShell
+      title="Privacy Policy"
+      subtitle={`Нууцлалын бодлого · Last updated: ${lastUpdated}`}
+    >
+      <p className="mb-8 rounded-lg border border-white/10 bg-white/[0.03] p-4 text-sm leading-relaxed text-white/60">
+        This page is the official privacy policy URL for the Tenkhee Plus mobile app, submitted to
+        Google Play and Apple App Store. It is available publicly at{' '}
+        <strong className="text-white">/privacy</strong>.
+      </p>
+
+      <div className="space-y-10">
+        {sections.map((section) => (
+          <section key={section.title}>
+            <h2 className="text-lg font-bold text-white">{section.title}</h2>
+            <h3 className="mt-1 text-base font-semibold text-[#ff453a]">{section.titleMn}</h3>
+            <div className="mt-4 space-y-3 text-sm leading-relaxed text-white/60">
+              {section.body.map((paragraph) => (
+                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              ))}
+            </div>
+            <div className="mt-4 space-y-3 border-l-2 border-[#ff453a]/30 pl-4 text-sm leading-relaxed text-white/80">
+              {section.bodyMn.map((paragraph) => (
+                <p key={paragraph.slice(0, 40)}>{paragraph}</p>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <div className="mt-16 border-t border-white/10 pt-8 text-center text-sm text-white/50">
+        <p className="space-x-4">
+          <a href="mailto:privacy@tenkhee.mn" className="text-[#ff453a] hover:underline">
+            privacy@tenkhee.mn
+          </a>
+          <Link href="/support" className="text-[#ff453a] hover:underline">
+            Support
           </Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-3xl px-6 py-10">
-        <p className="mb-8 rounded-lg border border-border bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
-          This page is the official privacy policy URL for the Tenkhee mobile app,
-          submitted to Google Play and Apple App Store. It is available publicly at{' '}
-          <strong className="text-foreground">/privacy</strong>.
         </p>
-
-        <div className="space-y-10">
-          {sections.map((section) => (
-            <section key={section.title}>
-              <h2 className="text-lg font-bold text-foreground">{section.title}</h2>
-              <h3 className="mt-1 text-base font-semibold text-primary">
-                {section.titleMn}
-              </h3>
-              <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
-                {section.body.map((paragraph) => (
-                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-                ))}
-              </div>
-              <div className="mt-4 space-y-3 border-l-2 border-primary/30 pl-4 text-sm leading-relaxed text-foreground/80">
-                {section.bodyMn.map((paragraph) => (
-                  <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        <footer className="mt-16 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Tenkhee. All rights reserved.</p>
-          <p className="mt-2 space-x-4">
-            <a href="mailto:privacy@tenkhee.mn" className="text-primary hover:underline">
-              privacy@tenkhee.mn
-            </a>
-            <Link href="/support" className="text-primary hover:underline">
-              Support
-            </Link>
-          </p>
-        </footer>
-      </main>
-    </div>
+      </div>
+    </LegalPageShell>
   );
 }

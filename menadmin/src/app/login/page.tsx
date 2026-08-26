@@ -1,9 +1,12 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api, setToken } from '@/lib/api';
 import { DEMO_ADMIN } from '@/lib/nav-config';
+import { SITE } from '@/lib/site-config';
+import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
 import { ThemeSwitcher } from '@/components/custom/theme-switcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,17 +43,23 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Link
+          href="/"
+          className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          ← Нүүр
+        </Link>
         <ThemeSwitcher />
       </div>
       <div className="w-full max-w-md space-y-4">
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto mb-2 flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-2xl font-bold text-primary">
-              V
+            <div className="mx-auto mb-2">
+              <TenkheeLogo size="lg" className="shadow-md" />
             </div>
-            <CardTitle className="text-2xl">Tenkhee Admin</CardTitle>
-            <CardDescription>Апп бүрэн удирдах самбар</CardDescription>
+            <CardTitle className="text-2xl">{SITE.name} Admin</CardTitle>
+            <CardDescription>Апп бүрэн удирдах самбар · {SITE.domain}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

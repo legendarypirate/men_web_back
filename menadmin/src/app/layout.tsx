@@ -12,8 +12,12 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: 'Tenkhee Admin',
-  description: 'Tenkhee удирдлагын самбар',
+  title: 'Tenkhee Plus',
+  description: 'Tenkhee Plus — tenkhee.mn албан ёсны вэб сайт',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
