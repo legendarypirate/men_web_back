@@ -96,6 +96,7 @@ export type WorkoutExercise = {
   sets: number;
   motion: string;
   motionHint: string;
+  targetMuscles?: string | null;
   videoUrl?: string | null;
   thumbnailUrl?: string | null;
   sortOrder?: number;
@@ -109,6 +110,7 @@ export type WorkoutProgram = {
   description: string;
   level: string;
   durationMinutes: number;
+  equipment?: string | null;
   tag: string;
   isToday: boolean;
   sortOrder: number;
@@ -490,7 +492,10 @@ export const api = {
   },
 
   workouts: {
-    list: () => request<{ programs: WorkoutProgram[] }>('/api/admin/workouts'),
+    list: (tag?: string) =>
+      request<{ programs: WorkoutProgram[] }>(
+        tag ? `/api/admin/workouts?tag=${encodeURIComponent(tag)}` : '/api/admin/workouts'
+      ),
     create: (data: Partial<WorkoutProgram> & { exercises?: WorkoutExercise[] }) =>
       request<{ program: WorkoutProgram }>('/api/admin/workouts', {
         method: 'POST',

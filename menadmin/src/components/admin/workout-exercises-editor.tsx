@@ -46,6 +46,7 @@ export const emptyExercise = (): WorkoutExercise => ({
   sets: 3,
   motion: 'kegelHold',
   motionHint: '',
+  targetMuscles: '',
   videoUrl: '',
   thumbnailUrl: '',
   introSlides: [],
@@ -259,6 +260,15 @@ export function WorkoutExercisesEditor({
                       value={exercise.instruction}
                       onChange={(e) => update(index, { instruction: e.target.value })}
                       rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label>Target muscles</Label>
+                    <Input
+                      value={exercise.targetMuscles || ''}
+                      onChange={(e) => update(index, { targetMuscles: e.target.value })}
+                      placeholder="Аарцгийн ёроол, Гуяны дотор тал..."
                     />
                   </div>
 

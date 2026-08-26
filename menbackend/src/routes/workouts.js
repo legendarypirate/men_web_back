@@ -22,6 +22,7 @@ function mapProgram(program) {
       sets: e.sets,
       motion: e.motion,
       motionHint: e.motionHint,
+      targetMuscles: e.targetMuscles || null,
       videoUrl: e.videoUrl || null,
       thumbnailUrl: e.thumbnailUrl || null,
       introSlides: (e.introSlides || []).sort(
@@ -42,6 +43,7 @@ function mapProgram(program) {
     description: json.description,
     level: json.level,
     durationMinutes: json.durationMinutes,
+    equipment: json.equipment || 'None',
     tag: json.tag,
     isToday: json.isToday,
     videoUrl: json.videoUrl || null,
@@ -57,7 +59,10 @@ function mapProgram(program) {
 
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
+    const tag = typeof req.query.tag === 'string' ? req.query.tag.trim() : '';
+    const where = tag ? { tag } : undefined;
     const programs = await WorkoutProgram.findAll({
+      where,
       include: [{ model: WorkoutExercise, as: 'exercises' }],
       order: [
         ['sortOrder', 'ASC'],

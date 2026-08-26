@@ -3,8 +3,132 @@ const { Op } = require('sequelize');
 const { Product, Order, OrderItem } = require('../models');
 const { ok, fail, formatMnt } = require('../utils/response');
 const { optionalAuth } = require('../middleware/auth');
+const { getPaymentSettings } = require('../utils/paymentSettings');
+const qpayService = require('../services/qpayService');
+const {
+  shopDescription,
+  shopOrderSummary,
+  shopSenderInvoiceNo,
+} = require('../utils/qpayDescriptions');
+const { markOrderPaid } = require('../utils/orderPayment');
 
 const router = express.Router();
+
+function mapBankUrls(urls) {
+  if (!Array.isArray(urls)) return [];
+  return urls
+    .map((entry) => ({
+      name: entry.name || entry.description || 'Bank',
+      logo: entry.logo || entry.logo_url || '',
+      link: entry.link || entry.deeplink || '',
+      description: entry.description || entry.name || '',
+    }))
+    .filter((entry) => entry.link);
+}
+
+function mapOrderPayment(order, extra = {}) {
+  const bankUrls = mapBankUrls(order.bankUrls);
+  return {
+    orderNumber: order.orderNumber,
+    invoiceId: order.invoiceId,
+    amountMnt: order.totalMnt,
+    amountLabel: formatMnt(order.totalMnt),
+    status: order.status,
+    paymentDescription: order.paymentDescription,
+    qrPayload: order.qrPayload,
+    qrImage: order.qrImage || null,
+    qrText: order.qrText || null,
+    banks: bankUrls,
+    expiresAt: order.expiresAt,
+    paidAt: order.paidAt,
+    verifiedByQpay: order.verifiedByQpay,
+    merchant: 'Tenkhee LLC',
+    ...extra,
+  };
+}
+
+function requireQPayConfigured(res) {
+  if (qpayService.isConfigured()) return true;
+  fail(
+    res,
+    'QPay merchant тохиргоо дутуу байна. QPAY_* env хувьсагчуудыг backend дээр тохируулна уу.',
+    503
+  );
+  return false;
+}
+
+async function syncOrderWithQPay(order) {
+  if (!qpayService.isConfigured() || order.status !== 'pending' || !order.invoiceId) {
+    return order;
+  }
+
+  if (order.expiresAt && order.expiresAt < new Date()) {
+    return order;
+  }
+
+  try {
+    const result = await qpayService.checkInvoicePayment(order.invoiceId);
+    if (result.isPaid) {
+      await markOrderPaid(order);
+    }
+  } catch (err) {
+    console.warn('[QPay] Shop order status check failed:', err.message);
+  }
+
+  return order;
+}
+
+async function createOrderQPayInvoice(order, items = []) {
+  if (order.invoiceId && order.status === 'pending') {
+    return order;
+  }
+  if (order.status !== 'pending') {
+    throw new Error('Захиалга аль хэдийн төлөгдсөн эсвэл цуцлагдсан');
+  }
+
+  const summary = shopOrderSummary(items);
+  const paymentDescription = shopDescription(order.orderNumber, summary);
+  const senderInvoiceNo = shopSenderInvoiceNo(order.orderNumber);
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  console.log('[QPay] Creating shop invoice', {
+    orderNumber: order.orderNumber,
+    amountMnt: order.totalMnt,
+    senderInvoiceNo,
+    paymentDescription,
+  });
+
+  const qpayInvoice = await qpayService.createInvoice({
+    amount: order.totalMnt,
+    description: paymentDescription,
+    senderInvoiceNo,
+  });
+
+  const invoiceId = qpayInvoice.invoiceId;
+  const qrImage = qpayInvoice.qrImage;
+  const qrText = qpayInvoice.qrText;
+  const qrPayload =
+    qrText || `QPAY|TENKHEE|INVOICE=${invoiceId}|amount=${order.totalMnt}`;
+  const bankUrls = qpayInvoice.bankUrls;
+
+  await order.update({
+    invoiceId,
+    paymentDescription,
+    qrPayload,
+    qrImage,
+    qrText,
+    bankUrls,
+    expiresAt,
+  });
+
+  console.log('[QPay] Shop invoice created', {
+    orderNumber: order.orderNumber,
+    invoiceId,
+    banks: bankUrls.length,
+  });
+
+  return order;
+}
 
 router.get('/products', async (req, res, next) => {
   try {
@@ -49,6 +173,7 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       shippingAddress,
       paymentMethod = 'qpay',
       notes,
+      createQpayInvoice = true,
     } = req.body;
 
     if (!customerName || !Array.isArray(items) || items.length === 0) {
@@ -78,7 +203,7 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       });
     }
 
-    const orderNumber = `VM-${Date.now().toString(36).toUpperCase()}`;
+    const orderNumber = `SHOP-${Date.now().toString(36).toUpperCase()}`;
     const order = await Order.create({
       orderNumber,
       userId: req.user?.id || null,
@@ -90,10 +215,26 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       shippingAddress: shippingAddress || null,
       paymentMethod,
       notes: notes || null,
+      paymentDescription: shopDescription(
+        orderNumber,
+        shopOrderSummary(lineItems)
+      ),
     });
 
     for (const line of lineItems) {
       await OrderItem.create({ ...line, orderId: order.id });
+    }
+
+    let payment = null;
+    const settings = await getPaymentSettings();
+    if (
+      paymentMethod === 'qpay' &&
+      settings.qpayEnabled &&
+      createQpayInvoice &&
+      qpayService.isConfigured()
+    ) {
+      await createOrderQPayInvoice(order, lineItems);
+      payment = mapOrderPayment(order);
     }
 
     const full = await Order.findByPk(order.id, {
@@ -105,7 +246,8 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       {
         order: full,
         totalLabel: formatMnt(totalMnt),
-        qrPayload: `Tenkhee|${orderNumber}|${totalMnt}`,
+        payment,
+        paymentDescription: full.paymentDescription,
       },
       'Захиалга үүслээ',
       201
@@ -125,7 +267,98 @@ router.get('/orders/:orderNumber', optionalAuth, async (req, res, next) => {
     if (req.user && order.userId && order.userId !== req.user.id) {
       return fail(res, 'Эрхгүй', 403);
     }
-    return ok(res, { order });
+    return ok(res, {
+      order,
+      payment: order.invoiceId ? mapOrderPayment(order) : null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/orders/:orderNumber/qpay/invoice', optionalAuth, async (req, res, next) => {
+  try {
+    const settings = await getPaymentSettings();
+    if (!settings.qpayEnabled) {
+      return fail(res, 'QPay одоогоор идэвхгүй байна', 503);
+    }
+    if (!requireQPayConfigured(res)) return;
+
+    const order = await Order.findOne({
+      where: { orderNumber: req.params.orderNumber },
+      include: [{ model: OrderItem, as: 'items' }],
+    });
+    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
+    if (req.user && order.userId && order.userId !== req.user.id) {
+      return fail(res, 'Эрхгүй', 403);
+    }
+    if (order.status === 'paid') {
+      return ok(res, { payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
+    }
+    if (order.status !== 'pending') {
+      return fail(res, 'Захиалга төлбөр хүлээн авах боломжгүй');
+    }
+
+    await createOrderQPayInvoice(order, order.items || []);
+    return ok(res, { payment: mapOrderPayment(order) }, 'QPay нэхэмжлэх үүслээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/orders/:orderNumber/qpay', optionalAuth, async (req, res, next) => {
+  try {
+    const order = await Order.findOne({
+      where: { orderNumber: req.params.orderNumber },
+      include: [{ model: OrderItem, as: 'items' }],
+    });
+    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
+    if (req.user && order.userId && order.userId !== req.user.id) {
+      return fail(res, 'Эрхгүй', 403);
+    }
+    if (!order.invoiceId) {
+      return fail(res, 'QPay нэхэмжлэх үүсээгүй байна', 404);
+    }
+
+    if (order.status === 'pending') {
+      await syncOrderWithQPay(order);
+      await order.reload({ include: [{ model: OrderItem, as: 'items' }] });
+    }
+
+    return ok(res, { payment: mapOrderPayment(order) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/orders/:orderNumber/qpay/confirm', optionalAuth, async (req, res, next) => {
+  try {
+    const order = await Order.findOne({
+      where: { orderNumber: req.params.orderNumber },
+      include: [{ model: OrderItem, as: 'items' }],
+    });
+    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
+    if (req.user && order.userId && order.userId !== req.user.id) {
+      return fail(res, 'Эрхгүй', 403);
+    }
+    if (order.status === 'paid') {
+      return ok(res, { order, payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
+    }
+    if (!order.invoiceId) {
+      return fail(res, 'QPay нэхэмжлэх олдсонгүй', 404);
+    }
+    if (!requireQPayConfigured(res)) return;
+
+    const result = await qpayService.checkInvoicePayment(order.invoiceId);
+    if (!result.isPaid) {
+      return fail(res, 'Төлбөр хараахан баталгаажаагүй байна');
+    }
+
+    await markOrderPaid(order);
+    const full = await Order.findByPk(order.id, {
+      include: [{ model: OrderItem, as: 'items' }],
+    });
+    return ok(res, { order: full, payment: mapOrderPayment(full) }, 'Төлбөр амжилттай');
   } catch (err) {
     next(err);
   }

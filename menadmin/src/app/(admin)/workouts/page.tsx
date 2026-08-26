@@ -26,10 +26,45 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+
+const WORKOUT_TAGS = [
+  { value: '', label: 'Бүгд' },
+  { value: 'PELVIC STRETCHING', label: 'Pelvic Stretching' },
+  { value: 'GROIN FITNESS', label: 'Groin Fitness' },
+  { value: 'KEGEL', label: 'Kegel' },
+  { value: 'ӨНӨӨДРИЙН ДАСГАЛ', label: 'Өнөөдрийн дасгал' },
+] as const;
+
+const WORKOUT_LEVELS = [
+  'Beginner',
+  'Intermediate',
+  'Advanced',
+  'All Levels',
+  'Эхлэгч',
+  'Дунд',
+  'Ахисан',
+] as const;
+
+const TAG_PRESETS = [
+  'PELVIC STRETCHING',
+  'GROIN FITNESS',
+  'KEGEL',
+  'ӨНӨӨДРИЙН ДАСГАЛ',
+  'ШИНЭ',
+] as const;
 
 export default function WorkoutsPage() {
   const confirm = useConfirm();
   const [programs, setPrograms] = useState<WorkoutProgram[]>([]);
+  const [tagFilter, setTagFilter] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<WorkoutProgram | null>(null);
@@ -40,9 +75,10 @@ export default function WorkoutsPage() {
     id: '',
     title: '',
     description: '',
-    level: 'Эхлэгч',
+    level: 'Beginner',
     durationMinutes: 10,
-    tag: 'ШИНЭ',
+    equipment: 'None',
+    tag: 'PELVIC STRETCHING',
     isToday: false,
     sortOrder: 0,
     videoUrl: null,
@@ -51,10 +87,10 @@ export default function WorkoutsPage() {
     exercises: [],
   };
 
-  async function load() {
+  async function load(filterTag = tagFilter) {
     setLoading(true);
     try {
-      const res = await api.workouts.list();
+      const res = await api.workouts.list(filterTag || undefined);
       setPrograms(res.data.programs);
       setError('');
     } catch (err) {
@@ -66,7 +102,8 @@ export default function WorkoutsPage() {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tagFilter]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -134,7 +171,11 @@ export default function WorkoutsPage() {
     <div>
       <PageHeader
         title="Дасгалын хөтөлбөрүүд"
-        subtitle={`${programs.length} хөтөлбөр`}
+        subtitle={
+          tagFilter
+            ? `${programs.length} хөтөлбөр · ${tagFilter}`
+            : `${programs.length} хөтөлбөр`
+        }
         action={
           <AddButton
             label="Хөтөлбөр нэмэх"
@@ -142,6 +183,7 @@ export default function WorkoutsPage() {
               setEditing({
                 ...empty,
                 id: `program_${Date.now()}`,
+                tag: tagFilter || empty.tag,
                 exercises: [emptyExercise()],
               });
               setShowForm(true);
@@ -149,6 +191,21 @@ export default function WorkoutsPage() {
           />
         }
       />
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {WORKOUT_TAGS.map((item) => (
+          <Button
+            key={item.label}
+            type="button"
+            size="sm"
+            variant={tagFilter === item.value ? 'default' : 'outline'}
+            className={cn(tagFilter === item.value && 'bg-[#FF453A] hover:bg-[#e63e35]')}
+            onClick={() => setTagFilter(item.value)}
+          >
+            {item.label}
+          </Button>
+        ))}
+      </div>
       {error && (
         <div className="mb-4">
           <ErrorState message={error} />
@@ -159,6 +216,18 @@ export default function WorkoutsPage() {
         columns={[
           { key: 'title', label: 'Нэр', className: 'font-semibold text-[#2c3e50]' },
           { key: 'level', label: 'Түвшин' },
+          {
+            key: 'tag',
+            label: 'Tag',
+            render: (p) => (
+              <span className="text-xs font-medium text-[#7f8c8d]">{p.tag || '—'}</span>
+            ),
+          },
+          {
+            key: 'equipment',
+            label: 'Хэрэгсэл',
+            render: (p) => p.equipment || 'None',
+          },
           {
             key: 'durationMinutes',
             label: 'Минут',
@@ -252,9 +321,28 @@ export default function WorkoutsPage() {
             </div>
             <div className="space-y-2">
               <Label>Түвшин</Label>
+              <Select
+                value={editing?.level || 'Beginner'}
+                onValueChange={(value) =>
+                  editing && setEditing({ ...editing, level: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Түвшин сонгох" />
+                </SelectTrigger>
+                <SelectContent>
+                  {WORKOUT_LEVELS.map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {level}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 value={editing?.level || ''}
                 onChange={(e) => editing && setEditing({ ...editing, level: e.target.value })}
+                placeholder="Эсвэл өөр түвшин бичих"
+                className="text-sm"
               />
             </div>
           </div>
@@ -275,7 +363,7 @@ export default function WorkoutsPage() {
               rows={2}
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-4">
             <div className="space-y-2">
               <Label>Минут</Label>
               <Input
@@ -287,11 +375,49 @@ export default function WorkoutsPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label>Хэрэгсэл</Label>
+              <Input
+                value={editing?.equipment || ''}
+                onChange={(e) =>
+                  editing && setEditing({ ...editing, equipment: e.target.value })
+                }
+                placeholder="None, Mat/Towel, Belt/Towel..."
+              />
+            </div>
+            <div className="space-y-2">
               <Label>Tag</Label>
+              <Select
+                value={
+                  TAG_PRESETS.includes((editing?.tag || '') as (typeof TAG_PRESETS)[number])
+                    ? editing?.tag || ''
+                    : '__custom__'
+                }
+                onValueChange={(value) => {
+                  if (!editing) return;
+                  if (value === '__custom__') return;
+                  setEditing({ ...editing, tag: value });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Tag сонгох" />
+                </SelectTrigger>
+                <SelectContent>
+                  {TAG_PRESETS.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="__custom__">Бусад...</SelectItem>
+                </SelectContent>
+              </Select>
               <Input
                 value={editing?.tag || ''}
                 onChange={(e) => editing && setEditing({ ...editing, tag: e.target.value })}
+                placeholder="PELVIC STRETCHING"
               />
+              <p className="text-[11px] text-[#95a5a6]">
+                Pelvic stretch түвшнүүд: tag = PELVIC STRETCHING
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Эрэмбэ</Label>

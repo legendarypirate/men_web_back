@@ -31,6 +31,7 @@ const WorkoutExercise = sequelize.define(
       allowNull: false,
     },
     motionHint: { type: DataTypes.STRING, allowNull: false },
+    targetMuscles: { type: DataTypes.TEXT, allowNull: true },
     videoUrl: { type: DataTypes.STRING, allowNull: true },
     thumbnailUrl: { type: DataTypes.STRING, allowNull: true },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },

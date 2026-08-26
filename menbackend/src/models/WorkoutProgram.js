@@ -12,6 +12,7 @@ const WorkoutProgram = sequelize.define(
     description: { type: DataTypes.TEXT, allowNull: false },
     level: { type: DataTypes.STRING, allowNull: false },
     durationMinutes: { type: DataTypes.INTEGER, allowNull: false },
+    equipment: { type: DataTypes.STRING, allowNull: true, defaultValue: 'None' },
     tag: { type: DataTypes.STRING, defaultValue: 'ӨНӨӨДРИЙН ДАСГАЛ' },
     isToday: { type: DataTypes.BOOLEAN, defaultValue: false },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },

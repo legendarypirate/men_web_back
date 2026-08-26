@@ -10,6 +10,10 @@ const {
 } = require('../utils/promoCode');
 const qpayService = require('../services/qpayService');
 const {
+  subscriptionDescription,
+  subscriptionSenderInvoiceNo,
+} = require('../utils/qpayDescriptions');
+const {
   computeMembershipExpiry,
   mapPlanToMembership,
   enrichPublicUser,
@@ -71,6 +75,7 @@ function mapPayment(payment, plan, extra = {}) {
     qrPayload: payment.qrPayload,
     qrImage: payment.qrImage || null,
     qrText: payment.qrText || null,
+    paymentDescription: payment.paymentDescription || null,
     banks: bankUrls,
     expiresAt: payment.expiresAt,
     paidAt: payment.paidAt,
@@ -204,10 +209,9 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
       appliedPromoCode = normalizeCode(promo.code);
     }
 
-    const stamp = Date.now();
-    const senderInvoiceNo = `VM-${plan.id.toUpperCase()}-${stamp}`;
+    const senderInvoiceNo = subscriptionSenderInvoiceNo(plan.id);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
-    const description = `Tenkhee Premium — ${plan.title}`;
+    const description = subscriptionDescription(plan.title);
 
     if (!requireQPayConfigured(res)) return;
 
@@ -251,6 +255,7 @@ router.post('/qpay/invoice', authRequired, async (req, res, next) => {
       qrText,
       bankUrls,
       expiresAt,
+      paymentDescription: description,
     });
 
     return ok(
@@ -330,19 +335,28 @@ router.post('/qpay/webhook', async (req, res, next) => {
     }
 
     const payment = await Payment.findOne({ where: { invoiceId } });
-    if (!payment) {
-      return ok(res, { received: true }, 'Payment not found');
-    }
-
-    if (paymentStatus === 'PAID' && payment.status !== 'paid') {
-      const { User } = require('../models');
-      const user = await User.findByPk(payment.userId);
-      if (user) {
-        await markPaymentPaid(payment, user);
+    if (payment) {
+      if (paymentStatus === 'PAID' && payment.status !== 'paid') {
+        const { User } = require('../models');
+        const user = await User.findByPk(payment.userId);
+        if (user) {
+          await markPaymentPaid(payment, user);
+        }
       }
+      return ok(res, { received: true, kind: 'subscription' });
     }
 
-    return ok(res, { received: true });
+    const { Order } = require('../models');
+    const { markOrderPaid } = require('../utils/orderPayment');
+    const order = await Order.findOne({ where: { invoiceId } });
+    if (order) {
+      if (paymentStatus === 'PAID' && order.status !== 'paid') {
+        await markOrderPaid(order);
+      }
+      return ok(res, { received: true, kind: 'shop' });
+    }
+
+    return ok(res, { received: true }, 'Payment not found');
   } catch (err) {
     next(err);
   }

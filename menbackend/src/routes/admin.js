@@ -216,7 +216,10 @@ router.post(
 
 router.get('/workouts', adminRequired, async (req, res, next) => {
   try {
+    const tag = typeof req.query.tag === 'string' ? req.query.tag.trim() : '';
+    const where = tag ? { tag } : undefined;
     const programs = await WorkoutProgram.findAll({
+      where,
       include: [{ model: WorkoutExercise, as: 'exercises' }],
       order: [
         ['sortOrder', 'ASC'],
