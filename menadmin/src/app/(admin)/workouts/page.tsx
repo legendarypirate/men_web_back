@@ -323,9 +323,10 @@ export default function WorkoutsPage() {
               <Label>Түвшин</Label>
               <Select
                 value={editing?.level || 'Beginner'}
-                onValueChange={(value) =>
-                  editing && setEditing({ ...editing, level: value })
-                }
+                onValueChange={(value) => {
+                  if (!editing || value == null) return;
+                  setEditing({ ...editing, level: value });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Түвшин сонгох" />
@@ -394,7 +395,7 @@ export default function WorkoutsPage() {
                 }
                 onValueChange={(value) => {
                   if (!editing) return;
-                  if (value === '__custom__') return;
+                  if (value == null || value === '__custom__') return;
                   setEditing({ ...editing, tag: value });
                 }}
               >
