@@ -7,6 +7,14 @@ const apiProxyTarget =
   'http://127.0.0.1:3001';
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
   async rewrites() {
     const base = apiProxyTarget.replace(/\/$/, '');
     return [

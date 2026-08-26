@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,7 +16,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 const LOGIN_BG =
-  'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50f?auto=format&fit=crop&w=1920&q=80';
+  'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=3840&q=90';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,19 +41,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden text-white">
-      <div
-        aria-hidden
-        className="absolute inset-0 scale-105 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('${LOGIN_BG}')` }}
-      />
-      <div className="absolute inset-0 bg-[#070b10]/80" />
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 top-0 size-[360px] rounded-full bg-[#ff453a]/25 blur-[100px]" />
-        <div className="absolute -right-16 bottom-0 size-[320px] rounded-full bg-[#ff453a]/15 blur-[90px]" />
+    <div className="relative min-h-screen min-h-[100dvh] overflow-hidden text-white">
+      <div className="fixed inset-0 z-0">
+        <Image
+          src={LOGIN_BG}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#070b10]/75 via-[#070b10]/45 to-[#070b10]/80" />
+        <div className="absolute inset-0 bg-[#ff453a]/10 mix-blend-multiply" />
       </div>
 
-      <div className="relative flex min-h-screen items-center justify-center p-4">
+      <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+        <div className="absolute -left-24 top-0 size-[420px] rounded-full bg-[#ff453a]/20 blur-[120px]" />
+        <div className="absolute -right-16 bottom-0 size-[380px] rounded-full bg-[#ff453a]/15 blur-[100px]" />
+      </div>
+
+      <div className="relative z-10 flex min-h-screen min-h-[100dvh] items-center justify-center p-4">
         <div className="absolute top-4 right-4 flex items-center gap-2">
           <Link
             href="/"
