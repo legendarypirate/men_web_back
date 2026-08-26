@@ -163,6 +163,123 @@ router.get('/products/:id', async (req, res, next) => {
   }
 });
 
+async function findOrderForPayment(orderNumber, user) {
+  const order = await Order.findOne({
+    where: { orderNumber },
+    include: [{ model: OrderItem, as: 'items' }],
+  });
+  if (!order) {
+    return { order: null, errorMessage: 'Захиалга олдсонгүй', errorStatus: 404 };
+  }
+  if (user && order.userId && order.userId !== user.id) {
+    return { order: null, errorMessage: 'Эрхгүй', errorStatus: 403 };
+  }
+  return { order, errorMessage: null, errorStatus: null };
+}
+
+async function handleCreateQPayInvoice(req, res, next) {
+  try {
+    const orderNumber = req.body?.orderNumber || req.params.orderNumber;
+    if (!orderNumber) {
+      return fail(res, 'orderNumber шаардлагатай');
+    }
+
+    const settings = await getPaymentSettings();
+    if (!settings.qpayEnabled) {
+      return fail(res, 'QPay одоогоор идэвхгүй байна', 503);
+    }
+    if (!requireQPayConfigured(res)) return;
+
+    const { order, errorMessage, errorStatus } = await findOrderForPayment(
+      orderNumber,
+      req.user
+    );
+    if (!order) return fail(res, errorMessage, errorStatus);
+
+    if (order.status === 'paid') {
+      return ok(res, { payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
+    }
+    if (order.status !== 'pending') {
+      return fail(res, 'Захиалга төлбөр хүлээн авах боломжгүй');
+    }
+
+    await createOrderQPayInvoice(order, order.items || []);
+    await order.reload({ include: [{ model: OrderItem, as: 'items' }] });
+    return ok(res, { payment: mapOrderPayment(order) }, 'QPay нэхэмжлэх үүслээ', 201);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function handleGetQPayStatus(req, res, next) {
+  try {
+    const orderNumber = req.query.orderNumber || req.params.orderNumber;
+    if (!orderNumber) {
+      return fail(res, 'orderNumber шаардлагатай');
+    }
+
+    const { order, errorMessage, errorStatus } = await findOrderForPayment(
+      orderNumber,
+      req.user
+    );
+    if (!order) return fail(res, errorMessage, errorStatus);
+
+    if (!order.invoiceId) {
+      return fail(res, 'QPay нэхэмжлэх үүсээгүй байна', 404);
+    }
+
+    if (order.status === 'pending') {
+      await syncOrderWithQPay(order);
+      await order.reload({ include: [{ model: OrderItem, as: 'items' }] });
+    }
+
+    return ok(res, { payment: mapOrderPayment(order) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function handleConfirmQPay(req, res, next) {
+  try {
+    const orderNumber = req.body?.orderNumber || req.params.orderNumber;
+    if (!orderNumber) {
+      return fail(res, 'orderNumber шаардлагатай');
+    }
+
+    const { order, errorMessage, errorStatus } = await findOrderForPayment(
+      orderNumber,
+      req.user
+    );
+    if (!order) return fail(res, errorMessage, errorStatus);
+
+    if (order.status === 'paid') {
+      return ok(res, { order, payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
+    }
+    if (!order.invoiceId) {
+      return fail(res, 'QPay нэхэмжлэх олдсонгүй', 404);
+    }
+    if (!requireQPayConfigured(res)) return;
+
+    const result = await qpayService.checkInvoicePayment(order.invoiceId);
+    if (!result.isPaid) {
+      return fail(res, 'Төлбөр хараахан баталгаажаагүй байна');
+    }
+
+    await markOrderPaid(order);
+    const full = await Order.findByPk(order.id, {
+      include: [{ model: OrderItem, as: 'items' }],
+    });
+    return ok(res, { order: full, payment: mapOrderPayment(full) }, 'Төлбөр амжилттай');
+  } catch (err) {
+    next(err);
+  }
+}
+
+// Flat QPay routes (preferred — avoids nested path issues on some deployments)
+router.post('/qpay/invoice', optionalAuth, handleCreateQPayInvoice);
+router.get('/qpay/status', optionalAuth, handleGetQPayStatus);
+router.post('/qpay/confirm', optionalAuth, handleConfirmQPay);
+
 router.post('/orders', optionalAuth, async (req, res, next) => {
   try {
     const {
@@ -234,6 +351,7 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       qpayService.isConfigured()
     ) {
       await createOrderQPayInvoice(order, lineItems);
+      await order.reload();
       payment = mapOrderPayment(order);
     }
 
@@ -276,92 +394,10 @@ router.get('/orders/:orderNumber', optionalAuth, async (req, res, next) => {
   }
 });
 
-router.post('/orders/:orderNumber/qpay/invoice', optionalAuth, async (req, res, next) => {
-  try {
-    const settings = await getPaymentSettings();
-    if (!settings.qpayEnabled) {
-      return fail(res, 'QPay одоогоор идэвхгүй байна', 503);
-    }
-    if (!requireQPayConfigured(res)) return;
+router.post('/orders/:orderNumber/qpay/invoice', optionalAuth, handleCreateQPayInvoice);
 
-    const order = await Order.findOne({
-      where: { orderNumber: req.params.orderNumber },
-      include: [{ model: OrderItem, as: 'items' }],
-    });
-    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
-    if (req.user && order.userId && order.userId !== req.user.id) {
-      return fail(res, 'Эрхгүй', 403);
-    }
-    if (order.status === 'paid') {
-      return ok(res, { payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
-    }
-    if (order.status !== 'pending') {
-      return fail(res, 'Захиалга төлбөр хүлээн авах боломжгүй');
-    }
+router.get('/orders/:orderNumber/qpay', optionalAuth, handleGetQPayStatus);
 
-    await createOrderQPayInvoice(order, order.items || []);
-    return ok(res, { payment: mapOrderPayment(order) }, 'QPay нэхэмжлэх үүслээ', 201);
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get('/orders/:orderNumber/qpay', optionalAuth, async (req, res, next) => {
-  try {
-    const order = await Order.findOne({
-      where: { orderNumber: req.params.orderNumber },
-      include: [{ model: OrderItem, as: 'items' }],
-    });
-    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
-    if (req.user && order.userId && order.userId !== req.user.id) {
-      return fail(res, 'Эрхгүй', 403);
-    }
-    if (!order.invoiceId) {
-      return fail(res, 'QPay нэхэмжлэх үүсээгүй байна', 404);
-    }
-
-    if (order.status === 'pending') {
-      await syncOrderWithQPay(order);
-      await order.reload({ include: [{ model: OrderItem, as: 'items' }] });
-    }
-
-    return ok(res, { payment: mapOrderPayment(order) });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.post('/orders/:orderNumber/qpay/confirm', optionalAuth, async (req, res, next) => {
-  try {
-    const order = await Order.findOne({
-      where: { orderNumber: req.params.orderNumber },
-      include: [{ model: OrderItem, as: 'items' }],
-    });
-    if (!order) return fail(res, 'Захиалга олдсонгүй', 404);
-    if (req.user && order.userId && order.userId !== req.user.id) {
-      return fail(res, 'Эрхгүй', 403);
-    }
-    if (order.status === 'paid') {
-      return ok(res, { order, payment: mapOrderPayment(order) }, 'Аль хэдийн төлөгдсөн');
-    }
-    if (!order.invoiceId) {
-      return fail(res, 'QPay нэхэмжлэх олдсонгүй', 404);
-    }
-    if (!requireQPayConfigured(res)) return;
-
-    const result = await qpayService.checkInvoicePayment(order.invoiceId);
-    if (!result.isPaid) {
-      return fail(res, 'Төлбөр хараахан баталгаажаагүй байна');
-    }
-
-    await markOrderPaid(order);
-    const full = await Order.findByPk(order.id, {
-      include: [{ model: OrderItem, as: 'items' }],
-    });
-    return ok(res, { order: full, payment: mapOrderPayment(full) }, 'Төлбөр амжилттай');
-  } catch (err) {
-    next(err);
-  }
-});
+router.post('/orders/:orderNumber/qpay/confirm', optionalAuth, handleConfirmQPay);
 
 module.exports = router;
