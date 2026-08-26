@@ -52,8 +52,3 @@ export const navGroups: { key: NavItem['group']; label: string }[] = [
   { key: 'content', label: 'Агуулга' },
   { key: 'commerce', label: 'Дэлгүүр & Төлбөр' },
 ];
-
-export const DEMO_ADMIN = {
-  email: 'admin@tenkhee.mn',
-  password: 'Tenkhee@2026',
-};

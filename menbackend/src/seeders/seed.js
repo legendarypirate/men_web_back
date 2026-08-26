@@ -269,7 +269,7 @@ async function seed() {
   console.log('Database synced (force)');
 
   const passwordHash = await bcrypt.hash('password123', 10);
-  const adminHash = await bcrypt.hash('Tenkhee@2026', 10);
+  const adminHash = await bcrypt.hash('user12', 10);
 
   const demoUser = await User.create({
     email: 'admin@tenkhee.mn',
@@ -283,7 +283,7 @@ async function seed() {
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('  DEMO ADMIN LOGIN');
   console.log('  Email:    admin@tenkhee.mn');
-  console.log('  Password: Tenkhee@2026');
+  console.log('  Password: user12');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
   const demoAppUser = await User.create({
