@@ -11,7 +11,6 @@ import {
   PROCESSING_MESSAGES,
   QUIZ_QUESTIONS,
   QUIZ_STAGES,
-  type QuizQuestion,
 } from '@/lib/quiz-data';
 import { SITE } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
@@ -67,11 +66,21 @@ export function KegelQuiz() {
   const result = buildQuizResult(answers);
 
   return (
-    <div className="flex min-h-screen min-h-[100dvh] flex-col bg-white text-[#1a1a1a]">
-      <header className="border-b border-[#ececec] px-4 py-4 sm:px-6">
-        <div className="mx-auto flex max-w-xl items-center gap-3">
-          <TenkheeLogo href="/" size="sm" />
-          <span className="text-sm font-medium text-[#6b7280]">Эрэгтэйчүүдийн эрүүл мэнд</span>
+    <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
+        <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
+      </div>
+
+      <header className="relative border-b border-white/10 bg-[#0a0f14]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <TenkheeLogo href="/" size="sm" />
+            <span className="text-sm font-medium text-white/55">Эрэгтэйчүүдийн эрүүл мэнд</span>
+          </div>
+          <Link href="/" className="text-xs font-medium text-white/45 hover:text-[#ff453a] sm:text-sm">
+            Гарах
+          </Link>
         </div>
       </header>
 
@@ -79,7 +88,10 @@ export function KegelQuiz() {
         <>
           <StageProgress currentStage={question.stage} />
 
-          <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+          <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]">
+              {QUIZ_STAGES.find((s) => s.id === question.stage)?.label}
+            </p>
             <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
               {question.title}
             </h1>
@@ -93,20 +105,22 @@ export function KegelQuiz() {
                       type="button"
                       onClick={() => selectOption(question.id, option.id)}
                       className={cn(
-                        'flex w-full items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left transition',
+                        'flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left transition active:scale-[0.99]',
                         isSelected
-                          ? 'bg-[#ddd6f3] ring-2 ring-[#1a1a1a]/20'
-                          : 'bg-[#ebe7f5] hover:bg-[#e3ddf0]'
+                          ? 'border-[#ff453a]/60 bg-[#ff453a]/15 shadow-lg shadow-[#ff453a]/10'
+                          : 'border-white/10 bg-white/[0.04] hover:border-[#ff453a]/30 hover:bg-white/[0.07]'
                       )}
                     >
-                      <span className="text-base font-medium text-[#1a1a1a]">{option.label}</span>
+                      <span className="text-base font-medium text-white">{option.label}</span>
                       <span
                         className={cn(
-                          'flex size-6 shrink-0 items-center justify-center rounded-full border-2 bg-white transition',
-                          isSelected ? 'border-[#1a1a1a]' : 'border-[#c4c4c4]'
+                          'flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition',
+                          isSelected
+                            ? 'border-[#ff453a] bg-[#ff453a]'
+                            : 'border-white/25 bg-transparent'
                         )}
                       >
-                        {isSelected && <span className="size-3 rounded-full bg-[#1a1a1a]" />}
+                        {isSelected && <Check className="size-3.5 text-white" strokeWidth={3} />}
                       </span>
                     </button>
                   </li>
@@ -114,22 +128,22 @@ export function KegelQuiz() {
               })}
             </ul>
 
-            <p className="mt-6 text-center text-xs text-[#9ca3af]">
-              {stepIndex + 1} / {totalQuestions}
+            <p className="mt-8 text-center text-xs text-white/35">
+              Асуулт {stepIndex + 1} / {totalQuestions}
             </p>
           </main>
 
-          <footer className="sticky bottom-0 border-t border-[#ececec] bg-white px-4 py-4 sm:px-6">
+          <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
             <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={goBack}
                 disabled={stepIndex === 0}
                 className={cn(
-                  'inline-flex h-12 items-center gap-1 rounded-xl px-4 text-sm font-semibold transition',
+                  'inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition',
                   stepIndex === 0
-                    ? 'cursor-not-allowed text-[#d1d5db]'
-                    : 'text-[#374151] hover:bg-[#f3f4f6]'
+                    ? 'cursor-not-allowed border-transparent text-white/20'
+                    : 'border-white/15 text-white/70 hover:border-white/25 hover:bg-white/5 hover:text-white'
                 )}
               >
                 <ChevronLeft className="size-5" />
@@ -140,10 +154,10 @@ export function KegelQuiz() {
                 onClick={goNext}
                 disabled={!selected}
                 className={cn(
-                  'inline-flex h-12 min-w-[140px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
+                  'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
                   selected
-                    ? 'bg-[#1a1a1a] hover:bg-[#333]'
-                    : 'cursor-not-allowed bg-[#d1d5db]'
+                    ? 'bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]'
+                    : 'cursor-not-allowed bg-white/10 text-white/30'
                 )}
               >
                 Үргэлжлүүлэх
@@ -155,35 +169,48 @@ export function KegelQuiz() {
       )}
 
       {phase === 'processing' && (
-        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-          <div className="mb-8 size-16 animate-spin rounded-full border-4 border-[#ebe7f5] border-t-[#1a1a1a]" />
+        <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="relative mb-8 size-20">
+            <div className="absolute inset-0 animate-ping rounded-full bg-[#ff453a]/20" />
+            <div className="relative flex size-20 items-center justify-center rounded-full border border-[#ff453a]/30 bg-[#ff453a]/10">
+              <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
+            </div>
+          </div>
           <h2 className="text-2xl font-bold">Таны төлөвлөгөө бэлтгэгдэж байна</h2>
-          <p className="mt-3 min-h-6 text-[#6b7280]">{PROCESSING_MESSAGES[processingIndex]}</p>
+          <p className="mt-3 min-h-6 text-white/55">{PROCESSING_MESSAGES[processingIndex]}</p>
+          <div className="mt-8 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-[#ff453a] transition-all duration-700"
+              style={{
+                width: `${((processingIndex + 1) / PROCESSING_MESSAGES.length) * 100}%`,
+              }}
+            />
+          </div>
         </main>
       )}
 
       {phase === 'result' && (
-        <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
+        <main className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
           <div className="text-center">
-            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ebe7f5]">
-              <Check className="size-8 text-[#1a1a1a]" strokeWidth={2.5} />
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]">
+              <Check className="size-8" strokeWidth={2.5} />
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight">Таны хувийн төлөвлөгөө бэлэн!</h1>
-            <p className="mt-3 text-[#6b7280]">
+            <p className="mt-3 text-white/55">
               {SITE.name} танд тохирсон Кегel хөтөлбөр бэлтгэлээ.
             </p>
           </div>
 
-          <dl className="mt-8 overflow-hidden rounded-2xl border border-[#ececec] divide-y divide-[#ececec]">
+          <dl className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] divide-y divide-white/10">
             <ResultRow label="Гол зорилго" value={result.goalLabel} />
             <ResultRow label="Түвшин" value={result.level} />
             <ResultRow label="Өдөрт" value={`${result.minutes} минут`} />
             <ResultRow label="Долоо хоногт" value={`${result.sessionsPerWeek} удаа`} />
           </dl>
 
-          <div className="mt-8 rounded-2xl bg-[#ebe7f5] p-6 text-center">
+          <div className="mt-8 rounded-2xl border border-[#ff453a]/25 bg-[#ff453a]/10 p-6 text-center">
             <p className="font-bold">Апп-аа татаад эхлээрэй</p>
-            <p className="mt-2 text-sm text-[#6b7280]">
+            <p className="mt-2 text-sm text-white/60">
               Видео заавар, явц хяналт, pelvic stretching — бүгд нэг дор.
             </p>
             <StoreBadges className="mt-6 justify-center" />
@@ -201,7 +228,10 @@ export function KegelQuiz() {
             </Link>
             <Link
               href="/"
-              className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-12')}
+              className={cn(
+                buttonVariants({ variant: 'outline', size: 'lg' }),
+                'h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white'
+              )}
             >
               Нүүр хуудас
             </Link>
@@ -214,22 +244,21 @@ export function KegelQuiz() {
 
 function StageProgress({ currentStage }: { currentStage: number }) {
   return (
-    <div className="px-4 pt-8 sm:px-6">
-      <div className="mx-auto flex max-w-xl items-center">
+    <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
+      <div className="mx-auto flex max-w-xl items-start">
         {QUIZ_STAGES.map((stage, index) => {
           const done = stage.id < currentStage;
           const active = stage.id === currentStage;
-          const pending = stage.id > currentStage;
 
           return (
             <div key={stage.id} className="flex flex-1 items-center">
-              <div className="flex flex-col items-center">
+              <div className="flex w-full flex-col items-center">
                 <div
                   className={cn(
-                    'flex size-9 items-center justify-center rounded-full border-2 transition',
-                    done && 'border-[#1a1a1a] bg-[#1a1a1a] text-white',
-                    active && 'border-[#1a1a1a] bg-white',
-                    pending && 'border-[#d1d5db] bg-white'
+                    'flex size-9 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    done && 'border-[#ff453a] bg-[#ff453a] text-white shadow-md shadow-[#ff453a]/30',
+                    active && 'border-[#ff453a] bg-[#0a0f14] shadow-[0_0_0_4px_rgba(255,69,58,0.15)]',
+                    !done && !active && 'border-white/20 bg-transparent'
                   )}
                 >
                   {done ? (
@@ -237,16 +266,16 @@ function StageProgress({ currentStage }: { currentStage: number }) {
                   ) : (
                     <span
                       className={cn(
-                        'size-2.5 rounded-full',
-                        active ? 'bg-[#1a1a1a]' : 'bg-transparent'
+                        'size-2.5 rounded-full transition',
+                        active ? 'bg-[#ff453a]' : 'bg-transparent'
                       )}
                     />
                   )}
                 </div>
                 <span
                   className={cn(
-                    'mt-2 hidden text-[10px] font-medium sm:block',
-                    active ? 'text-[#1a1a1a]' : 'text-[#9ca3af]'
+                    'mt-2 max-w-[72px] text-center text-[9px] font-medium leading-tight sm:max-w-none sm:text-[10px]',
+                    active ? 'text-[#ffb4af]' : done ? 'text-white/50' : 'text-white/30'
                   )}
                 >
                   {stage.label}
@@ -255,8 +284,8 @@ function StageProgress({ currentStage }: { currentStage: number }) {
               {index < QUIZ_STAGES.length - 1 && (
                 <div
                   className={cn(
-                    'mx-1 h-1 flex-1 rounded-full sm:mx-2',
-                    done ? 'bg-[#1a1a1a]' : 'bg-[#e5e7eb]'
+                    'mb-5 h-0.5 flex-1 rounded-full transition-colors duration-300',
+                    done ? 'bg-[#ff453a]' : 'bg-white/15'
                   )}
                 />
               )}
@@ -271,8 +300,8 @@ function StageProgress({ currentStage }: { currentStage: number }) {
 function ResultRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
-      <dt className="text-sm text-[#6b7280]">{label}</dt>
-      <dd className="text-right text-sm font-semibold">{value}</dd>
+      <dt className="text-sm text-white/50">{label}</dt>
+      <dd className="text-right text-sm font-semibold text-white">{value}</dd>
     </div>
   );
 }
