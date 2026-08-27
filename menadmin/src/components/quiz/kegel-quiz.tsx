@@ -245,20 +245,23 @@ export function KegelQuiz() {
 function StageProgress({ currentStage }: { currentStage: number }) {
   return (
     <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
-      <div className="mx-auto flex max-w-xl items-start">
-        {QUIZ_STAGES.map((stage, index) => {
-          const done = stage.id < currentStage;
-          const active = stage.id === currentStage;
+      <div className="mx-auto max-w-xl">
+        {/* Circles + connectors on one row */}
+        <div className="flex items-center">
+          {QUIZ_STAGES.map((stage, index) => {
+            const done = stage.id < currentStage;
+            const active = stage.id === currentStage;
+            const isLast = index === QUIZ_STAGES.length - 1;
 
-          return (
-            <div key={stage.id} className="flex flex-1 items-center">
-              <div className="flex w-full flex-col items-center">
+            return (
+              <div key={stage.id} className={cn('flex items-center', !isLast && 'flex-1')}>
                 <div
                   className={cn(
-                    'flex size-9 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300',
                     done && 'border-[#ff453a] bg-[#ff453a] text-white shadow-md shadow-[#ff453a]/30',
-                    active && 'border-[#ff453a] bg-[#0a0f14] shadow-[0_0_0_4px_rgba(255,69,58,0.15)]',
-                    !done && !active && 'border-white/20 bg-transparent'
+                    active &&
+                      'border-[#ff453a] bg-[#0a0f14] shadow-[0_0_0_4px_rgba(255,69,58,0.15)]',
+                    !done && !active && 'border-white/20 bg-[#0a0f14]'
                   )}
                 >
                   {done ? (
@@ -272,26 +275,40 @@ function StageProgress({ currentStage }: { currentStage: number }) {
                     />
                   )}
                 </div>
+                {!isLast && (
+                  <div
+                    className={cn(
+                      'mx-1.5 h-1 min-w-[12px] flex-1 rounded-full transition-colors duration-300 sm:mx-2',
+                      done ? 'bg-[#ff453a]' : 'bg-white/25'
+                    )}
+                    aria-hidden
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Labels below circles */}
+        <div className="mt-2.5 flex">
+          {QUIZ_STAGES.map((stage) => {
+            const done = stage.id < currentStage;
+            const active = stage.id === currentStage;
+
+            return (
+              <div key={stage.id} className="flex-1 px-0.5 text-center">
                 <span
                   className={cn(
-                    'mt-2 max-w-[72px] text-center text-[9px] font-medium leading-tight sm:max-w-none sm:text-[10px]',
+                    'text-[9px] font-medium leading-tight sm:text-[10px]',
                     active ? 'text-[#ffb4af]' : done ? 'text-white/50' : 'text-white/30'
                   )}
                 >
                   {stage.label}
                 </span>
               </div>
-              {index < QUIZ_STAGES.length - 1 && (
-                <div
-                  className={cn(
-                    'mb-5 h-0.5 flex-1 rounded-full transition-colors duration-300',
-                    done ? 'bg-[#ff453a]' : 'bg-white/15'
-                  )}
-                />
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
