@@ -21,6 +21,7 @@ export const SITE = {
 
 export const LANDING_NAV = [
   { href: '#features', label: 'Боломжууд' },
+  { href: '/quiz', label: 'Quiz' },
   { href: '#download', label: 'Апп татах' },
   { href: '/support', label: 'Дэмжлэг' },
   { href: '/privacy', label: 'Нууцлал' },
