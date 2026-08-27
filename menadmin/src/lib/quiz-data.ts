@@ -1,177 +1,197 @@
 export type QuizOption = {
   id: string;
   label: string;
-  emoji?: string;
 };
 
-export type QuizQuestionStep = {
-  type: 'question';
+export type QuizQuestion = {
   id: string;
+  stage: number;
   title: string;
-  subtitle?: string;
   options: QuizOption[];
 };
 
-export type QuizInfoStep = {
-  type: 'info';
-  id: string;
-  title: string;
-  body: string;
-  stat?: string;
-};
+export const QUIZ_STAGES = [
+  { id: 1, label: 'Ерөнхий' },
+  { id: 2, label: 'Бэлгийн эрүүл мэнд' },
+  { id: 3, label: 'Амьдралын хэв маяг' },
+  { id: 4, label: 'Зорилго' },
+] as const;
 
-export type QuizStep = QuizQuestionStep | QuizInfoStep;
-
-export const QUIZ_STEPS: QuizStep[] = [
+export const QUIZ_QUESTIONS: QuizQuestion[] = [
+  // Stage 1
   {
-    type: 'question',
     id: 'age',
+    stage: 1,
     title: 'Та хэдэн настай вэ?',
-    subtitle: 'Насны ангилалд үндэслэн дасгалын хэмжээг тохируулна.',
     options: [
-      { id: '18-30', label: '18–30', emoji: '🙂' },
-      { id: '31-40', label: '31–40', emoji: '🙂' },
-      { id: '41-50', label: '41–50', emoji: '😐' },
-      { id: '51+', label: '51+', emoji: '🧔' },
+      { id: '18-30', label: '18–30' },
+      { id: '31-40', label: '31–40' },
+      { id: '41-50', label: '41–50' },
+      { id: '51+', label: '51+' },
     ],
   },
   {
-    type: 'question',
     id: 'kegel_experience',
+    stage: 1,
     title: 'Та Кегелийн дасгал хийж байсан уу?',
     options: [
-      { id: 'never', label: 'Хэзээ ч хийж байгаагүй', emoji: '❌' },
-      { id: 'tried', label: 'Оролдсон, гэхдээ тогтмол биш', emoji: '🤔' },
-      { id: 'sometimes', label: 'Заримдаа хийдэг', emoji: '👍' },
-      { id: 'regular', label: 'Тогтмол хийдэг', emoji: '💪' },
+      { id: 'never', label: 'Хэзээ ч хийж байгаагүй' },
+      { id: 'tried', label: 'Оролдсон, гэхдээ тогтмол биш' },
+      { id: 'sometimes', label: 'Заримдаа хийдэг' },
+      { id: 'regular', label: 'Тогтмол хийдэг' },
     ],
   },
   {
-    type: 'info',
-    id: 'info_blood_flow',
-    title: 'Энгийн дасгалаар илүү сайн цусны урсац',
-    body: 'Кегелийн дасгал нь аарцгийн ёроолын булчинг бэхжүүлж, цусны урсацыг сайжруулдаг. Энэ нь илүү бат бөх эрекц, илүү сайн хяналт, илүү итгэлтүй бэлгийн амьдралд тусална.',
-    stat: 'Mayo Clinic-ийн судалгаанд дурдсан',
-  },
-  {
-    type: 'question',
-    id: 'performance_satisfaction',
-    title: 'Та бэлгийн гүйцэтгэлээсээ сэтгэл хангалуун байна уу?',
+    id: 'smoke',
+    stage: 1,
+    title: 'Та тамхи татдаг уу?',
     options: [
-      { id: 'very', label: 'Маш их', emoji: '😊' },
-      { id: 'somewhat', label: 'Зарим талаар', emoji: '🙂' },
-      { id: 'not_really', label: 'Тийм ч биш', emoji: '😐' },
-      { id: 'not_at_all', label: 'Огт биш', emoji: '😔' },
+      { id: 'yes', label: 'Тийм, татдаг' },
+      { id: 'no', label: 'Үгүй, татдаггүй' },
+      { id: 'sometimes', label: 'Заримдаа' },
     ],
   },
   {
-    type: 'info',
-    id: 'info_stamina',
-    title: 'Оронд илүү удаан байх боломжтой',
-    body: 'Аарцгийн ёроолын булчин нь эjacуляцийн хяналтад чухал үүрэгтэй. Тогтмол Кегел дасгал нь бэлгийн харилцаанд илүү удаан, илүү сайн хяналттай байхад тусалж болно.',
-    stat: 'Эрүүл мэндийн мэргэжилтнүүд зөвлөж байна',
-  },
-  {
-    type: 'question',
-    id: 'finish_early',
-    title: 'Хүссэнээсээ өмнө дуусах тохиолдол хэр олон удаа гардаг вэ?',
-    options: [
-      { id: 'never', label: 'Хэзээ ч үгүй', emoji: '✅' },
-      { id: 'rarely', label: 'Ховор', emoji: '🙂' },
-      { id: 'sometimes', label: 'Заримдаа', emoji: '😐' },
-      { id: 'often', label: 'Байнга', emoji: '😟' },
-    ],
-  },
-  {
-    type: 'question',
-    id: 'erection_quality',
-    title: 'Бэлгийн харилцаанд бат бөх эрекцтэй байдаг уу?',
-    options: [
-      { id: 'always', label: 'Үргэлж', emoji: '💪' },
-      { id: 'usually', label: 'Ихэнхдээ', emoji: '👍' },
-      { id: 'sometimes', label: 'Заримдаа', emoji: '🤔' },
-      { id: 'rarely', label: 'Ховор эсвэл үгүй', emoji: '😔' },
-    ],
-  },
-  {
-    type: 'info',
-    id: 'info_social_proof',
-    title: '10 эрэгтэйн 8 нь гүйцэтгэлээ сайжруулсан',
-    body: 'Tenkhee Plus-ийн хувийн Кегел хөтөлбөр нь нас, зорилго, түвшинг тань харгалзан өдөр бүр 5–12 минутын дасгал санал болгодог.',
-    stat: 'Хэрэглэгчдийн 87% 4 долоо хоногийн дотор ялгаа мэдэрсэн',
-  },
-  {
-    type: 'question',
-    id: 'sitting_hours',
-    title: 'Өдөрт хэдэн цаг суудаг вэ?',
-    subtitle: 'Удаан суух нь аарцгийн ёроолын булчин сулрахад нөлөөлдөг.',
-    options: [
-      { id: '0-2', label: '0–2 цаг', emoji: '🚶' },
-      { id: '3-5', label: '3–5 цаг', emoji: '💺' },
-      { id: '6-8', label: '6–8 цаг', emoji: '🖥️' },
-      { id: '8+', label: '8+ цаг', emoji: '🪑' },
-    ],
-  },
-  {
-    type: 'question',
     id: 'relationship',
+    stage: 1,
     title: 'Таны харилцааны байдал?',
     options: [
-      { id: 'single', label: 'Ганц бие', emoji: '🙂' },
-      { id: 'dating', label: 'Харилцаатай', emoji: '💑' },
-      { id: 'married', label: 'Гэрлэлттэй', emoji: '💍' },
-      { id: 'complicated', label: 'Нарийвчилж хэлэхгүй', emoji: '🤐' },
+      { id: 'single', label: 'Ганц бие' },
+      { id: 'dating', label: 'Харилцаатай' },
+      { id: 'married', label: 'Гэрлэлттэй' },
+      { id: 'other', label: 'Бусад' },
+    ],
+  },
+  // Stage 2
+  {
+    id: 'performance_satisfaction',
+    stage: 2,
+    title: 'Та бэлгийн гүйцэтгэлээсээ сэтгэл хангалуун байна уу?',
+    options: [
+      { id: 'very', label: 'Маш их' },
+      { id: 'somewhat', label: 'Зарим талаар' },
+      { id: 'not_really', label: 'Тийм ч биш' },
+      { id: 'not_at_all', label: 'Огт биш' },
     ],
   },
   {
-    type: 'question',
+    id: 'size_satisfaction',
+    stage: 2,
+    title: 'Та хэмжээгээсээ сэтгэл хангалуун байна уу?',
+    options: [
+      { id: 'very', label: 'Маш их' },
+      { id: 'somewhat', label: 'Зарим талаар' },
+      { id: 'not_really', label: 'Тийм ч биш' },
+      { id: 'not_at_all', label: 'Огт биш' },
+    ],
+  },
+  {
+    id: 'finish_early',
+    stage: 2,
+    title: 'Хүссэнээсээ өмнө дуусах тохиолдол хэр олон удаа гардаг вэ?',
+    options: [
+      { id: 'never', label: 'Хэзээ ч үгүй' },
+      { id: 'rarely', label: 'Ховор' },
+      { id: 'sometimes', label: 'Заримдаа' },
+      { id: 'often', label: 'Байнга' },
+    ],
+  },
+  {
+    id: 'erection_quality',
+    stage: 2,
+    title: 'Бэлгийн харилцаанд бат бөх эрекцтэй байдаг уу?',
+    options: [
+      { id: 'always', label: 'Үргэлж' },
+      { id: 'usually', label: 'Ихэнхдээ' },
+      { id: 'sometimes', label: 'Заримдаа' },
+      { id: 'rarely', label: 'Ховор эсвэл үгүй' },
+    ],
+  },
+  {
     id: 'activity_frequency',
+    stage: 2,
     title: 'Сар бүр хэдэн удаа бэлгийн харилцаанд ордог вэ?',
     options: [
-      { id: '0', label: '0 удаа', emoji: '➖' },
-      { id: '1-4', label: '1–4 удаа', emoji: '1️⃣' },
-      { id: '5-10', label: '5–10 удаа', emoji: '🔥' },
-      { id: '10+', label: '10+ удаа', emoji: '💯' },
+      { id: '0', label: '0 удаа' },
+      { id: '1-4', label: '1–4 удаа' },
+      { id: '5-10', label: '5–10 удаа' },
+      { id: '10+', label: '10+ удаа' },
     ],
   },
+  // Stage 3
   {
-    type: 'question',
-    id: 'pills',
-    title: 'Бэлгийн амьдралаа сайжруулах эм хэрэглэж байсан уу?',
+    id: 'sitting_hours',
+    stage: 3,
+    title: 'Өдөрт хэдэн цаг суудаг вэ?',
     options: [
-      { id: 'never', label: 'Хэзээ ч үгүй', emoji: '✅' },
-      { id: 'tried', label: 'Оролдсон', emoji: '💊' },
-      { id: 'currently', label: 'Одоо хэрэглэж байна', emoji: '⚠️' },
-      { id: 'prefer_not', label: 'Хэлэхгүй', emoji: '🤐' },
+      { id: '0-2', label: '0–2 цаг' },
+      { id: '3-5', label: '3–5 цаг' },
+      { id: '6-8', label: '6–8 цаг' },
+      { id: '8+', label: '8+ цаг' },
     ],
   },
   {
-    type: 'info',
-    id: 'info_program',
-    title: 'Tenkhee Plus хөтөлбөр эмээс илүү',
-    body: 'Эм нь түр зуурын шийдэл байж болох ч Кегел дасгал нь аарцгийн ёроолыг бэхжүүлж, урт хугацааны үр дүнг өгдөг. Таны хариултууд дээр үндэслэн бид хувийн төлөвлөгөө бэлтгэнэ.',
+    id: 'diet',
+    stage: 3,
+    title: 'Та хоолны дэглэм бариддаг уу?',
+    options: [
+      { id: 'yes', label: 'Тийм, баримталдаг' },
+      { id: 'trying', label: 'Оролдож байгаа' },
+      { id: 'no', label: 'Үгүй' },
+    ],
   },
   {
-    type: 'question',
+    id: 'alcohol',
+    stage: 3,
+    title: 'Та архи их уудаг уу?',
+    options: [
+      { id: 'never', label: 'Хэзээ ч үгүй' },
+      { id: 'sometimes', label: 'Заримдаа' },
+      { id: 'often', label: 'Байнга' },
+    ],
+  },
+  {
     id: 'stress',
+    stage: 3,
     title: 'Стрессийн түвшинг хэрхэн үнэлэх вэ?',
     options: [
-      { id: 'low', label: 'Бага', emoji: '😌' },
-      { id: 'moderate', label: 'Дунд', emoji: '😐' },
-      { id: 'high', label: 'Өндөр', emoji: '😰' },
-      { id: 'very_high', label: 'Маш өндөр', emoji: '😫' },
+      { id: 'low', label: 'Бага' },
+      { id: 'moderate', label: 'Дунд' },
+      { id: 'high', label: 'Өндөр' },
+      { id: 'very_high', label: 'Маш өндөр' },
     ],
   },
   {
-    type: 'question',
-    id: 'primary_goal',
-    title: 'Таны гол зорилго юу вэ?',
-    subtitle: 'Энэ асуултын дараа таны хувийн төлөвлөгөө бэлтгэгдэнэ.',
+    id: 'pills',
+    stage: 3,
+    title: 'Бэлгийн амьдралаа сайжруулах эм хэрэглэж байсан уу?',
     options: [
-      { id: 'control', label: 'Давсагны хяналт', emoji: '💧' },
-      { id: 'performance', label: 'Бэлгийн гүйцэтгэл', emoji: '❤️' },
-      { id: 'strength', label: 'Аарцгийн ёроол бэхжүүлэх', emoji: '🏋️' },
-      { id: 'overall', label: 'Ерөнхий эрүүл мэнд', emoji: '⚡' },
+      { id: 'never', label: 'Хэзээ ч үгүй' },
+      { id: 'tried', label: 'Оролдсон' },
+      { id: 'currently', label: 'Одоо хэрэглэж байна' },
+    ],
+  },
+  // Stage 4
+  {
+    id: 'bladder_control',
+    stage: 4,
+    title: 'Танд шээс яаралтай хүрэх тохиолдол хэр их гардаг вэ?',
+    options: [
+      { id: 'never', label: 'Хэзээ ч үгүй' },
+      { id: 'rarely', label: 'Ховор' },
+      { id: 'sometimes', label: 'Заримдаа' },
+      { id: 'often', label: 'Байнга' },
+    ],
+  },
+  {
+    id: 'primary_goal',
+    stage: 4,
+    title: 'Таны гол зорилго юу вэ?',
+    options: [
+      { id: 'control', label: 'Давсагны хяналт' },
+      { id: 'performance', label: 'Бэлгийн гүйцэтгэл' },
+      { id: 'strength', label: 'Аарцгийн ёроол бэхжүүлэх' },
+      { id: 'overall', label: 'Ерөнхий эрүүл мэнд' },
     ],
   },
 ];

@@ -1,16 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
 import { StoreBadges } from '@/components/landing/store-badges';
 import { buttonVariants } from '@/components/ui/button';
 import {
   buildQuizResult,
   PROCESSING_MESSAGES,
-  QUIZ_STEPS,
-  type QuizStep,
+  QUIZ_QUESTIONS,
+  QUIZ_STAGES,
+  type QuizQuestion,
 } from '@/lib/quiz-data';
 import { SITE } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
@@ -23,27 +24,26 @@ export function KegelQuiz() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [processingIndex, setProcessingIndex] = useState(0);
 
-  const totalSteps = QUIZ_STEPS.length;
-  const currentStep = QUIZ_STEPS[stepIndex];
-  const progress = phase === 'quiz' ? ((stepIndex + 1) / totalSteps) * 100 : 100;
+  const question = QUIZ_QUESTIONS[stepIndex];
+  const selected = question ? answers[question.id] : undefined;
+  const totalQuestions = QUIZ_QUESTIONS.length;
 
-  const goNext = useCallback(() => {
-    if (stepIndex >= totalSteps - 1) {
+  function goNext() {
+    if (!selected) return;
+    if (stepIndex >= totalQuestions - 1) {
       setPhase('processing');
       return;
     }
     setStepIndex((i) => i + 1);
-  }, [stepIndex, totalSteps]);
+  }
 
-  const goBack = () => {
+  function goBack() {
     if (stepIndex === 0) return;
     setStepIndex((i) => i - 1);
-  };
+  }
 
-  function selectOption(step: QuizStep, optionId: string) {
-    if (step.type !== 'question') return;
-    setAnswers((prev) => ({ ...prev, [step.id]: optionId }));
-    window.setTimeout(goNext, 280);
+  function selectOption(questionId: string, optionId: string) {
+    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   }
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function KegelQuiz() {
       setProcessingIndex((i) => {
         if (i >= PROCESSING_MESSAGES.length - 1) {
           window.clearInterval(interval);
-          window.setTimeout(() => setPhase('result'), 600);
+          window.setTimeout(() => setPhase('result'), 700);
           return i;
         }
         return i + 1;
@@ -67,210 +67,212 @@ export function KegelQuiz() {
   const result = buildQuizResult(answers);
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[#070b10] text-white">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
-        <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
-      </div>
-
-      <header className="relative border-b border-white/10 bg-[#0a0f14]/80 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 max-w-2xl items-center gap-4 px-4 sm:px-6">
-          {phase === 'quiz' && stepIndex > 0 ? (
-            <button
-              type="button"
-              onClick={goBack}
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg text-white/70 transition hover:bg-white/5 hover:text-white"
-              aria-label="Буцах"
-            >
-              <ArrowLeft className="size-5" />
-            </button>
-          ) : (
-            <TenkheeLogo href="/" size="sm" className="shrink-0" />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-[#ff453a] transition-all duration-500 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            {phase === 'quiz' && (
-              <p className="mt-1.5 text-center text-xs text-white/45">
-                {stepIndex + 1} / {totalSteps}
-              </p>
-            )}
-          </div>
-          <Link
-            href="/"
-            className="shrink-0 text-xs font-medium text-white/50 hover:text-white sm:text-sm"
-          >
-            Гарах
-          </Link>
+    <div className="flex min-h-screen min-h-[100dvh] flex-col bg-white text-[#1a1a1a]">
+      <header className="border-b border-[#ececec] px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-xl items-center gap-3">
+          <TenkheeLogo href="/" size="sm" />
+          <span className="text-sm font-medium text-[#6b7280]">Эрэгтэйчүүдийн эрүүл мэнд</span>
         </div>
       </header>
 
-      <main className="relative mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
-        {phase === 'quiz' && currentStep && (
-          <QuizStepView step={currentStep} onSelect={selectOption} onContinue={goNext} />
-        )}
+      {phase === 'quiz' && question && (
+        <>
+          <StageProgress currentStage={question.stage} />
 
-        {phase === 'processing' && (
-          <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-            <div className="relative mb-8 size-24">
-              <div className="absolute inset-0 animate-ping rounded-full bg-[#ff453a]/20" />
-              <div className="relative flex size-24 items-center justify-center rounded-full border border-[#ff453a]/30 bg-[#ff453a]/10">
-                <Sparkles className="size-10 text-[#ff453a] animate-pulse" />
-              </div>
-            </div>
-            <h2 className="text-2xl font-bold">Таны төлөвлөгөө бэлтгэгдэж байна</h2>
-            <p className="mt-3 min-h-6 text-white/60 transition-all duration-300">
-              {PROCESSING_MESSAGES[processingIndex]}
+          <main className="mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+            <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
+              {question.title}
+            </h1>
+
+            <ul className="mt-10 space-y-3">
+              {question.options.map((option) => {
+                const isSelected = selected === option.id;
+                return (
+                  <li key={option.id}>
+                    <button
+                      type="button"
+                      onClick={() => selectOption(question.id, option.id)}
+                      className={cn(
+                        'flex w-full items-center justify-between gap-4 rounded-2xl px-5 py-4 text-left transition',
+                        isSelected
+                          ? 'bg-[#ddd6f3] ring-2 ring-[#1a1a1a]/20'
+                          : 'bg-[#ebe7f5] hover:bg-[#e3ddf0]'
+                      )}
+                    >
+                      <span className="text-base font-medium text-[#1a1a1a]">{option.label}</span>
+                      <span
+                        className={cn(
+                          'flex size-6 shrink-0 items-center justify-center rounded-full border-2 bg-white transition',
+                          isSelected ? 'border-[#1a1a1a]' : 'border-[#c4c4c4]'
+                        )}
+                      >
+                        {isSelected && <span className="size-3 rounded-full bg-[#1a1a1a]" />}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p className="mt-6 text-center text-xs text-[#9ca3af]">
+              {stepIndex + 1} / {totalQuestions}
             </p>
-            <div className="mt-8 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-[#ff453a] transition-all duration-700"
-                style={{
-                  width: `${((processingIndex + 1) / PROCESSING_MESSAGES.length) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
-        )}
+          </main>
 
-        {phase === 'result' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center">
-              <div className="mx-auto mb-4 inline-flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]">
-                <CheckCircle2 className="size-8" />
-              </div>
-              <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Таны хувийн төлөвлөгөө бэлэн!
-              </h1>
-              <p className="mt-3 text-white/60">
-                Хариултуудын дагуу {SITE.name} танд тохирсон Кегел хөтөлбөр санал болголоо.
-              </p>
-            </div>
-
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-              <div className="border-b border-white/10 bg-gradient-to-r from-[#ff453a]/20 to-transparent px-6 py-4">
-                <p className="text-sm font-semibold uppercase tracking-wider text-[#ffb4af]">
-                  Таны төлөвлөгөө
-                </p>
-              </div>
-              <dl className="divide-y divide-white/10">
-                <ResultRow label="Гол зорилго" value={result.goalLabel} />
-                <ResultRow label="Түвшин" value={result.level} />
-                <ResultRow label="Өдөрт" value={`${result.minutes} минут`} />
-                <ResultRow label="Долоо хоногт" value={`${result.sessionsPerWeek} удаа`} />
-              </dl>
-            </div>
-
-            <div className="rounded-2xl border border-[#ff453a]/25 bg-[#ff453a]/10 p-6 text-center">
-              <p className="text-lg font-bold">Апп-аа татаад эхлээрэй</p>
-              <p className="mt-2 text-sm text-white/65">
-                Tenkhee Plus дотор видео заавар, явц хяналт, pelvic stretching болон premium
-                контент бүгд бэлэн.
-              </p>
-              <StoreBadges className="mt-6 justify-center" size="large" />
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/#download"
+          <footer className="sticky bottom-0 border-t border-[#ececec] bg-white px-4 py-4 sm:px-6">
+            <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={stepIndex === 0}
                 className={cn(
-                  buttonVariants({ size: 'lg' }),
-                  'h-12 bg-[#ff453a] px-8 font-semibold text-white hover:bg-[#e63e35]'
+                  'inline-flex h-12 items-center gap-1 rounded-xl px-4 text-sm font-semibold transition',
+                  stepIndex === 0
+                    ? 'cursor-not-allowed text-[#d1d5db]'
+                    : 'text-[#374151] hover:bg-[#f3f4f6]'
                 )}
               >
-                Апп татах
-              </Link>
-              <Link
-                href="/"
+                <ChevronLeft className="size-5" />
+                Буцах
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                disabled={!selected}
                 className={cn(
-                  buttonVariants({ variant: 'outline', size: 'lg' }),
-                  'h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white'
+                  'inline-flex h-12 min-w-[140px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
+                  selected
+                    ? 'bg-[#1a1a1a] hover:bg-[#333]'
+                    : 'cursor-not-allowed bg-[#d1d5db]'
                 )}
               >
-                Нүүр хуудас
-              </Link>
+                Үргэлжлүүлэх
+                <ChevronRight className="size-5" />
+              </button>
             </div>
+          </footer>
+        </>
+      )}
+
+      {phase === 'processing' && (
+        <main className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+          <div className="mb-8 size-16 animate-spin rounded-full border-4 border-[#ebe7f5] border-t-[#1a1a1a]" />
+          <h2 className="text-2xl font-bold">Таны төлөвлөгөө бэлтгэгдэж байна</h2>
+          <p className="mt-3 min-h-6 text-[#6b7280]">{PROCESSING_MESSAGES[processingIndex]}</p>
+        </main>
+      )}
+
+      {phase === 'result' && (
+        <main className="mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
+          <div className="text-center">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ebe7f5]">
+              <Check className="size-8 text-[#1a1a1a]" strokeWidth={2.5} />
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight">Таны хувийн төлөвлөгөө бэлэн!</h1>
+            <p className="mt-3 text-[#6b7280]">
+              {SITE.name} танд тохирсон Кегel хөтөлбөр бэлтгэлээ.
+            </p>
           </div>
-        )}
-      </main>
+
+          <dl className="mt-8 overflow-hidden rounded-2xl border border-[#ececec] divide-y divide-[#ececec]">
+            <ResultRow label="Гол зорилго" value={result.goalLabel} />
+            <ResultRow label="Түвшин" value={result.level} />
+            <ResultRow label="Өдөрт" value={`${result.minutes} минут`} />
+            <ResultRow label="Долоо хоногт" value={`${result.sessionsPerWeek} удаа`} />
+          </dl>
+
+          <div className="mt-8 rounded-2xl bg-[#ebe7f5] p-6 text-center">
+            <p className="font-bold">Апп-аа татаад эхлээрэй</p>
+            <p className="mt-2 text-sm text-[#6b7280]">
+              Видео заавар, явц хяналт, pelvic stretching — бүгд нэг дор.
+            </p>
+            <StoreBadges className="mt-6 justify-center" />
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Link
+              href="/#download"
+              className={cn(
+                buttonVariants({ size: 'lg' }),
+                'h-12 bg-[#ff453a] font-semibold text-white hover:bg-[#e63e35]'
+              )}
+            >
+              Апп татах
+            </Link>
+            <Link
+              href="/"
+              className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-12')}
+            >
+              Нүүр хуудас
+            </Link>
+          </div>
+        </main>
+      )}
+    </div>
+  );
+}
+
+function StageProgress({ currentStage }: { currentStage: number }) {
+  return (
+    <div className="px-4 pt-8 sm:px-6">
+      <div className="mx-auto flex max-w-xl items-center">
+        {QUIZ_STAGES.map((stage, index) => {
+          const done = stage.id < currentStage;
+          const active = stage.id === currentStage;
+          const pending = stage.id > currentStage;
+
+          return (
+            <div key={stage.id} className="flex flex-1 items-center">
+              <div className="flex flex-col items-center">
+                <div
+                  className={cn(
+                    'flex size-9 items-center justify-center rounded-full border-2 transition',
+                    done && 'border-[#1a1a1a] bg-[#1a1a1a] text-white',
+                    active && 'border-[#1a1a1a] bg-white',
+                    pending && 'border-[#d1d5db] bg-white'
+                  )}
+                >
+                  {done ? (
+                    <Check className="size-4" strokeWidth={3} />
+                  ) : (
+                    <span
+                      className={cn(
+                        'size-2.5 rounded-full',
+                        active ? 'bg-[#1a1a1a]' : 'bg-transparent'
+                      )}
+                    />
+                  )}
+                </div>
+                <span
+                  className={cn(
+                    'mt-2 hidden text-[10px] font-medium sm:block',
+                    active ? 'text-[#1a1a1a]' : 'text-[#9ca3af]'
+                  )}
+                >
+                  {stage.label}
+                </span>
+              </div>
+              {index < QUIZ_STAGES.length - 1 && (
+                <div
+                  className={cn(
+                    'mx-1 h-1 flex-1 rounded-full sm:mx-2',
+                    done ? 'bg-[#1a1a1a]' : 'bg-[#e5e7eb]'
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 function ResultRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-6 py-4">
-      <dt className="text-sm text-white/50">{label}</dt>
-      <dd className="text-right text-sm font-semibold text-white">{value}</dd>
-    </div>
-  );
-}
-
-function QuizStepView({
-  step,
-  onSelect,
-  onContinue,
-}: {
-  step: QuizStep;
-  onSelect: (step: QuizStep, optionId: string) => void;
-  onContinue: () => void;
-}) {
-  if (step.type === 'info') {
-    return (
-      <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-        <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
-          {step.title}
-        </h1>
-        <p className="mt-5 text-base leading-relaxed text-white/70 sm:text-lg">{step.body}</p>
-        {step.stat && (
-          <p className="mt-6 inline-flex rounded-full border border-[#ff453a]/30 bg-[#ff453a]/10 px-4 py-2 text-sm font-medium text-[#ffb4af]">
-            {step.stat}
-          </p>
-        )}
-        <button
-          type="button"
-          onClick={onContinue}
-          className={cn(
-            buttonVariants({ size: 'lg' }),
-            'mt-10 h-12 w-full bg-[#ff453a] font-semibold text-white hover:bg-[#e63e35] sm:w-auto sm:min-w-[200px]'
-          )}
-        >
-          Үргэлжлүүлэх
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-      <h1 className="text-2xl font-extrabold leading-tight tracking-tight sm:text-3xl">
-        {step.title}
-      </h1>
-      {step.subtitle && (
-        <p className="mt-3 text-base leading-relaxed text-white/60">{step.subtitle}</p>
-      )}
-      <ul className="mt-8 space-y-3">
-        {step.options.map((option) => (
-          <li key={option.id}>
-            <button
-              type="button"
-              onClick={() => onSelect(step, option.id)}
-              className="flex w-full items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-left transition hover:border-[#ff453a]/40 hover:bg-[#ff453a]/10 active:scale-[0.99]"
-            >
-              {option.emoji && (
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-xl">
-                  {option.emoji}
-                </span>
-              )}
-              <span className="text-base font-semibold text-white">{option.label}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
+    <div className="flex items-center justify-between gap-4 px-5 py-4">
+      <dt className="text-sm text-[#6b7280]">{label}</dt>
+      <dd className="text-right text-sm font-semibold">{value}</dd>
     </div>
   );
 }
