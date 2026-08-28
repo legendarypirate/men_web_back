@@ -4,9 +4,31 @@ const { User } = require('../models');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired, signToken } = require('../middleware/auth');
 const { verifyGoogleIdToken, isGoogleAuthConfigured } = require('../utils/googleAuth');
+const { getPaymentSettings } = require('../utils/paymentSettings');
 const { enrichPublicUser } = require('../utils/membership');
 
 const router = express.Router();
+
+async function assertEmailLoginEnabled(res) {
+  const settings = await getPaymentSettings();
+  if (!settings.emailLoginEnabled) {
+    fail(res, 'И-мэйл нэвтрэлт одоогоор идэвхгүй байна', 503);
+    return false;
+  }
+  return true;
+}
+
+router.get('/config', async (req, res, next) => {
+  try {
+    const settings = await getPaymentSettings();
+    return ok(res, {
+      emailLoginEnabled: settings.emailLoginEnabled !== false,
+      googleSignInConfigured: isGoogleAuthConfigured(),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 async function upsertGoogleUser(payload) {
   const email = payload.email?.toLowerCase();
@@ -43,6 +65,8 @@ async function upsertGoogleUser(payload) {
 
 router.post('/register', async (req, res, next) => {
   try {
+    if (!(await assertEmailLoginEnabled(res))) return;
+
     const { email, password, name } = req.body;
     if (!email || !password) {
       return fail(res, 'И-мэйл болон нууц үг шаардлагатай');
@@ -73,6 +97,8 @@ router.post('/register', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
+    if (!(await assertEmailLoginEnabled(res))) return;
+
     const { email, password } = req.body;
     if (!email || !password) {
       return fail(res, 'И-мэйл болон нууц үг шаардлагатай');

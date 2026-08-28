@@ -190,6 +190,7 @@ export type PremiumPlan = {
 
 export type PaymentSettings = {
   qpayEnabled: boolean;
+  emailLoginEnabled: boolean;
   bankName: string;
   bankAccountNumber: string;
   bankAccountName: string;

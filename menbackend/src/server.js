@@ -12,6 +12,8 @@ async function start() {
     await ensureWorkoutPrograms();
     await ensureContent();
     await ensureQuiz();
+    const { ensureDemoUser } = require('./bootstrap/ensureAuth');
+    await ensureDemoUser();
     console.log('Database connected');
     console.log(`Loaded env from: ${envPath}`);
 

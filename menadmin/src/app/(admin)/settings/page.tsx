@@ -57,7 +57,7 @@ export default function SettingsPage() {
     <div className="max-w-2xl">
       <PageHeader
         title="Тохиргоо"
-        subtitle="Төлбөрийн арга — QPay эсвэл банкны данс"
+        subtitle="Төлбөр болон нэвтрэлтийн тохиргоо"
       />
 
       {error && (
@@ -85,6 +85,24 @@ export default function SettingsPage() {
               onCheckedChange={(checked) =>
                 setSettings((prev) =>
                   prev ? { ...prev, qpayEnabled: checked === true } : prev
+                )
+              }
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div>
+              <Label htmlFor="email-login-enabled">И-мэйл нэвтрэлт</Label>
+              <p className="text-xs text-muted-foreground">
+                Идэвхтэй үед апп дээр и-мэйл, нууц үгээр нэвтэрнэ
+              </p>
+            </div>
+            <Switch
+              id="email-login-enabled"
+              checked={settings?.emailLoginEnabled ?? true}
+              onCheckedChange={(checked) =>
+                setSettings((prev) =>
+                  prev ? { ...prev, emailLoginEnabled: checked === true } : prev
                 )
               }
             />

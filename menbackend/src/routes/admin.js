@@ -742,6 +742,7 @@ router.patch('/settings/payment', adminRequired, async (req, res, next) => {
     const settings = await getPaymentSettings();
     const {
       qpayEnabled,
+      emailLoginEnabled,
       bankName,
       bankAccountNumber,
       bankAccountName,
@@ -750,6 +751,7 @@ router.patch('/settings/payment', adminRequired, async (req, res, next) => {
 
     await settings.update({
       ...(typeof qpayEnabled === 'boolean' ? { qpayEnabled } : {}),
+      ...(typeof emailLoginEnabled === 'boolean' ? { emailLoginEnabled } : {}),
       ...(bankName != null ? { bankName: String(bankName).trim() } : {}),
       ...(bankAccountNumber != null
         ? { bankAccountNumber: String(bankAccountNumber).trim() }

@@ -303,6 +303,17 @@ async function seed() {
   });
   console.log('Demo app user: demo@tenkhee.mn / password123');
 
+  const tetHash = await bcrypt.hash('user12', 10);
+  await User.create({
+    email: 'tet@gmail.com',
+    passwordHash: tetHash,
+    name: 'Demo User',
+    provider: 'email',
+    membership: 'free',
+    language: 'mn',
+  });
+  console.log('Demo app user: tet@gmail.com / user12');
+
   for (const program of programs) {
     const { exercises, ...programData } = program;
     await WorkoutProgram.create(programData);
@@ -641,6 +652,7 @@ async function seed() {
   await PaymentSettings.create({
     id: 'default',
     qpayEnabled: true,
+    emailLoginEnabled: true,
     bankName: 'Хаан банк',
     bankAccountNumber: '5000123456',
     bankAccountName: 'Tenkhee LLC',

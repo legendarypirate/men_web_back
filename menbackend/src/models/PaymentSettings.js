@@ -14,6 +14,11 @@ const PaymentSettings = sequelize.define(
       allowNull: false,
       defaultValue: true,
     },
+    emailLoginEnabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
     bankName: {
       type: DataTypes.STRING,
       allowNull: false,
