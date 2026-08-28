@@ -1,5 +1,6 @@
 const express = require('express');
-const { WorkoutProgram, WorkoutExercise, Article } = require('../models');
+const { Op } = require('sequelize');
+const { WorkoutProgram, WorkoutExercise, Article, WorkoutSession } = require('../models');
 const { ok } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
 
@@ -9,6 +10,21 @@ function greetingForHour(hour) {
   if (hour < 12) return 'Өглөөний мэнд';
   if (hour < 18) return 'Өдрийн мэнд';
   return 'Оройн мэнд';
+}
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+async function countSessionsToday(userId) {
+  return WorkoutSession.count({
+    where: {
+      userId,
+      createdAt: { [Op.gte]: startOfToday() },
+    },
+  });
 }
 
 router.get('/', authRequired, async (req, res, next) => {
@@ -40,6 +56,8 @@ router.get('/', authRequired, async (req, res, next) => {
       completed: i < Math.min(user.streakDays, 5),
     }));
 
+    const sessionsToday = await countSessionsToday(user.id);
+
     return ok(res, {
       greeting: `${greetingForHour(hour)}, ${user.name.split(' ')[0]}`,
       sectionLabel: 'ХЯНАЛТЫН САМБАР',
@@ -49,6 +67,7 @@ router.get('/', authRequired, async (req, res, next) => {
         membership: user.membership,
         vitalityScore: user.vitalityScore,
         streakDays: user.streakDays,
+        sessionsToday,
       },
       streak,
       todayWorkout: todayProgram

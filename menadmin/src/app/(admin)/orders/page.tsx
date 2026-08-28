@@ -55,6 +55,7 @@ export default function OrdersPage() {
         columns={[
           { key: 'orderNumber', label: 'Дугаар', className: 'font-mono text-xs' },
           { key: 'customerName', label: 'Худалдан авагч' },
+          { key: 'customerPhone', label: 'Утас', className: 'font-mono text-xs' },
           { key: 'totalMnt', label: 'Дүн', render: (r) => formatMnt(r.totalMnt) },
           {
             key: 'status',

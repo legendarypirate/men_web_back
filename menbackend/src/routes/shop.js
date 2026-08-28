@@ -297,6 +297,15 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       return fail(res, 'Худалдан авагч болон бүтээгдэхүүн шаардлагатай');
     }
 
+    const phone = String(customerPhone || '').trim();
+    const address = String(shippingAddress || '').trim();
+    if (!phone) {
+      return fail(res, 'Утасны дугаар шаардлагатай');
+    }
+    if (!address) {
+      return fail(res, 'Хүргэлтийн хаяг шаардлагатай');
+    }
+
     const productIds = items.map((i) => i.productId);
     const products = await Product.findAll({
       where: { id: { [Op.in]: productIds }, active: true, inStock: true },
@@ -327,9 +336,9 @@ router.post('/orders', optionalAuth, async (req, res, next) => {
       status: 'pending',
       totalMnt,
       customerName,
-      customerPhone: customerPhone || null,
+      customerPhone: phone,
       customerEmail: customerEmail || null,
-      shippingAddress: shippingAddress || null,
+      shippingAddress: address,
       paymentMethod,
       notes: notes || null,
       paymentDescription: shopDescription(

@@ -1,4 +1,5 @@
 const express = require('express');
+const { Op } = require('sequelize');
 const {
   WorkoutProgram,
   WorkoutExercise,
@@ -8,6 +9,21 @@ const { ok, fail } = require('../utils/response');
 const { authRequired, optionalAuth } = require('../middleware/auth');
 
 const router = express.Router();
+
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+async function countSessionsToday(userId) {
+  return WorkoutSession.count({
+    where: {
+      userId,
+      createdAt: { [Op.gte]: startOfToday() },
+    },
+  });
+}
 
 function mapProgram(program) {
   const json = program.toJSON();
@@ -150,6 +166,8 @@ router.post('/sessions', authRequired, async (req, res, next) => {
     user.vitalityScore = Math.min(100, user.vitalityScore + 1);
     await user.save();
 
+    const sessionsToday = await countSessionsToday(user.id);
+
     return ok(
       res,
       {
@@ -168,6 +186,7 @@ router.post('/sessions', authRequired, async (req, res, next) => {
           longestStreak: user.longestStreak,
           vitalityScore: user.vitalityScore,
           activeDays: user.activeDays,
+          sessionsToday,
         },
       },
       'Дасгал хадгалагдлаа',
