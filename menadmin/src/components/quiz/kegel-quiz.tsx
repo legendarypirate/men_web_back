@@ -15,6 +15,7 @@ import {
   type QuizPayload,
   type QuizStagePayload,
 } from '@/lib/quiz-api';
+import type { QuizQuestion } from '@/lib/quiz-data';
 import {
   counterVariants,
   getAnimationStyle,
@@ -229,7 +230,14 @@ export function KegelQuiz() {
 
       {!loading && phase === 'quiz' && question && (
         <>
-          <StageProgress stages={stages} currentStage={question.stage} />
+          <StageProgress
+            stages={stages}
+            questions={questions}
+            answers={answers}
+            stepIndex={stepIndex}
+            phase={phase}
+            sectionStageId={sectionStageId}
+          />
 
           <QuizSlide
             slideKey={`quiz-${stepIndex}`}
@@ -334,7 +342,11 @@ export function KegelQuiz() {
         <>
           <StageProgress
             stages={stages}
-            currentStage={sectionStageId ?? stages[0]?.id ?? 1}
+            questions={questions}
+            answers={answers}
+            stepIndex={stepIndex}
+            phase={phase}
+            sectionStageId={sectionStageId}
           />
           <QuizSlide
             slideKey={`section-${sectionStageId}-${sectionMediaIndex}`}
@@ -654,21 +666,95 @@ function QuizFooter({
   );
 }
 
+function resolveCurrentStage(
+  questions: QuizQuestion[],
+  stepIndex: number,
+  phase: Phase,
+  sectionStageId: number | null
+): number | null {
+  if (phase === 'section-end') return sectionStageId;
+  if (phase === 'processing' || phase === 'result') {
+    return questions[questions.length - 1]?.stage ?? null;
+  }
+  return questions[stepIndex]?.stage ?? null;
+}
+
+function getStageQuestions(questions: QuizQuestion[], stageId: number) {
+  return questions.filter((q) => q.stage === stageId);
+}
+
+function getConnectorProgress(
+  questions: QuizQuestion[],
+  answers: Record<string, string>,
+  stepIndex: number,
+  phase: Phase,
+  sectionStageId: number | null,
+  stageId: number
+): number {
+  const stageQuestions = getStageQuestions(questions, stageId);
+  if (stageQuestions.length === 0) return 0;
+
+  if (phase === 'processing' || phase === 'result') return 1;
+
+  const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
+  if (currentStage != null && currentStage > stageId) return 1;
+  if (phase === 'section-end' && sectionStageId === stageId) return 1;
+
+  const answered = stageQuestions.filter((q) => answers[q.id]).length;
+  return Math.min(1, answered / stageQuestions.length);
+}
+
+function isStageComplete(
+  stageId: number,
+  questions: QuizQuestion[],
+  answers: Record<string, string>,
+  stepIndex: number,
+  phase: Phase,
+  sectionStageId: number | null
+): boolean {
+  return getConnectorProgress(questions, answers, stepIndex, phase, sectionStageId, stageId) >= 1;
+}
+
 function StageProgress({
   stages,
-  currentStage,
+  questions,
+  answers,
+  stepIndex,
+  phase,
+  sectionStageId,
 }: {
   stages: QuizStagePayload[];
-  currentStage: number;
+  questions: QuizQuestion[];
+  answers: Record<string, string>;
+  stepIndex: number;
+  phase: Phase;
+  sectionStageId: number | null;
 }) {
+  const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
+
   return (
     <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
       <div className="mx-auto max-w-xl">
         <div className="flex items-center">
           {stages.map((stage, index) => {
-            const done = stage.id < currentStage;
-            const active = stage.id === currentStage;
+            const done = isStageComplete(
+              stage.id,
+              questions,
+              answers,
+              stepIndex,
+              phase,
+              sectionStageId
+            );
+            const active = currentStage === stage.id && !done;
             const isLast = index === stages.length - 1;
+            const connectorFill = getConnectorProgress(
+              questions,
+              answers,
+              stepIndex,
+              phase,
+              sectionStageId,
+              stage.id
+            );
 
             return (
               <div key={stage.id} className="contents">
@@ -716,10 +802,10 @@ function StageProgress({
                   <div className="relative mx-1.5 h-1 min-w-0 flex-1 self-center sm:mx-2">
                     <div className="absolute inset-0 rounded-full bg-white/20" aria-hidden />
                     <motion.div
-                      className="absolute inset-y-0 left-0 rounded-full bg-[#ff453a]"
+                      className="absolute inset-y-0 left-0 rounded-full bg-[#ff453a] shadow-[0_0_8px_rgba(255,69,58,0.45)]"
                       initial={false}
-                      animate={{ width: done ? '100%' : active ? '55%' : '0%' }}
-                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                      animate={{ width: `${connectorFill * 100}%` }}
+                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                       aria-hidden
                     />
                   </div>
@@ -731,8 +817,15 @@ function StageProgress({
 
         <div className="mt-2.5 flex items-start">
           {stages.map((stage, index) => {
-            const done = stage.id < currentStage;
-            const active = stage.id === currentStage;
+            const done = isStageComplete(
+              stage.id,
+              questions,
+              answers,
+              stepIndex,
+              phase,
+              sectionStageId
+            );
+            const active = currentStage === stage.id && !done;
             const isLast = index === stages.length - 1;
 
             return (
