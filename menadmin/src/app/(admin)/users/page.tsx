@@ -7,6 +7,12 @@ import { TableSelect } from '@/components/custom/table-select';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
 import { useConfirm } from '@/components/custom/confirm-provider';
 
+const premiumMemberships = new Set(['monthly', 'yearly', 'lifetime', 'platinum']);
+
+function membershipAllowsDates(membership: string) {
+  return premiumMemberships.has(membership);
+}
+
 const membershipLabels: Record<string, string> = {
   free: 'Free',
   monthly: 'Сар бүр',
@@ -53,10 +59,20 @@ export default function UsersPage() {
     field: 'membershipStartedAt' | 'membershipExpiresAt',
     value: string
   ) {
-    await api.users.update(id, {
-      [field]: value ? new Date(`${value}T00:00:00`).toISOString() : null,
-    } as Partial<User>);
-    load();
+    const current = users.find((u) => u.id === id);
+    if (current && !membershipAllowsDates(current.membership)) {
+      setError('Эхлээд гишүүнчлэлийг free-ээс өөр сонгоно уу');
+      return;
+    }
+    try {
+      await api.users.update(id, {
+        [field]: value ? new Date(`${value}T00:00:00`).toISOString() : null,
+      } as Partial<User>);
+      setError('');
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Алдаа');
+    }
   }
 
   async function handleDelete(id: string, name: string) {
@@ -111,8 +127,14 @@ export default function UsersPage() {
             render: (u) => (
               <input
                 type="date"
-                className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50]"
+                className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50] disabled:cursor-not-allowed disabled:opacity-50"
                 value={toDateInput(u.membershipStartedAt)}
+                disabled={!membershipAllowsDates(u.membership)}
+                title={
+                  membershipAllowsDates(u.membership)
+                    ? undefined
+                    : 'Эхлээд гишүүнчлэл сонгоно уу'
+                }
                 onChange={(e) =>
                   handleDate(u.id, 'membershipStartedAt', e.target.value)
                 }
@@ -128,8 +150,14 @@ export default function UsersPage() {
               ) : (
                 <input
                   type="date"
-                  className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50]"
+                  className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50] disabled:cursor-not-allowed disabled:opacity-50"
                   value={toDateInput(u.membershipExpiresAt)}
+                  disabled={!membershipAllowsDates(u.membership)}
+                  title={
+                    membershipAllowsDates(u.membership)
+                      ? undefined
+                      : 'Эхлээд гишүүнчлэл сонгоно уу'
+                  }
                   onChange={(e) =>
                     handleDate(u.id, 'membershipExpiresAt', e.target.value)
                   }

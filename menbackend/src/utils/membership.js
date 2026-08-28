@@ -25,8 +25,8 @@ function mapPlanToMembership(planId) {
 
 function isAdminGrantedPremium(user) {
   if (!user || !membershipIsPremium(user.membership)) return false;
-  // Admin panel always sets an explicit start date; fake/QPay-bypass rows do not.
-  return Boolean(user.membershipStartedAt);
+  // Admin panel sets explicit start and/or expiry dates; QPay rows use paidAt instead.
+  return Boolean(user.membershipStartedAt || user.membershipExpiresAt);
 }
 
 function hasActivePremium(user) {
@@ -81,13 +81,17 @@ async function resolveUserMembership(user) {
   }
 
   if (
-    membershipIsPremium(user.membership) ||
-    user.membershipStartedAt ||
-    user.membershipExpiresAt
+    !membershipIsPremium(user.membership) &&
+    (user.membershipStartedAt || user.membershipExpiresAt)
   ) {
-    user.membership = 'free';
     user.membershipStartedAt = null;
     user.membershipExpiresAt = null;
+    await user.save();
+    return user;
+  }
+
+  if (membershipIsPremium(user.membership) && !isAdminGrantedPremium(user)) {
+    user.membership = 'free';
     await user.save();
   }
 
@@ -98,8 +102,16 @@ async function syncUserMembership(user) {
   return resolveUserMembership(user);
 }
 
-async function enrichPublicUser(user) {
-  await resolveUserMembership(user);
+async function enrichPublicUser(user, { skipSync = false } = {}) {
+  if (!skipSync) {
+    await resolveUserMembership(user);
+  }
+  const json = publicUser(user);
+  json.hasActivePremium = hasActivePremium(user);
+  return json;
+}
+
+function adminPublicUser(user) {
   const json = publicUser(user);
   json.hasActivePremium = hasActivePremium(user);
   return json;
@@ -145,5 +157,6 @@ module.exports = {
   resolveUserMembership,
   syncUserMembership,
   enrichPublicUser,
+  adminPublicUser,
   applyAdminMembershipUpdate,
 };

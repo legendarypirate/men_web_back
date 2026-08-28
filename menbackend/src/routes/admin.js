@@ -36,7 +36,7 @@ const {
   applyAdminMembershipUpdate,
   computeMembershipExpiry,
   mapPlanToMembership,
-  enrichPublicUser,
+  adminPublicUser,
   hasActivePremium,
 } = require('../utils/membership');
 
@@ -184,7 +184,8 @@ router.patch('/users/:id', adminRequired, async (req, res, next) => {
     }
 
     await user.save();
-    return ok(res, { user: await enrichPublicUser(user) }, 'Хэрэглэгч шинэчлэгдлээ');
+    await user.reload();
+    return ok(res, { user: adminPublicUser(user) }, 'Хэрэглэгч шинэчлэгдлээ');
   } catch (err) {
     next(err);
   }
