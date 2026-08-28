@@ -44,8 +44,8 @@ const IMAGE_POOL = [
 function stripHtml(html) {
   return html
     .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<strong>/gi, '')
-    .replace(/<\/strong>/gi, '')
+    .replace(/<strong>/gi, '**')
+    .replace(/<\/strong>/gi, '**')
     .replace(/<[^>]+>/g, '')
     .replace(/&amp;/g, '&')
     .replace(/&nbsp;/g, ' ')
@@ -92,9 +92,21 @@ function parseStoryHtml(filePath) {
     const eyebrow = extractClassText(block, 'eyebrow').replace(/^·\s*/, '').trim();
     const headline = extractClassText(block, 'headline');
     const body = extractClassText(block, 'body-text');
-    const sourceMatch = block.match(/class="source"[^>]*>([\s\S]*?)<\/div>/i);
-    const source = sourceMatch ? stripHtml(sourceMatch[1]) : '';
-    const fullBody = [body, source].filter(Boolean).join('\n\n');
+    const sourceMatch = block.match(/class="source-title"[^>]*>([\s\S]*?)<\/div>[\s\S]*?class="source-pub"[^>]*>([\s\S]*?)<\/div>/i)
+      || block.match(/class="source"[^>]*>([\s\S]*?)<\/div>/i);
+    let sourceTitle = '';
+    let sourcePublisher = '';
+    if (sourceMatch) {
+      if (sourceMatch.length >= 3 && sourceMatch[2] != null) {
+        sourceTitle = stripHtml(sourceMatch[1]);
+        sourcePublisher = stripHtml(sourceMatch[2]);
+      } else {
+        const lines = stripHtml(sourceMatch[1]).split('\n').filter(Boolean);
+        sourceTitle = lines[0] || '';
+        sourcePublisher = lines.slice(1).join(' · ') || '';
+      }
+    }
+    const fullBody = body || '';
     const { line2, line3 } = splitHeadline(headline);
 
     if (idx === 0) {
@@ -112,6 +124,8 @@ function parseStoryHtml(filePath) {
       line2: line2 || headline.toUpperCase() || null,
       line3: line3 || null,
       body: fullBody || body || headline,
+      sourceTitle: sourceTitle || null,
+      sourcePublisher: sourcePublisher || null,
     };
   });
 
