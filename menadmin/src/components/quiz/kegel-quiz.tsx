@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
@@ -8,35 +8,102 @@ import { StoreBadges } from '@/components/landing/store-badges';
 import { buttonVariants } from '@/components/ui/button';
 import {
   buildQuizResult,
-  PROCESSING_MESSAGES,
-  QUIZ_QUESTIONS,
-  QUIZ_STAGES,
-} from '@/lib/quiz-data';
+  fetchPublicQuiz,
+  getQuizFallback,
+  type QuizEndMedia,
+  type QuizPayload,
+  type QuizStagePayload,
+} from '@/lib/quiz-api';
 import { SITE } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
-type Phase = 'quiz' | 'processing' | 'result';
+type Phase = 'quiz' | 'section-end' | 'processing' | 'result';
 
 export function KegelQuiz() {
+  const [quiz, setQuiz] = useState<QuizPayload | null>(null);
   const [phase, setPhase] = useState<Phase>('quiz');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [processingIndex, setProcessingIndex] = useState(0);
+  const [sectionStageId, setSectionStageId] = useState<number | null>(null);
 
-  const question = QUIZ_QUESTIONS[stepIndex];
+  useEffect(() => {
+    fetchPublicQuiz()
+      .then(setQuiz)
+      .catch(() => setQuiz(getQuizFallback()));
+  }, []);
+
+  const stages = quiz?.stages ?? getQuizFallback().stages;
+  const questions = quiz?.questions ?? getQuizFallback().questions;
+  const processingMessages =
+    quiz?.config.processingMessages.length
+      ? quiz.config.processingMessages
+      : getQuizFallback().config.processingMessages;
+  const processingTitle =
+    quiz?.config.processingTitle ?? getQuizFallback().config.processingTitle;
+
+  const question = questions[stepIndex];
   const selected = question ? answers[question.id] : undefined;
-  const totalQuestions = QUIZ_QUESTIONS.length;
+  const totalQuestions = questions.length;
+
+  const stageById = useMemo(() => {
+    const map = new Map<number, QuizStagePayload>();
+    for (const stage of stages) map.set(stage.id, stage);
+    return map;
+  }, [stages]);
+
+  const sectionEndMedia: QuizEndMedia | null =
+    sectionStageId != null
+      ? stageById.get(sectionStageId)?.endMedia ?? null
+      : null;
+
+  function isLastQuestionInStage(index: number) {
+    const current = questions[index];
+    const next = questions[index + 1];
+    if (!current) return false;
+    if (!next) return true;
+    return next.stage !== current.stage;
+  }
 
   function goNext() {
-    if (!selected) return;
+    if (!selected || !question) return;
+
+    const isLastQuestion = stepIndex >= totalQuestions - 1;
+    const endsStage = isLastQuestionInStage(stepIndex);
+
+    if (endsStage) {
+      const stage = stageById.get(question.stage);
+      if (stage?.endMedia) {
+        setSectionStageId(question.stage);
+        setPhase('section-end');
+        return;
+      }
+    }
+
+    if (isLastQuestion) {
+      setPhase('processing');
+      return;
+    }
+
+    setStepIndex((i) => i + 1);
+  }
+
+  function continueFromSectionEnd() {
+    setSectionStageId(null);
     if (stepIndex >= totalQuestions - 1) {
       setPhase('processing');
       return;
     }
+    setPhase('quiz');
     setStepIndex((i) => i + 1);
   }
 
   function goBack() {
+    if (phase === 'section-end') {
+      setSectionStageId(null);
+      setPhase('quiz');
+      return;
+    }
     if (stepIndex === 0) return;
     setStepIndex((i) => i - 1);
   }
@@ -51,7 +118,7 @@ export function KegelQuiz() {
     setProcessingIndex(0);
     const interval = window.setInterval(() => {
       setProcessingIndex((i) => {
-        if (i >= PROCESSING_MESSAGES.length - 1) {
+        if (i >= processingMessages.length - 1) {
           window.clearInterval(interval);
           window.setTimeout(() => setPhase('result'), 700);
           return i;
@@ -61,9 +128,10 @@ export function KegelQuiz() {
     }, 900);
 
     return () => window.clearInterval(interval);
-  }, [phase]);
+  }, [phase, processingMessages.length]);
 
   const result = buildQuizResult(answers);
+  const loading = !quiz;
 
   return (
     <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
@@ -84,13 +152,19 @@ export function KegelQuiz() {
         </div>
       </header>
 
-      {phase === 'quiz' && question && (
+      {loading && (
+        <main className="relative mx-auto flex w-full max-w-xl flex-1 items-center justify-center px-4 py-16">
+          <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
+        </main>
+      )}
+
+      {!loading && phase === 'quiz' && question && (
         <>
-          <StageProgress currentStage={question.stage} />
+          <StageProgress stages={stages} currentStage={question.stage} />
 
           <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
             <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]">
-              {QUIZ_STAGES.find((s) => s.id === question.stage)?.label}
+              {stages.find((s) => s.id === question.stage)?.label}
             </p>
             <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
               {question.title}
@@ -133,42 +207,58 @@ export function KegelQuiz() {
             </p>
           </main>
 
-          <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
-            <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={goBack}
-                disabled={stepIndex === 0}
-                className={cn(
-                  'inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition',
-                  stepIndex === 0
-                    ? 'cursor-not-allowed border-transparent text-white/20'
-                    : 'border-white/15 text-white/70 hover:border-white/25 hover:bg-white/5 hover:text-white'
-                )}
-              >
-                <ChevronLeft className="size-5" />
-                Буцах
-              </button>
-              <button
-                type="button"
-                onClick={goNext}
-                disabled={!selected}
-                className={cn(
-                  'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
-                  selected
-                    ? 'bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]'
-                    : 'cursor-not-allowed bg-white/10 text-white/30'
-                )}
-              >
-                Үргэлжлүүлэх
-                <ChevronRight className="size-5" />
-              </button>
-            </div>
-          </footer>
+          <QuizFooter
+            backDisabled={stepIndex === 0}
+            continueDisabled={!selected}
+            onBack={goBack}
+            onContinue={goNext}
+          />
         </>
       )}
 
-      {phase === 'processing' && (
+      {!loading && phase === 'section-end' && sectionEndMedia && (
+        <>
+          <StageProgress
+            stages={stages}
+            currentStage={sectionStageId ?? stages[0]?.id ?? 1}
+          />
+          <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
+            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]">
+              {sectionStageId != null
+                ? stages.find((s) => s.id === sectionStageId)?.label
+                : null}
+            </p>
+            <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
+              Хэсэг дууслаа
+            </h1>
+            {sectionEndMedia.caption && (
+              <p className="mt-3 text-center text-sm text-white/60">
+                {sectionEndMedia.caption}
+              </p>
+            )}
+            <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              {sectionEndMedia.type === 'video' ? (
+                <video
+                  src={sectionEndMedia.url}
+                  controls
+                  playsInline
+                  className="max-h-[420px] w-full bg-black object-contain"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={sectionEndMedia.url}
+                  alt=""
+                  className="max-h-[420px] w-full object-cover"
+                />
+              )}
+            </div>
+          </main>
+          <QuizFooter backDisabled={false} continueDisabled={false} onBack={goBack} onContinue={continueFromSectionEnd} />
+        </>
+      )}
+
+      {!loading && phase === 'processing' && (
         <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
           <div className="relative mb-8 size-20">
             <div className="absolute inset-0 animate-ping rounded-full bg-[#ff453a]/20" />
@@ -176,20 +266,20 @@ export function KegelQuiz() {
               <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
             </div>
           </div>
-          <h2 className="text-2xl font-bold">Таны төлөвлөгөө бэлтгэгдэж байна</h2>
-          <p className="mt-3 min-h-6 text-white/55">{PROCESSING_MESSAGES[processingIndex]}</p>
+          <h2 className="text-2xl font-bold">{processingTitle}</h2>
+          <p className="mt-3 min-h-6 text-white/55">{processingMessages[processingIndex]}</p>
           <div className="mt-8 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/10">
             <div
               className="h-full rounded-full bg-[#ff453a] transition-all duration-700"
               style={{
-                width: `${((processingIndex + 1) / PROCESSING_MESSAGES.length) * 100}%`,
+                width: `${((processingIndex + 1) / processingMessages.length) * 100}%`,
               }}
             />
           </div>
         </main>
       )}
 
-      {phase === 'result' && (
+      {!loading && phase === 'result' && (
         <main className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
           <div className="text-center">
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]">
@@ -242,16 +332,68 @@ export function KegelQuiz() {
   );
 }
 
-function StageProgress({ currentStage }: { currentStage: number }) {
+function QuizFooter({
+  backDisabled,
+  continueDisabled,
+  onBack,
+  onContinue,
+}: {
+  backDisabled: boolean;
+  continueDisabled: boolean;
+  onBack: () => void;
+  onContinue: () => void;
+}) {
+  return (
+    <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
+      <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={backDisabled}
+          className={cn(
+            'inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition',
+            backDisabled
+              ? 'cursor-not-allowed border-transparent text-white/20'
+              : 'border-white/15 text-white/70 hover:border-white/25 hover:bg-white/5 hover:text-white'
+          )}
+        >
+          <ChevronLeft className="size-5" />
+          Буцах
+        </button>
+        <button
+          type="button"
+          onClick={onContinue}
+          disabled={continueDisabled}
+          className={cn(
+            'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
+            continueDisabled
+              ? 'cursor-not-allowed bg-white/10 text-white/30'
+              : 'bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]'
+          )}
+        >
+          Үргэлжлүүлэх
+          <ChevronRight className="size-5" />
+        </button>
+      </div>
+    </footer>
+  );
+}
+
+function StageProgress({
+  stages,
+  currentStage,
+}: {
+  stages: QuizStagePayload[];
+  currentStage: number;
+}) {
   return (
     <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
       <div className="mx-auto max-w-xl">
-        {/* Circles + connectors on one row */}
         <div className="flex items-center">
-          {QUIZ_STAGES.map((stage, index) => {
+          {stages.map((stage, index) => {
             const done = stage.id < currentStage;
             const active = stage.id === currentStage;
-            const isLast = index === QUIZ_STAGES.length - 1;
+            const isLast = index === stages.length - 1;
 
             return (
               <div key={stage.id} className={cn('flex items-center', !isLast && 'flex-1')}>
@@ -289,9 +431,8 @@ function StageProgress({ currentStage }: { currentStage: number }) {
           })}
         </div>
 
-        {/* Labels below circles */}
         <div className="mt-2.5 flex">
-          {QUIZ_STAGES.map((stage) => {
+          {stages.map((stage) => {
             const done = stage.id < currentStage;
             const active = stage.id === currentStage;
 

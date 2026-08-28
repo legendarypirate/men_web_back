@@ -397,6 +397,32 @@ export type AssessmentAnswerRow = {
   user?: { id: string; name: string; email: string };
 };
 
+export type QuizStageRecord = {
+  id: number;
+  label: string;
+  sortOrder: number;
+  active: boolean;
+  endMediaType: 'none' | 'image' | 'video';
+  endMediaUrl?: string | null;
+  endMediaCaption?: string | null;
+};
+
+export type QuizQuestionRecord = {
+  id: string;
+  stageId: number;
+  title: string;
+  options: Array<{ id: string; label: string }>;
+  sortOrder: number;
+  active: boolean;
+};
+
+export type QuizConfigRecord = {
+  id: string;
+  processingTitle: string;
+  processingMessages: string[];
+  active: boolean;
+};
+
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('admin_token');
@@ -733,6 +759,48 @@ export const api = {
       }),
     remove: (id: string) =>
       request<null>(`/api/admin/feedback/${id}`, { method: 'DELETE' }),
+  },
+
+  quizStages: {
+    list: () => request<{ stages: QuizStageRecord[] }>('/api/admin/quiz/stages'),
+    create: (data: Partial<QuizStageRecord>) =>
+      request<{ stage: QuizStageRecord }>('/api/admin/quiz/stages', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: number, data: Partial<QuizStageRecord>) =>
+      request<{ stage: QuizStageRecord }>(`/api/admin/quiz/stages/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: number) =>
+      request<null>(`/api/admin/quiz/stages/${id}`, { method: 'DELETE' }),
+  },
+
+  quizQuestions: {
+    list: () =>
+      request<{ questions: QuizQuestionRecord[] }>('/api/admin/quiz/questions'),
+    create: (data: Partial<QuizQuestionRecord>) =>
+      request<{ question: QuizQuestionRecord }>('/api/admin/quiz/questions', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    update: (id: string, data: Partial<QuizQuestionRecord>) =>
+      request<{ question: QuizQuestionRecord }>(`/api/admin/quiz/questions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/quiz/questions/${id}`, { method: 'DELETE' }),
+  },
+
+  quizConfig: {
+    get: () => request<{ config: QuizConfigRecord }>('/api/admin/quiz/config'),
+    update: (data: Partial<QuizConfigRecord>) =>
+      request<{ config: QuizConfigRecord }>('/api/admin/quiz/config', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
   },
 };
 

@@ -20,6 +20,9 @@ const CoachProgram = require('./CoachProgram');
 const PromoCode = require('./PromoCode');
 const HomeProTip = require('./HomeProTip');
 const Feedback = require('./Feedback');
+const QuizStage = require('./QuizStage');
+const QuizQuestion = require('./QuizQuestion');
+const QuizConfig = require('./QuizConfig');
 
 WorkoutProgram.hasMany(WorkoutExercise, {
   foreignKey: 'programId',
@@ -54,6 +57,13 @@ OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 User.hasMany(Feedback, { foreignKey: 'userId', as: 'feedback' });
 Feedback.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+QuizStage.hasMany(QuizQuestion, {
+  foreignKey: 'stageId',
+  as: 'questions',
+  onDelete: 'CASCADE',
+});
+QuizQuestion.belongsTo(QuizStage, { foreignKey: 'stageId', as: 'stage' });
+
 module.exports = {
   sequelize,
   User,
@@ -77,4 +87,7 @@ module.exports = {
   PromoCode,
   HomeProTip,
   Feedback,
+  QuizStage,
+  QuizQuestion,
+  QuizConfig,
 };

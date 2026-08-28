@@ -3,6 +3,7 @@ const app = require('./app');
 const { sequelize } = require('./models');
 const { ensureWorkoutPrograms } = require('./bootstrap/ensureWorkoutPrograms');
 const { ensureContent } = require('./bootstrap/ensureContent');
+const { ensureQuiz } = require('./bootstrap/ensureQuiz');
 
 async function start() {
   try {
@@ -10,6 +11,7 @@ async function start() {
     await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
     await ensureWorkoutPrograms();
     await ensureContent();
+    await ensureQuiz();
     console.log('Database connected');
     console.log(`Loaded env from: ${envPath}`);
 

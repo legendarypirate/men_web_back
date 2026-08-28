@@ -22,6 +22,9 @@ const {
   CoachSetting,
   PromoCode,
   Feedback,
+  QuizStage,
+  QuizQuestion,
+  QuizConfig,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { adminRequired, signToken } = require('../middleware/auth');
@@ -985,6 +988,145 @@ router.get('/assessment-answers', adminRequired, async (req, res, next) => {
       limit: 300,
     });
     return ok(res, { answers });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Web quiz (tenkhee.mn/quiz) ---
+router.get('/quiz/stages', adminRequired, async (req, res, next) => {
+  try {
+    const stages = await QuizStage.findAll({
+      order: [['sortOrder', 'ASC'], ['id', 'ASC']],
+    });
+    return ok(res, { stages });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/quiz/stages', adminRequired, async (req, res, next) => {
+  try {
+    const { label, sortOrder, active, endMediaType, endMediaUrl, endMediaCaption } =
+      req.body;
+    if (!label) return fail(res, 'Хэсгийн нэр шаардлагатай');
+    const stage = await QuizStage.create({
+      label,
+      sortOrder: Number(sortOrder || 0),
+      active: active !== false,
+      endMediaType: endMediaType || 'none',
+      endMediaUrl: endMediaUrl || null,
+      endMediaCaption: endMediaCaption || null,
+    });
+    return ok(res, { stage }, 'Хэсэг нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/quiz/stages/:id', adminRequired, async (req, res, next) => {
+  try {
+    const stage = await QuizStage.findByPk(req.params.id);
+    if (!stage) return fail(res, 'Хэсэг олдсонгүй', 404);
+    await stage.update(req.body);
+    return ok(res, { stage }, 'Хэсэг шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/quiz/stages/:id', adminRequired, async (req, res, next) => {
+  try {
+    const stage = await QuizStage.findByPk(req.params.id);
+    if (!stage) return fail(res, 'Хэсэг олдсонгүй', 404);
+    await stage.destroy();
+    return ok(res, null, 'Хэсэг устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/quiz/questions', adminRequired, async (req, res, next) => {
+  try {
+    const questions = await QuizQuestion.findAll({
+      order: [['sortOrder', 'ASC'], ['id', 'ASC']],
+    });
+    return ok(res, { questions });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/quiz/questions', adminRequired, async (req, res, next) => {
+  try {
+    const { id, stageId, title, options, sortOrder, active } = req.body;
+    if (!id || !stageId || !title) {
+      return fail(res, 'id, stageId, title шаардлагатай');
+    }
+    const question = await QuizQuestion.create({
+      id,
+      stageId: Number(stageId),
+      title,
+      options: options || [],
+      sortOrder: Number(sortOrder || 0),
+      active: active !== false,
+    });
+    return ok(res, { question }, 'Асуулт нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/quiz/questions/:id', adminRequired, async (req, res, next) => {
+  try {
+    const question = await QuizQuestion.findByPk(req.params.id);
+    if (!question) return fail(res, 'Асуулт олдсонгүй', 404);
+    const body = { ...req.body };
+    if (body.stageId != null) body.stageId = Number(body.stageId);
+    if (body.sortOrder != null) body.sortOrder = Number(body.sortOrder);
+    await question.update(body);
+    return ok(res, { question }, 'Асуулт шинэчлэгдлээ');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/quiz/questions/:id', adminRequired, async (req, res, next) => {
+  try {
+    const question = await QuizQuestion.findByPk(req.params.id);
+    if (!question) return fail(res, 'Асуулт олдсонгүй', 404);
+    await question.destroy();
+    return ok(res, null, 'Асуулт устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/quiz/config', adminRequired, async (req, res, next) => {
+  try {
+    let config = await QuizConfig.findByPk('default');
+    if (!config) {
+      config = await QuizConfig.create({
+        id: 'default',
+        processingTitle: 'Таны төлөвлөгөө бэлтгэгдэж байна',
+        processingMessages: [],
+      });
+    }
+    return ok(res, { config });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/quiz/config', adminRequired, async (req, res, next) => {
+  try {
+    let config = await QuizConfig.findByPk('default');
+    if (!config) {
+      config = await QuizConfig.create({ id: 'default', ...req.body });
+    } else {
+      await config.update(req.body);
+    }
+    return ok(res, { config }, 'Тохиргоо хадгалагдлаа');
   } catch (err) {
     next(err);
   }

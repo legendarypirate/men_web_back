@@ -1,5 +1,5 @@
 import { FieldOption, ResourceConfig } from '@/lib/types/fields';
-import { Product, AssessmentQuestion, Article, HealthBite, HomeProTip, PremiumPlan, Hospital, HospitalCategoryRecord, CoachProgram, PromoCode } from '@/lib/api';
+import { Product, AssessmentQuestion, Article, HealthBite, HomeProTip, PremiumPlan, Hospital, HospitalCategoryRecord, CoachProgram, PromoCode, QuizQuestionRecord } from '@/lib/api';
 import { formatMnt } from '@/lib/api';
 import { StatusBadge } from '@/components/page-ui';
 
@@ -102,6 +102,54 @@ export const assessmentConfig: ResourceConfig<AssessmentQuestion> = {
     { key: 'step', label: 'Алхам', align: 'center', render: (row) => `${row.step}/${row.totalSteps}` },
     { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
     { key: 'active', label: 'Төлөв', render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} /> },
+  ],
+};
+
+export const quizQuestionConfig: ResourceConfig<QuizQuestionRecord> = {
+  title: 'Quiz асуултууд',
+  itemLabel: 'асуулт',
+  idKey: 'id',
+  listKey: 'questions',
+  itemKey: 'question',
+  emptyDefaults: {
+    stageId: 1,
+    options: [],
+    sortOrder: 0,
+    active: true,
+  },
+  fields: [
+    { key: 'id', label: 'ID', type: 'text', required: true },
+    {
+      key: 'stageId',
+      label: 'Хэсэг',
+      type: 'select',
+      required: true,
+      options: [],
+    },
+    { key: 'title', label: 'Асуулт', type: 'text', required: true },
+    {
+      key: 'options',
+      label: 'Сонголтууд',
+      type: 'object-list',
+      addLabel: 'Сонголт нэмэх',
+      itemFields: [
+        { key: 'id', label: 'ID', type: 'text', required: true },
+        { key: 'label', label: 'Текст', type: 'text', required: true },
+      ],
+    },
+    { key: 'sortOrder', label: 'Эрэмбэ', type: 'number' },
+    { key: 'active', label: 'Идэвхтэй', type: 'switch' },
+  ],
+  columns: [
+    { key: 'id', label: 'ID', className: 'font-mono text-xs' },
+    { key: 'stageId', label: 'Хэсэг', align: 'center' },
+    { key: 'title', label: 'Асуулт', className: 'max-w-md truncate' },
+    { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
+    {
+      key: 'active',
+      label: 'Төлөв',
+      render: (row) => <StatusBadge status={row.active ? 'active' : 'cancelled'} />,
+    },
   ],
 };
 
