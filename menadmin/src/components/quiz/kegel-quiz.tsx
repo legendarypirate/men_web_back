@@ -671,7 +671,7 @@ function StageProgress({
             const isLast = index === stages.length - 1;
 
             return (
-              <div key={stage.id} className={cn('flex items-center', !isLast && 'flex-1')}>
+              <div key={stage.id} className="contents">
                 <motion.div
                   layout
                   animate={
@@ -681,7 +681,10 @@ function StageProgress({
                   }
                   transition={
                     active
-                      ? { scale: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' }, boxShadow: { duration: 0.3 } }
+                      ? {
+                          scale: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' },
+                          boxShadow: { duration: 0.3 },
+                        }
                       : { duration: 0.3 }
                   }
                   className={cn(
@@ -692,7 +695,11 @@ function StageProgress({
                   )}
                 >
                   {done ? (
-                    <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                    >
                       <Check className="size-4" strokeWidth={3} />
                     </motion.div>
                   ) : (
@@ -704,42 +711,46 @@ function StageProgress({
                     />
                   )}
                 </motion.div>
+
                 {!isLast && (
-                  <motion.div
-                    layout
-                    animate={{ scaleX: done ? 1 : 0.3, opacity: done ? 1 : 0.4 }}
-                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ originX: 0 }}
-                    className={cn(
-                      'mx-1.5 h-1 min-w-[12px] flex-1 rounded-full sm:mx-2',
-                      done ? 'bg-[#ff453a]' : 'bg-white/25'
-                    )}
-                    aria-hidden
-                  />
+                  <div className="relative mx-1.5 h-1 min-w-0 flex-1 self-center sm:mx-2">
+                    <div className="absolute inset-0 rounded-full bg-white/20" aria-hidden />
+                    <motion.div
+                      className="absolute inset-y-0 left-0 rounded-full bg-[#ff453a]"
+                      initial={false}
+                      animate={{ width: done ? '100%' : active ? '55%' : '0%' }}
+                      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                      aria-hidden
+                    />
+                  </div>
                 )}
               </div>
             );
           })}
         </div>
 
-        <div className="mt-2.5 flex">
-          {stages.map((stage) => {
+        <div className="mt-2.5 flex items-start">
+          {stages.map((stage, index) => {
             const done = stage.id < currentStage;
             const active = stage.id === currentStage;
+            const isLast = index === stages.length - 1;
 
             return (
-              <div key={stage.id} className="flex-1 px-0.5 text-center">
-                <motion.span
-                  animate={
-                    active
-                      ? { opacity: 1, y: 0, color: '#ffb4af' }
-                      : { opacity: done ? 0.5 : 0.3, y: 0, color: 'rgba(255,255,255,0.3)' }
-                  }
-                  transition={{ duration: 0.35 }}
-                  className="block text-[9px] font-medium leading-tight sm:text-[10px]"
-                >
-                  {stage.label}
-                </motion.span>
+              <div key={`label-${stage.id}`} className="contents">
+                <div className="flex w-9 shrink-0 justify-center">
+                  <motion.span
+                    animate={
+                      active
+                        ? { opacity: 1, y: 0, color: '#ffb4af' }
+                        : { opacity: done ? 0.55 : 0.35, y: 0, color: 'rgba(255,255,255,0.35)' }
+                    }
+                    transition={{ duration: 0.35 }}
+                    className="max-w-[4.5rem] text-center text-[9px] font-medium leading-tight sm:max-w-none sm:text-[10px]"
+                  >
+                    {stage.label}
+                  </motion.span>
+                </div>
+                {!isLast && <div className="min-w-0 flex-1" aria-hidden />}
               </div>
             );
           })}
