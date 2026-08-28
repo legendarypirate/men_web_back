@@ -145,10 +145,12 @@ export function QuizStagesPanel({ stages, onChange }: Props) {
                   <Label>Төгсгөлийн медиа</Label>
                   <Select
                     value={stage.endMediaType}
-                    onValueChange={(value: QuizStageRecord['endMediaType']) => {
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      const mediaType = value as QuizStageRecord['endMediaType'];
                       patchDraft(stage.id, {
-                        endMediaType: value,
-                        ...(value === 'none'
+                        endMediaType: mediaType,
+                        ...(mediaType === 'none'
                           ? { endMediaUrl: null, endMediaCaption: null }
                           : {}),
                       });
