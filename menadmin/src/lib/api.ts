@@ -404,6 +404,7 @@ export type QuizStageRecord = {
   active: boolean;
   endMediaType: 'none' | 'image' | 'video';
   endMediaUrl?: string | null;
+  endMediaTitle?: string | null;
   endMediaCaption?: string | null;
 };
 

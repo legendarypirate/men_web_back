@@ -1007,7 +1007,7 @@ router.get('/quiz/stages', adminRequired, async (req, res, next) => {
 
 router.post('/quiz/stages', adminRequired, async (req, res, next) => {
   try {
-    const { label, sortOrder, active, endMediaType, endMediaUrl, endMediaCaption } =
+    const { label, sortOrder, active, endMediaType, endMediaUrl, endMediaTitle, endMediaCaption } =
       req.body;
     if (!label) return fail(res, 'Хэсгийн нэр шаардлагатай');
     const stage = await QuizStage.create({
@@ -1016,6 +1016,7 @@ router.post('/quiz/stages', adminRequired, async (req, res, next) => {
       active: active !== false,
       endMediaType: endMediaType || 'none',
       endMediaUrl: endMediaUrl || null,
+      endMediaTitle: endMediaTitle || null,
       endMediaCaption: endMediaCaption || null,
     });
     return ok(res, { stage }, 'Хэсэг нэмэгдлээ', 201);

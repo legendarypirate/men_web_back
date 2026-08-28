@@ -11,6 +11,7 @@ function mapStage(stage) {
       ? {
           type: json.endMediaType,
           url: json.endMediaUrl,
+          title: json.endMediaTitle || '',
           caption: json.endMediaCaption || '',
         }
       : null;

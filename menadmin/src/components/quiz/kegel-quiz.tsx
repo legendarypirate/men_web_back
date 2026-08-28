@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
@@ -229,21 +229,11 @@ export function KegelQuiz() {
                 : null}
             </p>
             <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
-              Хэсэг дууслаа
+              {sectionEndMedia.title?.trim() || 'Хэсэг дууслаа'}
             </h1>
-            {sectionEndMedia.caption && (
-              <p className="mt-3 text-center text-sm text-white/60">
-                {sectionEndMedia.caption}
-              </p>
-            )}
             <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               {sectionEndMedia.type === 'video' ? (
-                <video
-                  src={sectionEndMedia.url}
-                  controls
-                  playsInline
-                  className="max-h-[420px] w-full bg-black object-contain"
-                />
+                <SectionEndVideo src={sectionEndMedia.url} />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -253,6 +243,11 @@ export function KegelQuiz() {
                 />
               )}
             </div>
+            {sectionEndMedia.caption?.trim() && (
+              <p className="mt-5 text-center text-base leading-relaxed text-white/70">
+                {sectionEndMedia.caption}
+              </p>
+            )}
           </main>
           <QuizFooter backDisabled={false} continueDisabled={false} onBack={goBack} onContinue={continueFromSectionEnd} />
         </>
@@ -329,6 +324,32 @@ export function KegelQuiz() {
         </main>
       )}
     </div>
+  );
+}
+
+function SectionEndVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = true;
+    void video.play().catch(() => {});
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      controls={false}
+      disablePictureInPicture
+      controlsList="nodownload nofullscreen noremoteplayback"
+      className="pointer-events-none max-h-[420px] w-full bg-black object-contain"
+    />
   );
 }
 

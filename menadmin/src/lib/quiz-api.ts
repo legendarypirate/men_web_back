@@ -10,6 +10,7 @@ import {
 export type QuizEndMedia = {
   type: 'image' | 'video';
   url: string;
+  title?: string;
   caption?: string;
 };
 

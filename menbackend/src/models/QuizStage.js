@@ -17,6 +17,7 @@ const QuizStage = sequelize.define(
       defaultValue: 'none',
     },
     endMediaUrl: { type: DataTypes.STRING, allowNull: true },
+    endMediaTitle: { type: DataTypes.TEXT, allowNull: true },
     endMediaCaption: { type: DataTypes.TEXT, allowNull: true },
   },
   {

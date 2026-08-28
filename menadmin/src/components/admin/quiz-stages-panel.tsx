@@ -151,7 +151,7 @@ export function QuizStagesPanel({ stages, onChange }: Props) {
                       patchDraft(stage.id, {
                         endMediaType: mediaType,
                         ...(mediaType === 'none'
-                          ? { endMediaUrl: null, endMediaCaption: null }
+                          ? { endMediaUrl: null, endMediaTitle: null, endMediaCaption: null }
                           : {}),
                       });
                     }}
@@ -169,6 +169,27 @@ export function QuizStagesPanel({ stages, onChange }: Props) {
 
                 {stage.endMediaType !== 'none' && (
                   <>
+                    <div>
+                      <Label>Гарчиг (сонголттой)</Label>
+                      <Input
+                        value={stage.endMediaTitle || ''}
+                        onChange={(e) =>
+                          patchDraft(stage.id, { endMediaTitle: e.target.value })
+                        }
+                        placeholder="Жишээ: Маш сайн!"
+                      />
+                    </div>
+                    <div>
+                      <Label>Нэмэлт текст (сонголттой)</Label>
+                      <Textarea
+                        rows={3}
+                        value={stage.endMediaCaption || ''}
+                        onChange={(e) =>
+                          patchDraft(stage.id, { endMediaCaption: e.target.value })
+                        }
+                        placeholder="Зураг эсвэл видеоны доор харагдах тайлбар..."
+                      />
+                    </div>
                     <div>
                       <Label>URL</Label>
                       <Input
@@ -233,16 +254,6 @@ export function QuizStagesPanel({ stages, onChange }: Props) {
                         Видео байршуулах
                       </Button>
                     </div>
-                    <div>
-                      <Label>Тайлбар (сонголттой)</Label>
-                      <Textarea
-                        rows={2}
-                        value={stage.endMediaCaption || ''}
-                        onChange={(e) =>
-                          patchDraft(stage.id, { endMediaCaption: e.target.value })
-                        }
-                      />
-                    </div>
                     {stage.endMediaUrl && stage.endMediaType === 'image' && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -254,8 +265,11 @@ export function QuizStagesPanel({ stages, onChange }: Props) {
                     {stage.endMediaUrl && stage.endMediaType === 'video' && (
                       <video
                         src={stage.endMediaUrl}
-                        controls
-                        className="max-h-48 w-full rounded-lg border"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        className="max-h-48 w-full rounded-lg border object-cover"
                       />
                     )}
                   </>
