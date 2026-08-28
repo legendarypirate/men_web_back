@@ -19,6 +19,7 @@ const QuizStage = sequelize.define(
     endMediaUrl: { type: DataTypes.STRING, allowNull: true },
     endMediaTitle: { type: DataTypes.TEXT, allowNull: true },
     endMediaCaption: { type: DataTypes.TEXT, allowNull: true },
+    endMediaItems: { type: DataTypes.JSON, defaultValue: [] },
   },
   {
     tableName: 'quiz_stages',

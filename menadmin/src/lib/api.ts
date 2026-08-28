@@ -397,6 +397,15 @@ export type AssessmentAnswerRow = {
   user?: { id: string; name: string; email: string };
 };
 
+export type QuizEndMediaItem = {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+  title?: string;
+  caption?: string;
+  sortOrder?: number;
+};
+
 export type QuizStageRecord = {
   id: number;
   label: string;
@@ -406,6 +415,7 @@ export type QuizStageRecord = {
   endMediaUrl?: string | null;
   endMediaTitle?: string | null;
   endMediaCaption?: string | null;
+  endMediaItems?: QuizEndMediaItem[];
 };
 
 export type QuizQuestionRecord = {

@@ -27,6 +27,7 @@ const {
   QuizConfig,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
+const { syncLegacyMediaFields } = require('../utils/quizMedia');
 const { adminRequired, signToken } = require('../middleware/auth');
 const { uploadVideo, uploadImage } = require('../middleware/upload');
 const { handleImageUpload, handleVideoUpload } = require('./upload');
@@ -1007,17 +1008,15 @@ router.get('/quiz/stages', adminRequired, async (req, res, next) => {
 
 router.post('/quiz/stages', adminRequired, async (req, res, next) => {
   try {
-    const { label, sortOrder, active, endMediaType, endMediaUrl, endMediaTitle, endMediaCaption } =
-      req.body;
+    const { label, sortOrder, active, endMediaItems } = req.body;
     if (!label) return fail(res, 'Хэсгийн нэр шаардлагатай');
+    const items = Array.isArray(endMediaItems) ? endMediaItems : [];
     const stage = await QuizStage.create({
       label,
       sortOrder: Number(sortOrder || 0),
       active: active !== false,
-      endMediaType: endMediaType || 'none',
-      endMediaUrl: endMediaUrl || null,
-      endMediaTitle: endMediaTitle || null,
-      endMediaCaption: endMediaCaption || null,
+      endMediaItems: items,
+      ...syncLegacyMediaFields(items),
     });
     return ok(res, { stage }, 'Хэсэг нэмэгдлээ', 201);
   } catch (err) {
@@ -1029,7 +1028,11 @@ router.put('/quiz/stages/:id', adminRequired, async (req, res, next) => {
   try {
     const stage = await QuizStage.findByPk(req.params.id);
     if (!stage) return fail(res, 'Хэсэг олдсонгүй', 404);
-    await stage.update(req.body);
+    const body = { ...req.body };
+    if (Array.isArray(body.endMediaItems)) {
+      Object.assign(body, syncLegacyMediaFields(body.endMediaItems));
+    }
+    await stage.update(body);
     return ok(res, { stage }, 'Хэсэг шинэчлэгдлээ');
   } catch (err) {
     next(err);

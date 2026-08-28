@@ -7,18 +7,20 @@ import {
   type QuizQuestion,
 } from '@/lib/quiz-data';
 
-export type QuizEndMedia = {
+export type QuizEndMediaItem = {
+  id: string;
   type: 'image' | 'video';
   url: string;
   title?: string;
   caption?: string;
+  sortOrder?: number;
 };
 
 export type QuizStagePayload = {
   id: number;
   label: string;
   sortOrder?: number;
-  endMedia?: QuizEndMedia | null;
+  endMediaItems: QuizEndMediaItem[];
 };
 
 export type QuizConfigPayload = {
@@ -78,7 +80,7 @@ export function getQuizFallback(): QuizPayload {
     stages: QUIZ_STAGES.map((stage) => ({
       id: stage.id,
       label: stage.label,
-      endMedia: null,
+      endMediaItems: [],
     })),
     questions: QUIZ_QUESTIONS,
     config: {

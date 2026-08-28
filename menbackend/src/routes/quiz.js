@@ -1,26 +1,19 @@
 const express = require('express');
 const { QuizStage, QuizQuestion, QuizConfig } = require('../models');
 const { ok } = require('../utils/response');
+const { normalizeEndMediaItems } = require('../utils/quizMedia');
 
 const router = express.Router();
 
 function mapStage(stage) {
   const json = stage.toJSON ? stage.toJSON() : stage;
-  const endMedia =
-    json.endMediaType && json.endMediaType !== 'none' && json.endMediaUrl
-      ? {
-          type: json.endMediaType,
-          url: json.endMediaUrl,
-          title: json.endMediaTitle || '',
-          caption: json.endMediaCaption || '',
-        }
-      : null;
+  const endMediaItems = normalizeEndMediaItems(json);
 
   return {
     id: json.id,
     label: json.label,
     sortOrder: json.sortOrder,
-    endMedia,
+    endMediaItems,
   };
 }
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
 import { StoreBadges } from '@/components/landing/store-badges';
@@ -10,10 +11,21 @@ import {
   buildQuizResult,
   fetchPublicQuiz,
   getQuizFallback,
-  type QuizEndMedia,
+  type QuizEndMediaItem,
   type QuizPayload,
   type QuizStagePayload,
 } from '@/lib/quiz-api';
+import {
+  counterVariants,
+  labelVariants,
+  mediaRevealVariants,
+  optionItemVariants,
+  optionsContainerVariants,
+  QuizGlowBurst,
+  QuizSlide,
+  titleVariants,
+  type SlideDirection,
+} from '@/components/quiz/quiz-motion';
 import { SITE } from '@/lib/site-config';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +38,9 @@ export function KegelQuiz() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [processingIndex, setProcessingIndex] = useState(0);
   const [sectionStageId, setSectionStageId] = useState<number | null>(null);
+  const [sectionMediaIndex, setSectionMediaIndex] = useState(0);
+  const [slideDirection, setSlideDirection] = useState<SlideDirection>(1);
+  const [glowBurst, setGlowBurst] = useState(false);
 
   useEffect(() => {
     fetchPublicQuiz()
@@ -52,10 +67,16 @@ export function KegelQuiz() {
     return map;
   }, [stages]);
 
-  const sectionEndMedia: QuizEndMedia | null =
+  const sectionEndItems: QuizEndMediaItem[] =
     sectionStageId != null
-      ? stageById.get(sectionStageId)?.endMedia ?? null
-      : null;
+      ? stageById.get(sectionStageId)?.endMediaItems ?? []
+      : [];
+
+  const sectionEndMedia: QuizEndMediaItem | null =
+    sectionEndItems[sectionMediaIndex] ?? null;
+
+  const hasMoreSectionMedia =
+    sectionMediaIndex < sectionEndItems.length - 1;
 
   function isLastQuestionInStage(index: number) {
     const current = questions[index];
@@ -65,47 +86,77 @@ export function KegelQuiz() {
     return next.stage !== current.stage;
   }
 
+  function triggerForward(action: () => void) {
+    setSlideDirection(1);
+    setGlowBurst(true);
+    window.setTimeout(action, 90);
+    window.setTimeout(() => setGlowBurst(false), 520);
+  }
+
+  function triggerBackward(action: () => void) {
+    setSlideDirection(-1);
+    action();
+  }
+
   function goNext() {
     if (!selected || !question) return;
 
     const isLastQuestion = stepIndex >= totalQuestions - 1;
     const endsStage = isLastQuestionInStage(stepIndex);
 
-    if (endsStage) {
-      const stage = stageById.get(question.stage);
-      if (stage?.endMedia) {
-        setSectionStageId(question.stage);
-        setPhase('section-end');
+    triggerForward(() => {
+      if (endsStage) {
+        const stage = stageById.get(question.stage);
+        if (stage?.endMediaItems?.length) {
+          setSectionStageId(question.stage);
+          setSectionMediaIndex(0);
+          setPhase('section-end');
+          return;
+        }
+      }
+
+      if (isLastQuestion) {
+        setPhase('processing');
         return;
       }
-    }
 
-    if (isLastQuestion) {
-      setPhase('processing');
-      return;
-    }
-
-    setStepIndex((i) => i + 1);
+      setStepIndex((i) => i + 1);
+    });
   }
 
-  function continueFromSectionEnd() {
-    setSectionStageId(null);
-    if (stepIndex >= totalQuestions - 1) {
-      setPhase('processing');
-      return;
-    }
-    setPhase('quiz');
-    setStepIndex((i) => i + 1);
+  function advanceSectionEnd() {
+    triggerForward(() => {
+      if (hasMoreSectionMedia) {
+        setSectionMediaIndex((i) => i + 1);
+        return;
+      }
+
+      setSectionStageId(null);
+      setSectionMediaIndex(0);
+      if (stepIndex >= totalQuestions - 1) {
+        setPhase('processing');
+        return;
+      }
+      setPhase('quiz');
+      setStepIndex((i) => i + 1);
+    });
   }
 
   function goBack() {
     if (phase === 'section-end') {
-      setSectionStageId(null);
-      setPhase('quiz');
+      if (sectionMediaIndex > 0) {
+        triggerBackward(() => setSectionMediaIndex((i) => i - 1));
+        return;
+      }
+      triggerBackward(() => {
+        setSectionStageId(null);
+        setSectionMediaIndex(0);
+        setPhase('quiz');
+      });
       return;
     }
     if (stepIndex === 0) return;
-    setStepIndex((i) => i - 1);
+    triggerBackward(() => setStepIndex((i) => i - 1));
   }
 
   function selectOption(questionId: string, optionId: string) {
@@ -135,6 +186,7 @@ export function KegelQuiz() {
 
   return (
     <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
+      <QuizGlowBurst active={glowBurst} />
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
         <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
@@ -162,50 +214,93 @@ export function KegelQuiz() {
         <>
           <StageProgress stages={stages} currentStage={question.stage} />
 
-          <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
-            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]">
+          <QuizSlide
+            slideKey={`quiz-${stepIndex}`}
+            direction={slideDirection}
+            className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10"
+          >
+            <motion.p
+              variants={labelVariants}
+              initial="hidden"
+              animate="show"
+              className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]"
+            >
               {stages.find((s) => s.id === question.stage)?.label}
-            </p>
-            <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
+            </motion.p>
+            <motion.h1
+              variants={titleVariants}
+              initial="hidden"
+              animate="show"
+              className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]"
+            >
               {question.title}
-            </h1>
+            </motion.h1>
 
-            <ul className="mt-10 space-y-3">
+            <motion.ul
+              variants={optionsContainerVariants}
+              initial="hidden"
+              animate="show"
+              className="mt-10 space-y-3"
+            >
               {question.options.map((option) => {
                 const isSelected = selected === option.id;
                 return (
-                  <li key={option.id}>
-                    <button
+                  <motion.li key={option.id} variants={optionItemVariants}>
+                    <motion.button
                       type="button"
                       onClick={() => selectOption(question.id, option.id)}
-                      className={cn(
-                        'flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left transition active:scale-[0.99]',
+                      whileTap={{ scale: 0.98 }}
+                      animate={
                         isSelected
-                          ? 'border-[#ff453a]/60 bg-[#ff453a]/15 shadow-lg shadow-[#ff453a]/10'
+                          ? {
+                              borderColor: 'rgba(255,69,58,0.6)',
+                              boxShadow: '0 10px 40px rgba(255,69,58,0.15)',
+                            }
+                          : { borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 0 0 rgba(0,0,0,0)' }
+                      }
+                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      className={cn(
+                        'flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left',
+                        isSelected
+                          ? 'bg-[#ff453a]/15'
                           : 'border-white/10 bg-white/[0.04] hover:border-[#ff453a]/30 hover:bg-white/[0.07]'
                       )}
                     >
                       <span className="text-base font-medium text-white">{option.label}</span>
-                      <span
-                        className={cn(
-                          'flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition',
+                      <motion.span
+                        animate={
                           isSelected
-                            ? 'border-[#ff453a] bg-[#ff453a]'
-                            : 'border-white/25 bg-transparent'
-                        )}
+                            ? { scale: 1, backgroundColor: '#ff453a', borderColor: '#ff453a' }
+                            : { scale: 1, backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.25)' }
+                        }
+                        transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                        className="flex size-6 shrink-0 items-center justify-center rounded-full border-2"
                       >
-                        {isSelected && <Check className="size-3.5 text-white" strokeWidth={3} />}
-                      </span>
-                    </button>
-                  </li>
+                        {isSelected && (
+                          <motion.span
+                            initial={{ scale: 0, rotate: -90 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            transition={{ type: 'spring', stiffness: 700, damping: 18 }}
+                          >
+                            <Check className="size-3.5 text-white" strokeWidth={3} />
+                          </motion.span>
+                        )}
+                      </motion.span>
+                    </motion.button>
+                  </motion.li>
                 );
               })}
-            </ul>
+            </motion.ul>
 
-            <p className="mt-8 text-center text-xs text-white/35">
+            <motion.p
+              variants={counterVariants}
+              initial="hidden"
+              animate="show"
+              className="mt-8 text-center text-xs text-white/35"
+            >
               Асуулт {stepIndex + 1} / {totalQuestions}
-            </p>
-          </main>
+            </motion.p>
+          </QuizSlide>
 
           <QuizFooter
             backDisabled={stepIndex === 0}
@@ -222,86 +317,203 @@ export function KegelQuiz() {
             stages={stages}
             currentStage={sectionStageId ?? stages[0]?.id ?? 1}
           />
-          <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10">
-            <p className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]">
+          <QuizSlide
+            slideKey={`section-${sectionStageId}-${sectionMediaIndex}`}
+            direction={slideDirection}
+            className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10"
+          >
+            <motion.p
+              variants={labelVariants}
+              initial="hidden"
+              animate="show"
+              className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]"
+            >
               {sectionStageId != null
                 ? stages.find((s) => s.id === sectionStageId)?.label
                 : null}
-            </p>
-            <h1 className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]">
+            </motion.p>
+            <motion.h1
+              variants={titleVariants}
+              initial="hidden"
+              animate="show"
+              className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]"
+            >
               {sectionEndMedia.title?.trim() || 'Хэсэг дууслаа'}
-            </h1>
-            <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+            </motion.h1>
+            <motion.div
+              variants={mediaRevealVariants}
+              initial="hidden"
+              animate="show"
+              className="relative mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-[0_20px_60px_rgba(255,69,58,0.12)]"
+            >
+              <motion.div
+                aria-hidden
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 0.5, 0] }}
+                transition={{ duration: 1.2, delay: 0.15 }}
+                className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#ff453a]/20 via-transparent to-transparent"
+              />
               {sectionEndMedia.type === 'video' ? (
                 <SectionEndVideo src={sectionEndMedia.url} />
               ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={sectionEndMedia.url}
-                  alt=""
-                  className="max-h-[420px] w-full object-cover"
-                />
+                <motion.div
+                  initial={{ scale: 1.08 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={sectionEndMedia.url}
+                    alt=""
+                    className="max-h-[420px] w-full object-cover"
+                  />
+                </motion.div>
               )}
-            </div>
+            </motion.div>
             {sectionEndMedia.caption?.trim() && (
-              <p className="mt-5 text-center text-base leading-relaxed text-white/70">
+              <motion.p
+                variants={titleVariants}
+                initial="hidden"
+                animate="show"
+                className="mt-5 text-center text-base leading-relaxed text-white/70"
+              >
                 {sectionEndMedia.caption}
-              </p>
+              </motion.p>
             )}
-          </main>
-          <QuizFooter backDisabled={false} continueDisabled={false} onBack={goBack} onContinue={continueFromSectionEnd} />
+            {sectionEndItems.length > 1 && (
+              <motion.p
+                variants={counterVariants}
+                initial="hidden"
+                animate="show"
+                className="mt-6 text-center text-xs text-white/35"
+              >
+                {sectionMediaIndex + 1} / {sectionEndItems.length}
+              </motion.p>
+            )}
+          </QuizSlide>
+          <QuizFooter
+            backDisabled={false}
+            continueDisabled={false}
+            continueLabel={hasMoreSectionMedia ? 'Дараах' : 'Үргэлжлүүлэх'}
+            onBack={goBack}
+            onContinue={advanceSectionEnd}
+          />
         </>
       )}
 
       {!loading && phase === 'processing' && (
-        <main className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
-          <div className="relative mb-8 size-20">
+        <QuizSlide slideKey="processing" direction={slideDirection} className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+          <motion.div
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            className="relative mb-8 size-20"
+          >
             <div className="absolute inset-0 animate-ping rounded-full bg-[#ff453a]/20" />
             <div className="relative flex size-20 items-center justify-center rounded-full border border-[#ff453a]/30 bg-[#ff453a]/10">
               <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
             </div>
-          </div>
-          <h2 className="text-2xl font-bold">{processingTitle}</h2>
-          <p className="mt-3 min-h-6 text-white/55">{processingMessages[processingIndex]}</p>
+          </motion.div>
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 400, damping: 30 }}
+            className="text-2xl font-bold"
+          >
+            {processingTitle}
+          </motion.h2>
+          <motion.p
+            key={processingIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mt-3 min-h-6 text-white/55"
+          >
+            {processingMessages[processingIndex]}
+          </motion.p>
           <div className="mt-8 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-white/10">
-            <div
-              className="h-full rounded-full bg-[#ff453a] transition-all duration-700"
-              style={{
+            <motion.div
+              className="h-full rounded-full bg-[#ff453a]"
+              initial={{ width: 0 }}
+              animate={{
                 width: `${((processingIndex + 1) / processingMessages.length) * 100}%`,
               }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             />
           </div>
-        </main>
+        </QuizSlide>
       )}
 
       {!loading && phase === 'result' && (
-        <main className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]">
+        <QuizSlide slideKey="result" direction={slideDirection} className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+            className="text-center"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 18, delay: 0.08 }}
+              className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]"
+            >
               <Check className="size-8" strokeWidth={2.5} />
-            </div>
+            </motion.div>
             <h1 className="text-3xl font-extrabold tracking-tight">Таны хувийн төлөвлөгөө бэлэн!</h1>
             <p className="mt-3 text-white/55">
               {SITE.name} танд тохирсон Кегel хөтөлбөр бэлтгэлээ.
             </p>
-          </div>
+          </motion.div>
 
-          <dl className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] divide-y divide-white/10">
-            <ResultRow label="Гол зорилго" value={result.goalLabel} />
-            <ResultRow label="Түвшин" value={result.level} />
-            <ResultRow label="Өдөрт" value={`${result.minutes} минут`} />
-            <ResultRow label="Долоо хоногт" value={`${result.sessionsPerWeek} удаа`} />
-          </dl>
+          <motion.dl
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: {},
+              show: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+            }}
+            className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] divide-y divide-white/10"
+          >
+            {[
+              { label: 'Гол зорилго', value: result.goalLabel },
+              { label: 'Түвшин', value: result.level },
+              { label: 'Өдөрт', value: `${result.minutes} минут` },
+              { label: 'Долоо хоногт', value: `${result.sessionsPerWeek} удаа` },
+            ].map((row) => (
+              <motion.div
+                key={row.label}
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 420, damping: 30 } },
+                }}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+              >
+                <dt className="text-sm text-white/50">{row.label}</dt>
+                <dd className="text-right text-sm font-semibold text-white">{row.value}</dd>
+              </motion.div>
+            ))}
+          </motion.dl>
 
-          <div className="mt-8 rounded-2xl border border-[#ff453a]/25 bg-[#ff453a]/10 p-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, type: 'spring', stiffness: 360, damping: 28 }}
+            className="mt-8 rounded-2xl border border-[#ff453a]/25 bg-[#ff453a]/10 p-6 text-center"
+          >
             <p className="font-bold">Апп-аа татаад эхлээрэй</p>
             <p className="mt-2 text-sm text-white/60">
               Видео заавар, явц хяналт, pelvic stretching — бүгд нэг дор.
             </p>
             <StoreBadges className="mt-6 justify-center" />
-          </div>
+          </motion.div>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.55, type: 'spring', stiffness: 360, damping: 28 }}
+            className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
+          >
             <Link
               href="/#download"
               className={cn(
@@ -320,8 +532,8 @@ export function KegelQuiz() {
             >
               Нүүр хуудас
             </Link>
-          </div>
-        </main>
+          </motion.div>
+        </QuizSlide>
       )}
     </div>
   );
@@ -356,21 +568,24 @@ function SectionEndVideo({ src }: { src: string }) {
 function QuizFooter({
   backDisabled,
   continueDisabled,
+  continueLabel = 'Үргэлжлүүлэх',
   onBack,
   onContinue,
 }: {
   backDisabled: boolean;
   continueDisabled: boolean;
+  continueLabel?: string;
   onBack: () => void;
   onContinue: () => void;
 }) {
   return (
     <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
-        <button
+        <motion.button
           type="button"
           onClick={onBack}
           disabled={backDisabled}
+          whileTap={backDisabled ? undefined : { scale: 0.96 }}
           className={cn(
             'inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition',
             backDisabled
@@ -380,21 +595,29 @@ function QuizFooter({
         >
           <ChevronLeft className="size-5" />
           Буцах
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           type="button"
           onClick={onContinue}
           disabled={continueDisabled}
+          whileTap={continueDisabled ? undefined : { scale: 0.95 }}
+          whileHover={continueDisabled ? undefined : { scale: 1.02 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 22 }}
           className={cn(
-            'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white transition',
+            'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white',
             continueDisabled
               ? 'cursor-not-allowed bg-white/10 text-white/30'
               : 'bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]'
           )}
         >
-          Үргэлжлүүлэх
-          <ChevronRight className="size-5" />
-        </button>
+          {continueLabel}
+          <motion.span
+            animate={continueDisabled ? {} : { x: [0, 3, 0] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+          >
+            <ChevronRight className="size-5" />
+          </motion.span>
+        </motion.button>
       </div>
     </footer>
   );
@@ -418,17 +641,29 @@ function StageProgress({
 
             return (
               <div key={stage.id} className={cn('flex items-center', !isLast && 'flex-1')}>
-                <div
+                <motion.div
+                  layout
+                  animate={
+                    active
+                      ? { scale: [1, 1.08, 1], boxShadow: '0 0 0 4px rgba(255,69,58,0.15)' }
+                      : { scale: 1, boxShadow: '0 0 0 0px rgba(255,69,58,0)' }
+                  }
+                  transition={
+                    active
+                      ? { scale: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' }, boxShadow: { duration: 0.3 } }
+                      : { duration: 0.3 }
+                  }
                   className={cn(
-                    'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2',
                     done && 'border-[#ff453a] bg-[#ff453a] text-white shadow-md shadow-[#ff453a]/30',
-                    active &&
-                      'border-[#ff453a] bg-[#0a0f14] shadow-[0_0_0_4px_rgba(255,69,58,0.15)]',
+                    active && 'border-[#ff453a] bg-[#0a0f14]',
                     !done && !active && 'border-white/20 bg-[#0a0f14]'
                   )}
                 >
                   {done ? (
-                    <Check className="size-4" strokeWidth={3} />
+                    <motion.div initial={{ scale: 0, rotate: -180 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
+                      <Check className="size-4" strokeWidth={3} />
+                    </motion.div>
                   ) : (
                     <span
                       className={cn(
@@ -437,11 +672,15 @@ function StageProgress({
                       )}
                     />
                   )}
-                </div>
+                </motion.div>
                 {!isLast && (
-                  <div
+                  <motion.div
+                    layout
+                    animate={{ scaleX: done ? 1 : 0.3, opacity: done ? 1 : 0.4 }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ originX: 0 }}
                     className={cn(
-                      'mx-1.5 h-1 min-w-[12px] flex-1 rounded-full transition-colors duration-300 sm:mx-2',
+                      'mx-1.5 h-1 min-w-[12px] flex-1 rounded-full sm:mx-2',
                       done ? 'bg-[#ff453a]' : 'bg-white/25'
                     )}
                     aria-hidden
@@ -459,28 +698,22 @@ function StageProgress({
 
             return (
               <div key={stage.id} className="flex-1 px-0.5 text-center">
-                <span
-                  className={cn(
-                    'text-[9px] font-medium leading-tight sm:text-[10px]',
-                    active ? 'text-[#ffb4af]' : done ? 'text-white/50' : 'text-white/30'
-                  )}
+                <motion.span
+                  animate={
+                    active
+                      ? { opacity: 1, y: 0, color: '#ffb4af' }
+                      : { opacity: done ? 0.5 : 0.3, y: 0, color: 'rgba(255,255,255,0.3)' }
+                  }
+                  transition={{ duration: 0.35 }}
+                  className="block text-[9px] font-medium leading-tight sm:text-[10px]"
                 >
                   {stage.label}
-                </span>
+                </motion.span>
               </div>
             );
           })}
         </div>
       </div>
-    </div>
-  );
-}
-
-function ResultRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 px-5 py-4">
-      <dt className="text-sm text-white/50">{label}</dt>
-      <dd className="text-right text-sm font-semibold text-white">{value}</dd>
     </div>
   );
 }
