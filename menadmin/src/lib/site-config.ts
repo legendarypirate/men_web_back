@@ -16,7 +16,7 @@ export const SITE = {
   supportEmail: 'support@tenkhee.mn',
   infoEmail: 'info@tenkhee.mn',
   appStoreUrl: 'https://apps.apple.com/app/tenkhee-plus',
-  playStoreUrl: 'https://play.google.com/store/apps/details?id=com.tenkhee.mgl',
+  playStoreUrl: 'https://play.google.com/store/apps/details?id=mn.vitalmen.mgl',
 } as const;
 
 export const LANDING_NAV = [
