@@ -1,5 +1,4 @@
 const express = require('express');
-const { Op } = require('sequelize');
 const {
   WorkoutProgram,
   WorkoutExercise,
@@ -7,23 +6,13 @@ const {
 } = require('../models');
 const { ok, fail } = require('../utils/response');
 const { authRequired, optionalAuth } = require('../middleware/auth');
+const {
+  SESSIONS_PER_DAY,
+  countSessionsToday,
+  computeStreakDays,
+} = require('../utils/streak');
 
 const router = express.Router();
-
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-async function countSessionsToday(userId) {
-  return WorkoutSession.count({
-    where: {
-      userId,
-      createdAt: { [Op.gte]: startOfToday() },
-    },
-  });
-}
 
 function mapProgram(program) {
   const json = program.toJSON();
@@ -158,15 +147,19 @@ router.post('/sessions', authRequired, async (req, res, next) => {
 
     const user = req.user;
     user.totalSessions += 1;
-    user.activeDays += 1;
-    user.streakDays += 1;
+
+    const sessionsToday = await countSessionsToday(user.id);
+    if (sessionsToday === SESSIONS_PER_DAY) {
+      user.activeDays += 1;
+    }
+
+    const streakDays = await computeStreakDays(user.id);
+    user.streakDays = streakDays;
     if (user.streakDays > user.longestStreak) {
       user.longestStreak = user.streakDays;
     }
     user.vitalityScore = Math.min(100, user.vitalityScore + 1);
     await user.save();
-
-    const sessionsToday = await countSessionsToday(user.id);
 
     return ok(
       res,

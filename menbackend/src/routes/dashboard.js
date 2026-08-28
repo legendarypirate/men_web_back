@@ -1,8 +1,11 @@
 const express = require('express');
-const { Op } = require('sequelize');
-const { WorkoutProgram, WorkoutExercise, Article, WorkoutSession } = require('../models');
+const { WorkoutProgram, WorkoutExercise, Article } = require('../models');
 const { ok } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
+const {
+  countSessionsToday,
+  computeStreakDays,
+} = require('../utils/streak');
 
 const router = express.Router();
 
@@ -10,21 +13,6 @@ function greetingForHour(hour) {
   if (hour < 12) return 'Өглөөний мэнд';
   if (hour < 18) return 'Өдрийн мэнд';
   return 'Оройн мэнд';
-}
-
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-async function countSessionsToday(userId) {
-  return WorkoutSession.count({
-    where: {
-      userId,
-      createdAt: { [Op.gte]: startOfToday() },
-    },
-  });
 }
 
 router.get('/', authRequired, async (req, res, next) => {
@@ -57,6 +45,14 @@ router.get('/', authRequired, async (req, res, next) => {
     }));
 
     const sessionsToday = await countSessionsToday(user.id);
+    const streakDays = await computeStreakDays(user.id);
+    if (user.streakDays !== streakDays) {
+      user.streakDays = streakDays;
+      if (user.streakDays > user.longestStreak) {
+        user.longestStreak = user.streakDays;
+      }
+      await user.save();
+    }
 
     return ok(res, {
       greeting: `${greetingForHour(hour)}, ${user.name.split(' ')[0]}`,
@@ -66,7 +62,7 @@ router.get('/', authRequired, async (req, res, next) => {
         name: user.name,
         membership: user.membership,
         vitalityScore: user.vitalityScore,
-        streakDays: user.streakDays,
+        streakDays,
         sessionsToday,
       },
       streak,
