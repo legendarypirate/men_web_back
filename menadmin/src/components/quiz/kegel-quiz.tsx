@@ -17,13 +17,14 @@ import {
 } from '@/lib/quiz-api';
 import {
   counterVariants,
-  labelVariants,
-  mediaRevealVariants,
-  optionItemVariants,
-  optionsContainerVariants,
+  getAnimationStyle,
+  getLabelVariants,
+  getMediaRevealVariants,
+  getOptionItemVariants,
+  getOptionsContainerVariants,
+  getTitleVariants,
   QuizGlowBurst,
   QuizSlide,
-  titleVariants,
   type SlideDirection,
 } from '@/components/quiz/quiz-motion';
 import { SITE } from '@/lib/site-config';
@@ -41,6 +42,7 @@ export function KegelQuiz() {
   const [sectionMediaIndex, setSectionMediaIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<SlideDirection>(1);
   const [glowBurst, setGlowBurst] = useState(false);
+  const [animSeed, setAnimSeed] = useState(0);
 
   useEffect(() => {
     fetchPublicQuiz()
@@ -78,6 +80,20 @@ export function KegelQuiz() {
   const hasMoreSectionMedia =
     sectionMediaIndex < sectionEndItems.length - 1;
 
+  const quizAnimStyle = getAnimationStyle(stepIndex);
+  const sectionAnimStyle = getAnimationStyle(stepIndex * 2 + sectionMediaIndex + 1);
+  const processingAnimStyle = getAnimationStyle(totalQuestions + 1);
+  const resultAnimStyle = getAnimationStyle(totalQuestions + 2);
+
+  const quizTitleVariants = getTitleVariants(quizAnimStyle);
+  const quizLabelVariants = getLabelVariants(quizAnimStyle);
+  const quizOptionsContainer = getOptionsContainerVariants(quizAnimStyle);
+  const quizOptionItem = getOptionItemVariants(quizAnimStyle);
+
+  const sectionTitleVariants = getTitleVariants(sectionAnimStyle);
+  const sectionLabelVariants = getLabelVariants(sectionAnimStyle);
+  const sectionMediaVariants = getMediaRevealVariants(sectionAnimStyle);
+
   function isLastQuestionInStage(index: number) {
     const current = questions[index];
     const next = questions[index + 1];
@@ -88,6 +104,7 @@ export function KegelQuiz() {
 
   function triggerForward(action: () => void) {
     setSlideDirection(1);
+    setAnimSeed((s) => s + 1);
     setGlowBurst(true);
     window.setTimeout(action, 90);
     window.setTimeout(() => setGlowBurst(false), 520);
@@ -186,7 +203,7 @@ export function KegelQuiz() {
 
   return (
     <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
-      <QuizGlowBurst active={glowBurst} />
+      <QuizGlowBurst active={glowBurst} seed={animSeed} />
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
         <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
@@ -217,10 +234,11 @@ export function KegelQuiz() {
           <QuizSlide
             slideKey={`quiz-${stepIndex}`}
             direction={slideDirection}
+            animStyle={quizAnimStyle}
             className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10"
           >
             <motion.p
-              variants={labelVariants}
+              variants={quizLabelVariants}
               initial="hidden"
               animate="show"
               className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]"
@@ -228,7 +246,7 @@ export function KegelQuiz() {
               {stages.find((s) => s.id === question.stage)?.label}
             </motion.p>
             <motion.h1
-              variants={titleVariants}
+              variants={quizTitleVariants}
               initial="hidden"
               animate="show"
               className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]"
@@ -237,15 +255,16 @@ export function KegelQuiz() {
             </motion.h1>
 
             <motion.ul
-              variants={optionsContainerVariants}
+              variants={quizOptionsContainer}
               initial="hidden"
               animate="show"
               className="mt-10 space-y-3"
+              style={{ perspective: 900 }}
             >
               {question.options.map((option) => {
                 const isSelected = selected === option.id;
                 return (
-                  <motion.li key={option.id} variants={optionItemVariants}>
+                  <motion.li key={option.id} variants={quizOptionItem}>
                     <motion.button
                       type="button"
                       onClick={() => selectOption(question.id, option.id)}
@@ -320,10 +339,11 @@ export function KegelQuiz() {
           <QuizSlide
             slideKey={`section-${sectionStageId}-${sectionMediaIndex}`}
             direction={slideDirection}
+            animStyle={sectionAnimStyle}
             className="relative mx-auto flex w-full max-w-xl flex-1 flex-col px-4 py-8 sm:px-6 sm:py-10"
           >
             <motion.p
-              variants={labelVariants}
+              variants={sectionLabelVariants}
               initial="hidden"
               animate="show"
               className="mb-3 text-center text-xs font-semibold uppercase tracking-widest text-[#ffb4af]"
@@ -333,7 +353,7 @@ export function KegelQuiz() {
                 : null}
             </motion.p>
             <motion.h1
-              variants={titleVariants}
+              variants={sectionTitleVariants}
               initial="hidden"
               animate="show"
               className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]"
@@ -341,10 +361,11 @@ export function KegelQuiz() {
               {sectionEndMedia.title?.trim() || 'Хэсэг дууслаа'}
             </motion.h1>
             <motion.div
-              variants={mediaRevealVariants}
+              variants={sectionMediaVariants}
               initial="hidden"
               animate="show"
               className="relative mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-[0_20px_60px_rgba(255,69,58,0.12)]"
+              style={{ transformStyle: sectionAnimStyle === 'flip' ? 'preserve-3d' : undefined }}
             >
               <motion.div
                 aria-hidden
@@ -372,7 +393,7 @@ export function KegelQuiz() {
             </motion.div>
             {sectionEndMedia.caption?.trim() && (
               <motion.p
-                variants={titleVariants}
+                variants={sectionTitleVariants}
                 initial="hidden"
                 animate="show"
                 className="mt-5 text-center text-base leading-relaxed text-white/70"
@@ -402,7 +423,12 @@ export function KegelQuiz() {
       )}
 
       {!loading && phase === 'processing' && (
-        <QuizSlide slideKey="processing" direction={slideDirection} className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center">
+        <QuizSlide
+          slideKey="processing"
+          direction={slideDirection}
+          animStyle={processingAnimStyle}
+          className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center px-4 py-16 text-center"
+        >
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -445,7 +471,12 @@ export function KegelQuiz() {
       )}
 
       {!loading && phase === 'result' && (
-        <QuizSlide slideKey="result" direction={slideDirection} className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6">
+        <QuizSlide
+          slideKey="result"
+          direction={slideDirection}
+          animStyle={resultAnimStyle}
+          className="relative mx-auto w-full max-w-xl flex-1 px-4 py-10 sm:px-6"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
