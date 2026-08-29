@@ -10,11 +10,13 @@ export type ArticleStorySlide = {
 };
 
 function slidesHaveContent(slides: ArticleStorySlide[]): boolean {
-  return slides.some((slide) =>
-    [slide.accentLine, slide.line2, slide.line3, slide.body].some(
+  return slides.some((slide) => {
+    const imageUrl = typeof slide.imageUrl === 'string' ? slide.imageUrl.trim() : '';
+    if (imageUrl) return true;
+    return [slide.line2, slide.line3, slide.body].some(
       (value) => typeof value === 'string' && value.trim().length > 0
-    )
-  );
+    );
+  });
 }
 
 export { slidesHaveContent };
