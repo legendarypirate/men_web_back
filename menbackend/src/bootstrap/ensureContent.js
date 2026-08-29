@@ -73,7 +73,18 @@ async function ensureSexualHealthStoryArticles() {
       where: { title: data.title, category: data.category },
     });
     if (existing) {
-      await existing.update(data);
+      const updates = {};
+      if (!existing.imageUrl && data.imageUrl) updates.imageUrl = data.imageUrl;
+      if (!existing.body && data.body) updates.body = data.body;
+      if (!existing.excerpt && data.excerpt) updates.excerpt = data.excerpt;
+      const slides = existing.storySlides;
+      const hasSlides = Array.isArray(slides) && slides.length > 0;
+      if (!hasSlides && data.storySlides?.length) {
+        updates.storySlides = data.storySlides;
+      }
+      if (Object.keys(updates).length > 0) {
+        await existing.update(updates);
+      }
     } else {
       await Article.create(data);
     }
