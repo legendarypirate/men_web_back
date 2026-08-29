@@ -32,6 +32,8 @@ export function normalizePhase(raw: WorkoutExercisePhase, sortOrder: number): Wo
     durationSeconds: Math.max(1, Number(raw.durationSeconds) || 5),
     holdSeconds: isHold ? Math.max(1, Number(raw.holdSeconds) || 5) : 0,
     relaxSeconds: isHold ? Math.max(1, Number(raw.relaxSeconds) || 5) : 0,
+    holdIntervalLabel: raw.holdIntervalLabel,
+    relaxIntervalLabel: raw.relaxIntervalLabel,
     vibrationEnabled: raw.vibrationEnabled ?? isHold,
     vibrationIntervalMs: Math.min(500, Math.max(40, Number(raw.vibrationIntervalMs) || 80)),
     showInCarousel:

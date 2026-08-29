@@ -45,6 +45,14 @@ export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): 
   };
 }
 
+export function defaultHoldIntervalLabel(type: WorkoutSectionType): string {
+  return type === 'coreBrace' ? 'Чангалах' : 'Барих';
+}
+
+export function defaultRelaxIntervalLabel(): string {
+  return 'Амрах';
+}
+
 export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): SectionTiming {
   return normalizeSectionTiming({
     enabled: true,
@@ -52,18 +60,25 @@ export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): Sect
     sets: 3,
     holdSeconds: 5,
     relaxSeconds: 5,
+    holdIntervalLabel: defaultHoldIntervalLabel(type),
+    relaxIntervalLabel: defaultRelaxIntervalLabel(),
     vibrationEnabled: type === 'kegelHold' || type === 'coreBrace',
     vibrationIntervalMs: 80,
   });
 }
 
-export function normalizeSectionTiming(raw: Partial<SectionTiming>): SectionTiming {
+export function normalizeSectionTiming(raw: Partial<SectionTiming>, sectionType?: WorkoutSectionType): SectionTiming {
+  const type = sectionType ?? 'kegelHold';
   return {
     enabled: raw.enabled !== false,
     durationSeconds: Math.max(0, Number(raw.durationSeconds) || 0),
     sets: Math.max(1, Number(raw.sets) || 1),
     holdSeconds: Math.max(1, Number(raw.holdSeconds) || 1),
     relaxSeconds: Math.max(1, Number(raw.relaxSeconds) || 1),
+    holdIntervalLabel:
+      String(raw.holdIntervalLabel || '').trim() || defaultHoldIntervalLabel(type),
+    relaxIntervalLabel:
+      String(raw.relaxIntervalLabel || '').trim() || defaultRelaxIntervalLabel(),
     vibrationEnabled: raw.vibrationEnabled ?? true,
     vibrationIntervalMs: Math.max(40, Number(raw.vibrationIntervalMs) || 80),
   };
@@ -99,11 +114,14 @@ export function syncLevelPresets(
     const key = String(level);
     const current = next[key] ?? [];
     const synced = sections.map((section, index) => {
-      if (current[index]) return normalizeSectionTiming(current[index]);
-      return normalizeSectionTiming({
-        ...emptySectionTiming(section.type),
-        enabled: defaultEnabledForLevel(level),
-      });
+      if (current[index]) return normalizeSectionTiming(current[index], section.type);
+      return normalizeSectionTiming(
+        {
+          ...emptySectionTiming(section.type),
+          enabled: defaultEnabledForLevel(level),
+        },
+        section.type
+      );
     });
     next[key] = synced;
   }
@@ -182,6 +200,8 @@ function buildPhasesForSection(
         durationSeconds: timing.durationSeconds,
         holdSeconds: timing.holdSeconds,
         relaxSeconds: timing.relaxSeconds,
+        holdIntervalLabel: timing.holdIntervalLabel,
+        relaxIntervalLabel: timing.relaxIntervalLabel,
         vibrationEnabled: timing.vibrationEnabled,
         vibrationIntervalMs: timing.vibrationIntervalMs,
       },
@@ -196,6 +216,8 @@ function buildPhasesForSection(
         durationSeconds: timing.durationSeconds,
         holdSeconds: timing.holdSeconds,
         relaxSeconds: timing.relaxSeconds,
+        holdIntervalLabel: timing.holdIntervalLabel,
+        relaxIntervalLabel: timing.relaxIntervalLabel,
         vibrationEnabled: timing.vibrationEnabled,
         vibrationIntervalMs: timing.vibrationIntervalMs,
       },
@@ -266,17 +288,23 @@ function buildExerciseFromSection(
 
 function timingFromPhase(
   phase: WorkoutExercisePhase,
-  exercise: WorkoutExercise
+  exercise: WorkoutExercise,
+  sectionType: WorkoutSectionType
 ): SectionTiming {
-  return normalizeSectionTiming({
-    enabled: true,
-    durationSeconds: phase.durationSeconds,
-    sets: exercise.sets || 3,
-    holdSeconds: phase.holdSeconds || 5,
-    relaxSeconds: phase.relaxSeconds || 5,
-    vibrationEnabled: phase.vibrationEnabled,
-    vibrationIntervalMs: phase.vibrationIntervalMs,
-  });
+  return normalizeSectionTiming(
+    {
+      enabled: true,
+      durationSeconds: phase.durationSeconds,
+      sets: exercise.sets || 3,
+      holdSeconds: phase.holdSeconds || 5,
+      relaxSeconds: phase.relaxSeconds || 5,
+      holdIntervalLabel: phase.holdIntervalLabel,
+      relaxIntervalLabel: phase.relaxIntervalLabel,
+      vibrationEnabled: phase.vibrationEnabled,
+      vibrationIntervalMs: phase.vibrationIntervalMs,
+    },
+    sectionType
+  );
 }
 
 function referenceTiming(
@@ -312,27 +340,31 @@ export function loadProgramSections(program: WorkoutProgram): {
         instruction: exercise.instruction || '',
       });
       baseTimings.push(
-        normalizeSectionTiming({
-          enabled: true,
-          durationSeconds: exercise.durationSeconds || 25,
-          sets: exercise.sets || 3,
-          holdSeconds: 5,
-          relaxSeconds: 5,
-          vibrationEnabled: exercise.motion === 'kegelHold' || exercise.motion === 'coreBrace',
-          vibrationIntervalMs: 80,
-        })
+        normalizeSectionTiming(
+          {
+            enabled: true,
+            durationSeconds: exercise.durationSeconds || 25,
+            sets: exercise.sets || 3,
+            holdSeconds: 5,
+            relaxSeconds: 5,
+            vibrationEnabled: exercise.motion === 'kegelHold' || exercise.motion === 'coreBrace',
+            vibrationIntervalMs: 80,
+          },
+          phaseTypeToSectionType('hold', exercise.motion)
+        )
       );
       continue;
     }
 
     for (const phase of visible) {
+      const sectionType = phaseTypeToSectionType(phase.phaseType, exercise.motion);
       sections.push({
         id: `${exercise.id || 'ex'}-${phase.sortOrder ?? sections.length}`,
         label: phase.label.trim() || exercise.name || 'Дасгал',
-        type: phaseTypeToSectionType(phase.phaseType, exercise.motion),
+        type: sectionType,
         instruction: exercise.instruction || '',
       });
-      baseTimings.push(timingFromPhase(phase, exercise));
+      baseTimings.push(timingFromPhase(phase, exercise, sectionType));
     }
   }
 

@@ -71,6 +71,8 @@ export type WorkoutExercisePhase = {
   vibrationIntervalMs: number;
   holdSeconds?: number;
   relaxSeconds?: number;
+  holdIntervalLabel?: string;
+  relaxIntervalLabel?: string;
   showInCarousel?: boolean;
 };
 
@@ -110,6 +112,8 @@ export type SectionTiming = {
   sets: number;
   holdSeconds: number;
   relaxSeconds: number;
+  holdIntervalLabel: string;
+  relaxIntervalLabel: string;
   vibrationEnabled: boolean;
   vibrationIntervalMs: number;
 };

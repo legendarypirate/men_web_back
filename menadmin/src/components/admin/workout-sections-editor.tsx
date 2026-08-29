@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import {
+  defaultEnabledForLevel,
+  defaultHoldIntervalLabel,
   emptySectionDefinition,
   emptySectionTiming,
   normalizeSectionTiming,
@@ -10,7 +12,6 @@ import {
   TRAINING_LEVELS,
   WorkoutSectionDefinition,
   WorkoutSectionType,
-  defaultEnabledForLevel,
 } from '@/lib/workout-sections';
 import { SectionTiming, WorkoutLevelPresets } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -105,19 +106,50 @@ export function WorkoutSectionsEditor({
   }
 
   function updateSection(index: number, patch: Partial<WorkoutSectionDefinition>) {
-    const nextSections = sections.map((section, i) =>
-      i === index ? { ...section, ...patch } : section
-    );
+    const nextSections = sections.map((section, i) => {
+      if (i !== index) return section;
+      const next = { ...section, ...patch };
+      if (patch.type && patch.type !== section.type) {
+        const oldPreset = SECTION_TYPE_OPTIONS.find((o) => o.value === section.type);
+        const newPreset = SECTION_TYPE_OPTIONS.find((o) => o.value === patch.type);
+        if (newPreset && (!section.label || section.label === oldPreset?.label)) {
+          next.label = newPreset.label;
+        }
+      }
+      return next;
+    });
+    if (patch.type) {
+      const nextPresets = { ...levelPresets };
+      for (const { level } of TRAINING_LEVELS) {
+        const key = String(level);
+        const timings = [...(nextPresets[key] ?? [])];
+        if (timings[index]) {
+          timings[index] = normalizeSectionTiming(
+            {
+              ...timings[index],
+              holdIntervalLabel: defaultHoldIntervalLabel(patch.type as WorkoutSectionType),
+            },
+            patch.type as WorkoutSectionType
+          );
+        }
+        nextPresets[key] = timings;
+      }
+      emit(nextSections, nextPresets);
+      return;
+    }
     emit(nextSections, levelPresets);
   }
 
   function updateTiming(index: number, patch: Partial<SectionTiming>) {
     const nextPresets = { ...levelPresets };
     const timings = [...(nextPresets[levelKey] ?? [])];
-    timings[index] = normalizeSectionTiming({
-      ...(timings[index] ?? emptySectionTiming(sections[index]?.type)),
-      ...patch,
-    });
+    timings[index] = normalizeSectionTiming(
+      {
+        ...(timings[index] ?? emptySectionTiming(sections[index]?.type)),
+        ...patch,
+      },
+      sections[index]?.type
+    );
     nextPresets[levelKey] = timings;
     emit(sections, nextPresets);
   }
@@ -391,6 +423,7 @@ export function WorkoutSectionsEditor({
                   </div>
 
                   {supportsIntervals(section.type) && (
+                    <>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <Label>Чангалах интервал (сек)</Label>
@@ -409,6 +442,29 @@ export function WorkoutSectionsEditor({
                         />
                       </div>
                     </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label>Барих/чангалах нэр (тimer дээр)</Label>
+                        <Input
+                          value={timing.holdIntervalLabel}
+                          onChange={(e) =>
+                            updateTiming(index, { holdIntervalLabel: e.target.value })
+                          }
+                          placeholder="Барих"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Амрах нэр (timer дээр)</Label>
+                        <Input
+                          value={timing.relaxIntervalLabel}
+                          onChange={(e) =>
+                            updateTiming(index, { relaxIntervalLabel: e.target.value })
+                          }
+                          placeholder="Амрах"
+                        />
+                      </div>
+                    </div>
+                    </>
                   )}
 
                   {supportsVibration(section.type) && (
