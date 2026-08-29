@@ -589,6 +589,19 @@ export const api = {
       }),
     remove: (id: string) =>
       request<null>(`/api/admin/article-categories/${id}`, { method: 'DELETE' }),
+    removeByName: (name: string) =>
+      request<null>(
+        `/api/admin/article-categories/by-name/${encodeURIComponent(name)}`,
+        { method: 'DELETE' }
+      ),
+    reorder: (data: { names: string[] }) =>
+      request<{ categories: ArticleCategoryRecord[] }>(
+        '/api/admin/article-categories/reorder',
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        }
+      ),
   },
 
   articles: {

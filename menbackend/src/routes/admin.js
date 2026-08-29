@@ -338,17 +338,97 @@ router.post('/article-categories', adminRequired, async (req, res, next) => {
   }
 });
 
+router.put('/article-categories/reorder', adminRequired, async (req, res, next) => {
+  try {
+    const names = req.body.names;
+    if (!Array.isArray(names) || names.length === 0) {
+      return fail(res, 'Дараалал шаардлагатай');
+    }
+
+    const { randomUUID } = require('crypto');
+    const sequelize = require('../config/database');
+    const transaction = await sequelize.transaction();
+
+    try {
+      for (let i = 0; i < names.length; i++) {
+        const name = String(names[i] || '').trim();
+        if (!name) continue;
+
+        const existing = await ArticleCategory.findOne({ where: { name }, transaction });
+        if (existing) {
+          await existing.update({ sortOrder: i }, { transaction });
+        } else {
+          await ArticleCategory.create(
+            { id: randomUUID(), name, sortOrder: i },
+            { transaction }
+          );
+        }
+      }
+
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+
+    const categories = await ArticleCategory.findAll({
+      order: [
+        ['sortOrder', 'ASC'],
+        ['name', 'ASC'],
+      ],
+    });
+    return ok(res, { categories }, 'Дараалал хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/article-categories/by-name/:name', adminRequired, async (req, res, next) => {
+  try {
+    const name = decodeURIComponent(req.params.name || '').trim();
+    if (!name) return fail(res, 'Ангилалын нэр шаардлагатай');
+
+    const sequelize = require('../config/database');
+    const transaction = await sequelize.transaction();
+
+    try {
+      await Article.destroy({ where: { category: name }, transaction });
+      const category = await ArticleCategory.findOne({ where: { name }, transaction });
+      if (category) {
+        await category.destroy({ transaction });
+      }
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+
+    return ok(res, null, 'Ангилал устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.delete('/article-categories/:id', adminRequired, async (req, res, next) => {
   try {
     const category = await ArticleCategory.findByPk(req.params.id);
     if (!category) return fail(res, 'Ангилал олдсонгүй', 404);
 
-    const articleCount = await Article.count({ where: { category: category.name } });
-    if (articleCount > 0) {
-      return fail(res, 'Энэ ангилалд нийтлэл байгаа тул устгах боломжгүй');
+    const sequelize = require('../config/database');
+    const transaction = await sequelize.transaction();
+
+    try {
+      await Article.destroy({
+        where: { category: category.name },
+        transaction,
+      });
+      await category.destroy({ transaction });
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
     }
 
-    await category.destroy();
     return ok(res, null, 'Ангилал устгагдлаа');
   } catch (err) {
     next(err);

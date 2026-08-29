@@ -1,8 +1,9 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ChevronRight, Newspaper, Trash2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { api, Article, ArticleCategoryRecord } from '@/lib/api';
+import { ArticleCategoryGrid } from '@/components/admin/article-category-grid';
 import { ArticleStorySlidesEditor } from '@/components/admin/article-story-slides-editor';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { articleCategoryOptions, articleConfig } from '@/lib/resource-configs';
@@ -13,7 +14,6 @@ import { useConfirm } from '@/components/custom/confirm-provider';
 import { AddButton } from '@/components/custom/add-button';
 import { ErrorState, LoadingState, PageHeader } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -58,11 +58,6 @@ function buildCategories(articles: Article[], categoryRecords: ArticleCategoryRe
   for (const record of categoryRecords) {
     byName.set(record.name, record);
   }
-  for (const option of articleCategoryOptions) {
-    if (!byName.has(option.value)) {
-      byName.set(option.value, { id: '', name: option.value, sortOrder: 999 });
-    }
-  }
   for (const name of counts.keys()) {
     if (!byName.has(name)) {
       byName.set(name, { id: '', name, sortOrder: 999 });
@@ -93,6 +88,7 @@ export default function ArticlesPage() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [saving, setSaving] = useState(false);
   const [categorySaving, setCategorySaving] = useState(false);
+  const [categoryReordering, setCategoryReordering] = useState(false);
 
   const categories = useMemo(
     () => buildCategories(articles, categoryRecords),
@@ -225,23 +221,59 @@ export default function ArticlesPage() {
     }
   }
 
-  async function handleDeleteCategory(category: { id: string; name: string; count: number }) {
-    if (!category.id) return;
-    if (category.count > 0) {
-      setError('Энэ ангилалд нийтлэл байгаа тул устгах боломжгүй');
-      return;
+  async function handleReorderCategories(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return;
+
+    const reordered = [...categories];
+    const [moved] = reordered.splice(fromIndex, 1);
+    reordered.splice(toIndex, 0, moved);
+
+    const previousRecords = categoryRecords;
+    const recordByName = new Map(categoryRecords.map((record) => [record.name, record]));
+    const optimisticRecords = reordered.map((category, index) => {
+      const existing = recordByName.get(category.name);
+      return existing
+        ? { ...existing, sortOrder: index }
+        : { id: category.id, name: category.name, sortOrder: index };
+    });
+
+    setCategoryRecords(optimisticRecords);
+    setCategoryReordering(true);
+    setError('');
+
+    try {
+      const res = await api.articleCategories.reorder({
+        names: reordered.map((category) => category.name),
+      });
+      setCategoryRecords(res.data.categories);
+    } catch (err) {
+      setCategoryRecords(previousRecords);
+      setError(err instanceof Error ? err.message : 'Дараалал хадгалахад алдаа');
+    } finally {
+      setCategoryReordering(false);
     }
+  }
+
+  async function handleDeleteCategory(category: { id: string; name: string; count: number }) {
+    const articleWarning =
+      category.count > 0
+        ? ` Энэ ангилалд ${category.count} нийтлэл байгаа тул бүгд устгагдана.`
+        : '';
 
     const ok = await confirm({
       title: 'Ангилал устгах уу?',
-      description: `"${category.name}" ангиллыг устгах уу?`,
+      description: `"${category.name}" ангиллыг устгах уу?${articleWarning}`,
       confirmLabel: 'Устгах',
       destructive: true,
     });
     if (!ok) return;
 
     try {
-      await api.articleCategories.remove(category.id);
+      if (category.id) {
+        await api.articleCategories.remove(category.id);
+      } else {
+        await api.articleCategories.removeByName(category.name);
+      }
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ангилал устгахад алдаа');
@@ -256,7 +288,7 @@ export default function ArticlesPage() {
         <>
           <PageHeader
             title={articleConfig.title}
-            subtitle={`${categories.length} ангилал`}
+            subtitle={`${categories.length} ангилал · чирж дараалал солино`}
             action={
               <AddButton
                 label="Ангилал нэмэх"
@@ -275,49 +307,13 @@ export default function ArticlesPage() {
             </div>
           )}
 
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {categories.map((category) => (
-              <div key={category.name} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategory(category.name)}
-                  className="w-full text-left"
-                >
-                  <Card className="h-full border-border/80 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/20">
-                    <CardContent className="flex items-center gap-4 p-5">
-                      <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                        <Newspaper className="size-5" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-semibold text-foreground">
-                          {category.name}
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {category.count} нийтлэл
-                        </p>
-                      </div>
-                      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-                    </CardContent>
-                  </Card>
-                </button>
-                {category.id && category.count === 0 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 size-8 text-muted-foreground hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCategory(category);
-                    }}
-                    aria-label={`${category.name} устгах`}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
+          <ArticleCategoryGrid
+            categories={categories}
+            reordering={categoryReordering}
+            onOpen={setSelectedCategory}
+            onDelete={handleDeleteCategory}
+            onReorder={handleReorderCategories}
+          />
         </>
       ) : (
         <>

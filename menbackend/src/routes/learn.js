@@ -47,11 +47,16 @@ router.get('/articles', optionalAuth, async (req, res, next) => {
       }),
     ]);
 
-    const names = new Set(articleCategories.map((row) => row.name));
+    const orderedFromDb = articleCategories.map((row) => row.name);
+    const extraFromArticles = [];
     for (const row of categoryRows) {
-      if (row.category) names.add(row.category);
+      const name = row.category ? String(row.category).trim() : '';
+      if (name && !orderedFromDb.includes(name)) {
+        extraFromArticles.push(name);
+      }
     }
-    const dbCategories = Array.from(names).sort((a, b) => a.localeCompare(b, 'mn'));
+    extraFromArticles.sort((a, b) => a.localeCompare(b, 'mn'));
+    const dbCategories = [...orderedFromDb, ...extraFromArticles];
 
     return ok(res, {
       categories: ['Бүх нийтлэл', ...dbCategories],
