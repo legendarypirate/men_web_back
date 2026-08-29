@@ -4,6 +4,31 @@ const { ok } = require('../utils/response');
 
 const router = express.Router();
 
+function mapCoachSettings(settings) {
+  if (!settings || settings.active === false) {
+    return {
+      screenTitle: '',
+      bannerTitle: '',
+      bannerSubtitle: '',
+      coachName: '',
+      coachRole: '',
+      coachImageUrl: null,
+      learnMoreLabel: '',
+    };
+  }
+
+  const row = settings.toJSON ? settings.toJSON() : settings;
+  return {
+    screenTitle: row.screenTitle || '',
+    bannerTitle: row.bannerTitle || '',
+    bannerSubtitle: row.bannerSubtitle || '',
+    coachName: row.coachName || '',
+    coachRole: row.coachRole || '',
+    coachImageUrl: row.coachImageUrl || null,
+    learnMoreLabel: row.learnMoreLabel || '',
+  };
+}
+
 router.get('/', async (req, res, next) => {
   try {
     const [settings, programs] = await Promise.all([
@@ -14,15 +39,7 @@ router.get('/', async (req, res, next) => {
       }),
     ]);
 
-    const banner = settings || {
-      screenTitle: 'Explore',
-      bannerTitle: 'Private Coaching Is Now Available',
-      bannerSubtitle: 'Expert 1:1 support is now available inside Tenkhee.',
-      coachName: 'Dr. Sarah Chen',
-      coachRole: 'Sexual Health Coach',
-      coachImageUrl: null,
-      learnMoreLabel: 'Learn More',
-    };
+    const banner = mapCoachSettings(settings);
 
     const list = programs.map((p) => (p.toJSON ? p.toJSON() : p));
     const mainProgram = list.find((p) => p.section === 'main') || null;
