@@ -6,7 +6,7 @@ import { api, Article, ArticleCategoryRecord } from '@/lib/api';
 import { ArticleStorySlidesEditor } from '@/components/admin/article-story-slides-editor';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { articleCategoryOptions, articleConfig } from '@/lib/resource-configs';
-import { buildStorySlidesFromArticle } from '@/lib/article-story-slides';
+import { buildStorySlidesFromArticle, slidesHaveContent } from '@/lib/article-story-slides';
 import { AppDrawer } from '@/components/custom/app-drawer';
 import { AppTable } from '@/components/custom/app-table';
 import { useConfirm } from '@/components/custom/confirm-provider';
@@ -172,9 +172,13 @@ export default function ArticlesPage() {
     setSaving(true);
     try {
       const { id, ...rest } = editing;
+      const rawSlides = editing.storySlides || [];
+      const storySlides = slidesHaveContent(rawSlides)
+        ? rawSlides
+        : buildStorySlidesFromArticle(editing);
       const payload = {
         ...rest,
-        storySlides: editing.storySlides || [],
+        storySlides,
       };
       if (id && articles.some((a) => a.id === id)) {
         await api.articles.update(id, payload);

@@ -9,6 +9,16 @@ export type ArticleStorySlide = {
   isCover?: boolean;
 };
 
+function slidesHaveContent(slides: ArticleStorySlide[]): boolean {
+  return slides.some((slide) =>
+    [slide.accentLine, slide.line2, slide.line3, slide.body].some(
+      (value) => typeof value === 'string' && value.trim().length > 0
+    )
+  );
+}
+
+export { slidesHaveContent };
+
 export function emptyStorySlide(isCover = false): ArticleStorySlide {
   return {
     imageUrl: null,
