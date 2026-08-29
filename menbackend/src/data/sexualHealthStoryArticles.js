@@ -11,7 +11,7 @@ const sexualHealthStoryArticles = [
     "isNew": true,
     "sortOrder": 10,
     "published": true,
-    "featured": true,
+    "featured": false,
     "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400",
     "storySlides": [
       {
@@ -19,7 +19,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ХЛАМИДИА",
         "line3": "Дэлхийн хамгийн түгээмэл БЗДХ — юу гэдгийг мэдэх хэрэгтэй",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -29,7 +29,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын 2020 оны тооцоогоор дэлхий даяар 15-49 насныхны дунд жилд ойролцоогоор **128.5 сая** шинэ Хламидиагийн халдвар бүртгэгддэг — эмэгтэйчүүдийн 4%, эрэгтэйчүүдийн 2.5% нь тээгчид тооцогдоно.",
         "sourceTitle": "Chlamydia — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO), 2020",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -39,7 +39,7 @@ const sexualHealthStoryArticles = [
         "body": "Chlamydia trachomatis нянгаар үүсдэг. Кондомгүйгээр хийсэн үтрээ, шулуун гэдэс, амаар хийх бэлгийн харьцаагаар шууд дамждаг. Мөн жирэмсэн эх нярайдаа төрөх үедээ халдаварлуулж болно.",
         "sourceTitle": "About Chlamydia",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -49,7 +49,7 @@ const sexualHealthStoryArticles = [
         "body": "Шодойгоос шингэн гарах, шээх үед шатах, өндгөвч өвдөж хавагнах зэрэг шинж илэрч болно. Гэхдээ **ихэнх эрэгтэй** ямар ч шинж тэмдэггүй тээгч байдаг — тул зөвхөн шинжилгээ л найдвартай хариулт өгнө.",
         "sourceTitle": "Chlamydia — Symptoms & causes",
         "sourcePublisher": "Mayo Clinic / ДЭМБ",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -59,7 +59,7 @@ const sexualHealthStoryArticles = [
         "body": "Өндгөвчний хавгарал (эпидидимит), түрүү булчирхайн үрэвсэл, ховор тохиолдолд үргүйдэл, үений үрэвсэл (reactive arthritis) үүсч болно. Мөн ХДХВ-ээр халдварлах эрсдэлийг нэмэгдүүлдэг.",
         "sourceTitle": "Chlamydia — Symptoms & causes",
         "sourcePublisher": "Mayo Clinic",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -69,7 +69,7 @@ const sexualHealthStoryArticles = [
         "body": "Шээс/цэврүүлгийн шинжилгээгээр (NAAT) тодорхойлно. Эмч ихэвчлэн **Доксициклин 100мг өдөрт 2 удаа, 7 хоног** (эсвэл Азитромицин 1гр нэг тун) тогтооно. Сүүлийн 60 хоногийн хамтрагчийг мөн шинжлүүлж, эмчлүүлэх шаардлагатай.",
         "sourceTitle": "Chlamydia Treatment Guidelines",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -79,7 +79,7 @@ const sexualHealthStoryArticles = [
         "body": "Бэлгийн харьцаа бүрд кондом хэрэглэх, шинэ хамтрагчтайгаа хамт шинжилгээ өгсний дараа харьцах, идэвхтэй бэлгийн амьдралтай бол жил бүр шинжилгээ өгөх нь хамгийн үр дүнтэй.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -89,7 +89,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -103,7 +103,7 @@ const sexualHealthStoryArticles = [
     "isNew": true,
     "sortOrder": 11,
     "published": true,
-    "featured": true,
+    "featured": false,
     "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400",
     "storySlides": [
       {
@@ -111,7 +111,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ЗАГ ХҮЙТЭН",
         "line3": "(Гонорей) — залуучуудад хамгийн түгээмэл БЗДХ-ын нэг",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -121,7 +121,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын 2020 оны тооцоогоор дэлхий даяар насанд хүрэгчдийн дунд жилд ойролцоогоор **82.4 сая** шинэ Гонорейн халдвар бүртгэгддэг — ялангуяа 15-24 насны залуучуудад хамгийн түгээмэл тохиолддог.",
         "sourceTitle": "Gonorrhoea — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO), 2020",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -131,7 +131,7 @@ const sexualHealthStoryArticles = [
         "body": "Neisseria gonorrhoeae нэртэй нянгаар үүсдэг. Кондомгүйгээр хийсэн үтрээ, шулуун гэдэс, амаар хийх бэлгийн харьцаагаар шууд дамждаг. Мөн жирэмсэн эх нярайдаа төрөх үедээ халдаварлуулж болно.",
         "sourceTitle": "About Gonorrhea",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -141,7 +141,7 @@ const sexualHealthStoryArticles = [
         "body": "Шээх үед шатах мэдрэмж, шодойгоос цагаан, шар эсвэл ногоон идээт шингэн гарах, өндгөвч өвдөж хавагнах зэрэг шинж илэрч болно. Гэхдээ олон эрэгтэй **ямар ч шинж тэмдэггүй** тээгч байдаг тул зөвхөн шинжилгээ л найдвартай хариулт өгнө.",
         "sourceTitle": "Gonorrhea — Symptoms & causes",
         "sourcePublisher": "Mayo Clinic / ДЭМБ",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -151,7 +151,7 @@ const sexualHealthStoryArticles = [
         "body": "Өндгөвчний хавгарал (эпидидимит) — ховор тохиолдолд үргүйдэлд хүргэж болно. Мөн цусаар дамжин үе мөч рүү тархаж халуурах, тууралт, үений өвдөлт үүсгэж болзошгүй бөгөөд ХДХВ-ээр халдварлах эрсдэлийг нэмэгдүүлдэг.",
         "sourceTitle": "Gonorrhea — Symptoms & causes",
         "sourcePublisher": "Mayo Clinic / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -161,7 +161,7 @@ const sexualHealthStoryArticles = [
         "body": "Шээс/цэврүүлгийн шинжилгээгээр тодорхойлно. Эмч тарианы антибиотик (**Цефтриаксон**) тогтооно — учир нь ДЭМБ эмэнд тэсвэртэй хэлбэрүүд газар авч байгааг анхааруулж байна. Сүүлийн 60 хоногийн хамтрагчийг мөн эмчлүүлж, эмчилгээний дараа 7 хоног харьцаанаас татгалзана.",
         "sourceTitle": "Clinical Treatment of Gonorrhea",
         "sourcePublisher": "CDC / WHO",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -171,7 +171,7 @@ const sexualHealthStoryArticles = [
         "body": "Бэлгийн харьцаа бүрд кондом хэрэглэх, шинэ хамтрагчтайгаа хамт шинжилгээ өгсний дараа харьцах, идэвхтэй бэлгийн амьдралтай бол жил бүр шинжилгээ өгөх нь хамгийн үр дүнтэй.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -181,7 +181,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -203,7 +203,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "HPV",
         "line3": "(Хүний папилломавирус) — идэвхтэй бэлгийн амьдралтай бараг бүх хүн авдаг",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -213,7 +213,7 @@ const sexualHealthStoryArticles = [
         "body": "Идэвхтэй бэлгийн харьцаатай **бараг бүх хүн** амьдралын явцад дор хаяж нэг удаа HPV-ээр халдварладаг гэж ДЭМБ тэмдэглэдэг. Вакцин хийлгээгүй бол насан туршдаа HPV авах магадлал маш өндөр.",
         "sourceTitle": "HPV and cervical cancer",
         "sourcePublisher": "ДЭМБ (WHO) / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -223,7 +223,7 @@ const sexualHealthStoryArticles = [
         "body": "Вирус нь үтрээ, шулуун гэдэс, амаар хийх бэлгийн харьцаа, бэлэг эрхтний арьс-арьстай шүргэлцэхэд дамждаг. Кондом эрсдэлийг бууруулна, гэвч халдвартай хэсэг кондомоор хучигдаагүй байвал бүрэн хамгаалахгүй.",
         "sourceTitle": "About HPV",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -233,7 +233,7 @@ const sexualHealthStoryArticles = [
         "body": "Дийлэнх тохиолдолд ямар ч шинж тэмдэггүй байдаг, дархлаа 1-2 жилийн дотор их хэсгийг цэвэрлэдэг. Зарим төрөл нь бэлэг эрхтний ялдамгүүр үүсгэдэг бол зарим \"өндөр эрсдэлтэй\" төрөл нь жилийн дараа хорт хавдарт хvргэж болно.",
         "sourceTitle": "HPV and cervical cancer",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -243,7 +243,7 @@ const sexualHealthStoryArticles = [
         "body": "Тодорхой \"өндөр эрсдэлтэй\" төрлүүд удаан үргэлжилбэл умайн хүзүүний хорт хавдрын **~76%**-ийг үүсгэдэг. Эрэгтэйчүүдэд шулуун гэдэс, эрхтэн, хоолойн хорт хавдрын эрсдэлийг мөн нэмэгдүүлдэг.",
         "sourceTitle": "HPV and cervical cancer",
         "sourcePublisher": "ДЭМБ (WHO) / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -253,7 +253,7 @@ const sexualHealthStoryArticles = [
         "body": "Вирусийг устгах эм байхгүй — ихэвчлэн дархлаа өөрөө дийлдэг. Ялдамгүүрийг хөлдөөх, лазер, мэс засал, тос/крем зэргээр арилгадаг. Умайн хүзүүний эсийн өөрчлөлтийг Pap smear, HPV DNA шинжилгээгээр эрт илрүүлж эмчилдэг.",
         "sourceTitle": "HPV — Diagnosis & treatment",
         "sourcePublisher": "Mayo Clinic",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -263,7 +263,7 @@ const sexualHealthStoryArticles = [
         "body": "HPV вакцин бэлгийн амьдрал эхлэхээс өмнө хийлгэвэл хамгийн үр дүнтэй сэргийлэлт. Кондом эрсдэлийг бууруулна, тамхи татахгүй байх, тогтмол шинжилгээ өгөх нь бас чухал.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -273,7 +273,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -295,7 +295,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ХДХВ",
         "line3": "Дархлалын эсийг сулруулдаг вирус — эмчилгээгээр хэвийн, урт наслах боломжтой",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -305,7 +305,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын тооцоогоор 2025 оны эцэс гэхэд дэлхий даяар ойролцоогоор **41 сая хvн** ХДХВ-тэй амьдарч байна. Тохирох эмчилгээ авбал вирусийг хяналтад байлгаж, хэвийн наслах боломжтой.",
         "sourceTitle": "HIV/AIDS — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -315,7 +315,7 @@ const sexualHealthStoryArticles = [
         "body": "Вирус нь цус, vрийн шингэн, vтрээний шvvрэл, эхийн сvvгээр дамждаг — ихэвчлэн хамгаалалтгvй бэлгийн харьцаа, тариур хуваалцах, төрөх vед ээжээс хvvхдэд шилждэг. Тэвэрч, гар барих, хамт хооллоход ДАМЖИХГvй.",
         "sourceTitle": "About HIV Transmission",
         "sourcePublisher": "CDC / ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -325,7 +325,7 @@ const sexualHealthStoryArticles = [
         "body": "Халдварын дараа 2-4 долоо хоногт томуу төст шинж тэмдэг (халуурах, тууралт, хоолой өвдөх) илэрдэг. Дараа нь эмчилгээгvй бол жилээр vргэлжлэх шинжгvй vе ирдэг — тиймээс тогтмол шинжилгээ хийлгэх чухал.",
         "sourceTitle": "HIV/AIDS — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -335,7 +335,7 @@ const sexualHealthStoryArticles = [
         "body": "Эмчилгээгvй удаан vргэлжилбэл дархлаа маш сулран, сvрьеэ, тархины мененгит зэрэг хvнд халдвар, зарим төрлийн хорт хавдарт өртөх эрсдэл нэмэгддэг — vvнийг ДОХ (СПИД) шат гэдэг.",
         "sourceTitle": "HIV/AIDS — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -345,7 +345,7 @@ const sexualHealthStoryArticles = [
         "body": "Цусны шинжилгээгээр эрт илрvvлж болно. Оношлогдмогц антиретровирал (ART) эмчилгээг даруй эхэлбэл вирусийг илрэшгvй хэмжээнд дарж, хэвийн урт наслах боломжтой.",
         "sourceTitle": "HIV Treatment — ART",
         "sourcePublisher": "Mayo Clinic / ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -355,7 +355,7 @@ const sexualHealthStoryArticles = [
         "body": "Кондом ашиглах, тариур хуваалцахгvй байх, эрсдэлтэй бол PrEP (урьдчилан сэргийлэх эм) авах, хамтрагчтайгаа хамт тогтмол шинжилгээ өгөх нь хамгийн vр дvнтэй сэргийлэлт.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -365,7 +365,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -387,7 +387,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ГЕРПЕС",
         "line3": "(HSV) — амьдралын туршид үлддэг, гэхдээ хянаж болдог вирус",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -397,7 +397,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын тооцоогоор дэлхий даяар 15-49 насны ойролцоогоор **520 сая** хүн HSV-2 (бэлгийн герпес) вирvvстэй. Эмэгтэйчvvд эрэгтэйчvvдээс бараг 2 дахин олон тохиолддог.",
         "sourceTitle": "Herpes simplex virus — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -407,7 +407,7 @@ const sexualHealthStoryArticles = [
         "body": "HSV-1 болон HSV-2 вирусээр vvсдэг. Шарх ил харагдахгvй байсан ч арьснаас вирус ялгарч болох (asymptomatic shedding) тул кондом ашигласан ч бvрэн хамгаалахгvй.",
         "sourceTitle": "About Genital Herpes",
         "sourcePublisher": "CDC / ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -417,7 +417,7 @@ const sexualHealthStoryArticles = [
         "body": "Анхны илрэлд халуурах, булчирхай хавагнах, дараа нь бэлэг эрхтэн орчимд өвдөлттэй цэврvv/шарх vvсдэг. Дараагийн давтагдах илрэлvvд ихэвчлэн хөнгөн, олон хvн ямар ч шинжгvй тээгч байдаг.",
         "sourceTitle": "Herpes simplex virus",
         "sourcePublisher": "ДЭМБ (WHO) / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -427,7 +427,7 @@ const sexualHealthStoryArticles = [
         "body": "Вирус мэдрэлийн эсэд нуугдаж амьдралын туршид vлддэг, vе vе идэвхжиж болно. ХДХВ-ээр халдварлах эрсдэлийг ойролцоогоор **3 дахин** нэмэгдvvлдэг. Төрөх vеэрээ эхээс нярайд халдварласан тохиолдол маш ноцтой байж болно.",
         "sourceTitle": "Herpes simplex virus — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -437,7 +437,7 @@ const sexualHealthStoryArticles = [
         "body": "Идэвхтэй шарх/цэврvvнээс авсан шинжилгээ, цусны эсрэгбие шинжилгээгээр тодорхойлно. **Ацикловир, Валацикловир** зэрэг эсрэг вирусийн эм илрэлийг хурдан намдааж, давтагдах тоог бууруулдаг ч вирусийг бvрэн арилгадаггvй.",
         "sourceTitle": "Genital Herpes — Diagnosis & treatment",
         "sourcePublisher": "Mayo Clinic",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -447,7 +447,7 @@ const sexualHealthStoryArticles = [
         "body": "Идэвхжсэн vед (шарх, загатнаа) бэлгийн харьцаанаас бvрэн татгалзах, кондом байнга хэрэглэх, хамтрагчдаа vнэнч мэдэгдэх нь дамжуулах эрсдэлийг мэдэгдэхvйц бууруулдаг.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -457,7 +457,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -479,7 +479,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ГЕПАТИТ B",
         "line3": "Элэгт халддаг вирус — вакцинаар бараг бvрэн сэргийлэгддэг цөөхөн БЗДХ-ийн нэг",
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -489,7 +489,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын 2024 оны тооцоогоор дэлхийд **240 сая хvн** архаг гепатит B-тэй амьдарч, жил бvр ойролцоогоор 1.1 сая хvн vvнтэй холбоотой шалтгаанаар нас бардаг.",
         "sourceTitle": "Hepatitis B — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -499,7 +499,7 @@ const sexualHealthStoryArticles = [
         "body": "Вирус нь хамгаалалтгvй бэлгийн харьцаа, тариур/хурц зvйл хуваалцах, төрөх vед ээжээс хvvхдэд дамждаг. Эндемик бvс нутагт бага насны хvvхдvvдийн дунд ойр орчмын харьцаагаар мөн дамжиж болно.",
         "sourceTitle": "Hepatitis B — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -509,7 +509,7 @@ const sexualHealthStoryArticles = [
         "body": "Шинэ халдвар авсан хvмvvсийн дийлэнх нь шинж тэмдэггvй байдаг. Зарим тохиолдолд шар өнгөтэй болох (шарлалт), шээс бараантах, ядрах, дотор муухайрах, гэдэс өвдөх зэрэг илэрдэг.",
         "sourceTitle": "Hepatitis B — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -519,7 +519,7 @@ const sexualHealthStoryArticles = [
         "body": "Архаг халдвар удаан vргэлжилбэл элэгний хатуурал (цирроз), элэгний дутагдал, элэгний хорт хавдар vvсгэж болно — эдгээр нь амь насанд аюултай.",
         "sourceTitle": "Hepatitis B — Key facts",
         "sourcePublisher": "ДЭМБ (WHO)",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -529,7 +529,7 @@ const sexualHealthStoryArticles = [
         "body": "Цусны шинжилгээгээр (HBsAg) оношилно. Антивирал эм (тенофовир, энтекавир) архаг халдварыг удирдаж, хатуурал, хорт хавдрын эрсдэлийг бууруулдаг ч дэлхийн хэмжээнд тээгчдийн ердөө ~4%-ийг л эмчилгээнд хамруулж чадаж байна (ДЭМБ, 2024).",
         "sourceTitle": "Hepatitis B — Diagnosis & treatment",
         "sourcePublisher": "ДЭМБ (WHO) / Mayo Clinic",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -539,7 +539,7 @@ const sexualHealthStoryArticles = [
         "body": "Гепатит B-ийн вакцин 20-иос дээш жил, магадгvй насан туршид vргэлжлэх бараг бvрэн хамгаалалт өгдөг — БЗДХ дундаас хамгийн vр дvнтэй сэргийлэлттэй нь. Кондом ашиглах, тариур хуваалцахгvй байх нь мөн чухал.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -549,7 +549,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -571,7 +571,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "ТРИХОМОНИАЗ",
         "line3": "(Trichomonas) — эмчилж бүрэн эдгэрдэг паразит халдвар",
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -581,7 +581,7 @@ const sexualHealthStoryArticles = [
         "body": "ДЭМБ-ын 2020 оны тооцоогоор дэлхий даяар 15-49 насныхны дунд жилд ойролцоогоор **156 сая** хүн Трихомониазаар халдварладаг — хамгийн түгээмэл эмчлэгддэг БЗДХ-ын нэг.",
         "sourceTitle": "Trichomoniasis — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO), 2020",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -591,7 +591,7 @@ const sexualHealthStoryArticles = [
         "body": "Trichomonas vaginalis нэртэй нэг эст паразитаар үүсдэг. Бэлгийн эрхтэн хоорондын шууд харьцаагаар (эрхтэнээс эрхтэнд) дамждаг — бусад БЗДХ-аас ялгаатай нь ам, гараар бараг дамждаггүй.",
         "sourceTitle": "About Trichomoniasis",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -601,7 +601,7 @@ const sexualHealthStoryArticles = [
         "body": "Эрэгтэйчүүдийн дийлэнх нь ямар ч шинжгүй байдаг. Зарим нь шодой дотор загатнах, шээх/дуулгах үед шатах, бага зэргийн шингэн гарах мэдрэмжтэй байж болно.",
         "sourceTitle": "Trichomoniasis — Symptoms",
         "sourcePublisher": "CDC / Mayo Clinic",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -611,7 +611,7 @@ const sexualHealthStoryArticles = [
         "body": "Бэлэг эрхтний бүсэд үрэвсэл үүсгэж ХДХВ-ээр халдварлах, дамжуулах эрсдэлийг ойролцоогоор **1.5 дахин** нэмэгдүүлдэг. Жирэмсэн үед эрт төрөлт, бага жинтэй нярай төрөх эрсдэлтэй холбоотой.",
         "sourceTitle": "Trichomoniasis — Fact sheet",
         "sourcePublisher": "ДЭМБ (WHO) / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -621,7 +621,7 @@ const sexualHealthStoryArticles = [
         "body": "Шээс эсвэл шодойн шингэний шинжилгээгээр тодорхойлно. **Метронидазол** эсвэл тинидазол антибиотикийн нэг удаагийн тунгаар бүрэн эдгэрдэг. Хамтрагчийг зэрэгцvvлж эмчлэхгүй бол дахин халдварлах эрсдэлтэй.",
         "sourceTitle": "Trichomoniasis Treatment",
         "sourcePublisher": "ДЭМБ (WHO) / CDC",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -631,7 +631,7 @@ const sexualHealthStoryArticles = [
         "body": "Кондом тогтмол хэрэглэх нь хамгийн үр дүнтэй сэргийлэлт. Хамтрагчтайгаа зэрэгцүүлэн шинжилгээ өгч, аль аль тал бүрэн эмчлүүлсний дараа л дахин харьцахыг зөвлөдөг.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -641,7 +641,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   },
@@ -663,7 +663,7 @@ const sexualHealthStoryArticles = [
         "accentLine": "МЭДЛЭГ",
         "line2": "МИКОПЛАЗМА",
         "line3": "(Mycoplasma genitalium) — олонд сайн танигдаагvй ч түгээмэл тохиолддог нян халдвар",
-        "imageUrl": "https://images.unsplash.com/photo-1584036561561-d466889a5579?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -673,7 +673,7 @@ const sexualHealthStoryArticles = [
         "body": "CDC-ийн мэдээлснээр энэ нь идэвхтэй бэлгийн харьцаатай хvмvvсийн дунд түгээмэл тохиолддог нян боловч сайн танигдаагvй, шинжилгээг эмнэлэгт ховор хийдэг тул нуугдмал тохиолдол их байдаг гэж vздэг.",
         "sourceTitle": "About Mycoplasma genitalium",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -683,7 +683,7 @@ const sexualHealthStoryArticles = [
         "body": "Кондомгvй vтрээ болон шулуун гэдэсний бэлгийн харьцаагаар дамждаг. Шинж тэмдэггvй хvн ч бусдад халдвар дамжуулж чаддагийг CDC онцолдог.",
         "sourceTitle": "About Mycoplasma genitalium",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -693,7 +693,7 @@ const sexualHealthStoryArticles = [
         "body": "Ихэнхдээ шинж тэмдэггvй. Илрэх тохиолдолд шээх vед шатаж өвдөх, эрхтнээс шvvрэл гарах зэрэг vзэгддэг. Эрэгтэйчvvдийн нянгаар vvсгэгдсэн шээсний сувгийн vрэвслийн **15-20%**-ийг энэ нян vvсгэдэг гэж CDC мэдээлдэг.",
         "sourceTitle": "STI Treatment Guidelines",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -703,7 +703,7 @@ const sexualHealthStoryArticles = [
         "body": "Эмэгтэйчvvдэд эмчлvvлээгvй бол аарцагийн эрхтний vрэвсэл (PID), хvvхэдгvйдэл, дутуу төрөлт vvсгэж болно. Эрэгтэйчvvдэд удаан хугацааны нөлөөг одоогоор бvрэн тодорхойгvй байгааг CDC онцолдог.",
         "sourceTitle": "About Mycoplasma genitalium",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1576678927484-cc907957088c?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -713,7 +713,7 @@ const sexualHealthStoryArticles = [
         "body": "Шээсний шинжилгээгээр оношилно. Зөв антибиотикоор (доксициклин, дараа нь азитромицин, эсвэл эмэнд тэсвэртэй бол моксифлоксацин) бvрэн эмчилж болно — гэвч эмэнд тэсвэртэй хэлбэр (44-90%) улам түгээмэл болж байгааг CDC анхааруулдаг тул эмчийн зааврыг чанд дагах ёстой.",
         "sourceTitle": "STI Treatment Guidelines",
         "sourcePublisher": "CDC (АНУ)",
-        "imageUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -723,7 +723,7 @@ const sexualHealthStoryArticles = [
         "body": "Кондом тогтмол ашиглах, шинж тэмдэг илрэвэл яаралтай шинжилгээ өгөх, хамтрагчийг мэдээлж хамт эмчлvvлэх нь тархалтыг зогсооно.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       },
       {
         "isCover": false,
@@ -733,7 +733,7 @@ const sexualHealthStoryArticles = [
         "body": "Дээрх агуулга зөвхөн мэдлэг олгох зорилготой — оношилгоо биш. Зөвхөн мэргэшсэн эмч танд оношийг тавьж, эмчилгээг тохируулах боломжтой. Энэ халдварын талаар ДЭМБ/Mayo Clinic-д тусгайлсан хуудас байхгvй тул мэдээллийг зөвхөн CDC-ийн албан ёсны эх сурвалжаас авсан.",
         "sourceTitle": null,
         "sourcePublisher": null,
-        "imageUrl": "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=900&h=1400"
+        "imageUrl": ""
       }
     ]
   }

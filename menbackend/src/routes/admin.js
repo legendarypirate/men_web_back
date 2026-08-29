@@ -7,6 +7,7 @@ const {
   WorkoutExercise,
   WorkoutSession,
   Article,
+  ArticleCategory,
   HealthBite,
   HomeProTip,
   PremiumPlan,
@@ -296,6 +297,59 @@ router.delete('/workouts/:id', adminRequired, async (req, res, next) => {
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
     await program.destroy();
     return ok(res, null, 'Дасгал устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// --- Article categories ---
+router.get('/article-categories', adminRequired, async (req, res, next) => {
+  try {
+    const categories = await ArticleCategory.findAll({
+      order: [
+        ['sortOrder', 'ASC'],
+        ['name', 'ASC'],
+      ],
+    });
+    return ok(res, { categories });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/article-categories', adminRequired, async (req, res, next) => {
+  try {
+    const name = String(req.body.name || '').trim();
+    if (!name) return fail(res, 'Ангиллын нэр шаардлагатай');
+
+    const existing = await ArticleCategory.findOne({ where: { name } });
+    if (existing) return fail(res, 'Энэ ангилал аль хэдийн байна');
+
+    const { randomUUID } = require('crypto');
+    const maxSort = (await ArticleCategory.max('sortOrder')) || 0;
+    const category = await ArticleCategory.create({
+      id: randomUUID(),
+      name,
+      sortOrder: Number(req.body.sortOrder ?? maxSort + 1),
+    });
+    return ok(res, { category }, 'Ангилал нэмэгдлээ', 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/article-categories/:id', adminRequired, async (req, res, next) => {
+  try {
+    const category = await ArticleCategory.findByPk(req.params.id);
+    if (!category) return fail(res, 'Ангилал олдсонгүй', 404);
+
+    const articleCount = await Article.count({ where: { category: category.name } });
+    if (articleCount > 0) {
+      return fail(res, 'Энэ ангилалд нийтлэл байгаа тул устгах боломжгүй');
+    }
+
+    await category.destroy();
+    return ok(res, null, 'Ангилал устгагдлаа');
   } catch (err) {
     next(err);
   }

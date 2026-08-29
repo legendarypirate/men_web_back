@@ -4,6 +4,7 @@ const WorkoutProgram = require('./WorkoutProgram');
 const WorkoutExercise = require('./WorkoutExercise');
 const WorkoutSession = require('./WorkoutSession');
 const Article = require('./Article');
+const ArticleCategory = require('./ArticleCategory');
 const HealthBite = require('./HealthBite');
 const PremiumPlan = require('./PremiumPlan');
 const Payment = require('./Payment');
@@ -71,6 +72,7 @@ module.exports = {
   WorkoutExercise,
   WorkoutSession,
   Article,
+  ArticleCategory,
   HealthBite,
   PremiumPlan,
   Payment,

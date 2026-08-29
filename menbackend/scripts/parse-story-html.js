@@ -142,9 +142,9 @@ function buildArticle(filePath, index) {
   const parsed = parseStoryHtml(filePath);
   const imageUrl = IMAGE_POOL[index % IMAGE_POOL.length];
 
-  const storySlides = parsed.slides.map((slide, slideIdx) => ({
+  const storySlides = parsed.slides.map((slide) => ({
     ...slide,
-    imageUrl: IMAGE_POOL[(index + slideIdx) % IMAGE_POOL.length],
+    imageUrl: '',
   }));
 
   const bodyLines = storySlides
@@ -161,7 +161,7 @@ function buildArticle(filePath, index) {
     isNew: true,
     sortOrder: 10 + index,
     published: true,
-    featured: index < 2,
+    featured: false,
     imageUrl,
     storySlides,
   };

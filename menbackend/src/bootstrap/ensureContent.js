@@ -5,6 +5,7 @@ const {
   Product,
   PromoCode,
   Article,
+  ArticleCategory,
   HomeProTip,
   HospitalCategory,
 } = require('../models');
@@ -106,8 +107,51 @@ async function ensureHospitalCategories() {
   console.log(`Seeded ${hospitalCategories.length} hospital categories`);
 }
 
+const DEFAULT_ARTICLE_CATEGORIES = [
+  'Шилдэг сонголтууд',
+  'Бэлгийн эрүүл мэнд',
+  'Сэргээлт',
+  'Хоол тэжээл',
+  'Шинжлэх ухаан',
+];
+
+async function ensureArticleCategories() {
+  const { randomUUID } = require('crypto');
+  const count = await ArticleCategory.count();
+  if (count === 0) {
+    await ArticleCategory.bulkCreate(
+      DEFAULT_ARTICLE_CATEGORIES.map((name, index) => ({
+        id: randomUUID(),
+        name,
+        sortOrder: index,
+      }))
+    );
+    console.log(`Seeded ${DEFAULT_ARTICLE_CATEGORIES.length} article categories`);
+  }
+
+  const articleRows = await Article.findAll({
+    attributes: ['category'],
+    group: ['category'],
+    raw: true,
+  });
+  let synced = 0;
+  for (const row of articleRows) {
+    const name = String(row.category || '').trim();
+    if (!name) continue;
+    const [, created] = await ArticleCategory.findOrCreate({
+      where: { name },
+      defaults: { id: randomUUID(), sortOrder: 100 + synced },
+    });
+    if (created) synced += 1;
+  }
+  if (synced > 0) {
+    console.log(`Synced ${synced} article categories from existing articles`);
+  }
+}
+
 async function ensureContent() {
   await ensureHospitalCategories();
+  await ensureArticleCategories();
   await ensureHospitals();
   await ensurePromoCodes();
   await ensureCoachContent();

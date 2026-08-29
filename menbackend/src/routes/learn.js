@@ -1,6 +1,6 @@
 const express = require('express');
 const { Op } = require('sequelize');
-const { Article, HealthBite } = require('../models');
+const { Article, ArticleCategory, HealthBite } = require('../models');
 const sequelize = require('../config/database');
 const { ok, fail } = require('../utils/response');
 const { optionalAuth } = require('../middleware/auth');
@@ -32,15 +32,26 @@ router.get('/articles', optionalAuth, async (req, res, next) => {
 
     const featured = articles.find((a) => a.featured) || articles[0] || null;
 
-    const categoryRows = await Article.findAll({
-      attributes: [[sequelize.fn('DISTINCT', sequelize.col('category')), 'category']],
-      where: { published: true },
-      raw: true,
-    });
-    const dbCategories = categoryRows
-      .map((row) => row.category)
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b, 'mn'));
+    const [categoryRows, articleCategories] = await Promise.all([
+      Article.findAll({
+        attributes: [[sequelize.fn('DISTINCT', sequelize.col('category')), 'category']],
+        where: { published: true },
+        raw: true,
+      }),
+      ArticleCategory.findAll({
+        attributes: ['name'],
+        order: [
+          ['sortOrder', 'ASC'],
+          ['name', 'ASC'],
+        ],
+      }),
+    ]);
+
+    const names = new Set(articleCategories.map((row) => row.name));
+    for (const row of categoryRows) {
+      if (row.category) names.add(row.category);
+    }
+    const dbCategories = Array.from(names).sort((a, b) => a.localeCompare(b, 'mn'));
 
     return ok(res, {
       categories: ['Бүх нийтлэл', ...dbCategories],

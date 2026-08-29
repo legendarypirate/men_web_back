@@ -1,8 +1,8 @@
 'use client';
 
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ChevronRight, Newspaper } from 'lucide-react';
-import { api, Article } from '@/lib/api';
+import { ArrowLeft, ChevronRight, Newspaper, Trash2 } from 'lucide-react';
+import { api, Article, ArticleCategoryRecord } from '@/lib/api';
 import { ArticleStorySlidesEditor } from '@/components/admin/article-story-slides-editor';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { articleCategoryOptions, articleConfig } from '@/lib/resource-configs';
@@ -14,6 +14,13 @@ import { AddButton } from '@/components/custom/add-button';
 import { ErrorState, LoadingState, PageHeader } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -41,32 +48,61 @@ const emptyArticle = (category: string): Article => ({
   storySlides: [],
 });
 
-function buildCategories(articles: Article[]) {
+function buildCategories(articles: Article[], categoryRecords: ArticleCategoryRecord[]) {
   const counts = new Map<string, number>();
   for (const article of articles) {
     counts.set(article.category, (counts.get(article.category) || 0) + 1);
   }
 
-  const names = new Set<string>();
-  for (const option of articleCategoryOptions) names.add(option.value);
-  for (const name of counts.keys()) names.add(name);
+  const byName = new Map<string, ArticleCategoryRecord>();
+  for (const record of categoryRecords) {
+    byName.set(record.name, record);
+  }
+  for (const option of articleCategoryOptions) {
+    if (!byName.has(option.value)) {
+      byName.set(option.value, { id: '', name: option.value, sortOrder: 999 });
+    }
+  }
+  for (const name of counts.keys()) {
+    if (!byName.has(name)) {
+      byName.set(name, { id: '', name, sortOrder: 999 });
+    }
+  }
 
-  return Array.from(names)
-    .sort((a, b) => a.localeCompare(b, 'mn'))
-    .map((name) => ({ name, count: counts.get(name) || 0 }));
+  return Array.from(byName.values())
+    .sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+      return a.name.localeCompare(b.name, 'mn');
+    })
+    .map((record) => ({
+      ...record,
+      count: counts.get(record.name) || 0,
+    }));
 }
 
 export default function ArticlesPage() {
   const confirm = useConfirm();
   const [articles, setArticles] = useState<Article[]>([]);
+  const [categoryRecords, setCategoryRecords] = useState<ArticleCategoryRecord[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Article | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCategoryForm, setShowCategoryForm] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [categorySaving, setCategorySaving] = useState(false);
 
-  const categories = useMemo(() => buildCategories(articles), [articles]);
+  const categories = useMemo(
+    () => buildCategories(articles, categoryRecords),
+    [articles, categoryRecords]
+  );
+
+  const categoryOptions = useMemo(
+    () => categories.map((category) => ({ label: category.name, value: category.name })),
+    [categories]
+  );
 
   const filteredArticles = useMemo(
     () =>
@@ -98,8 +134,12 @@ export default function ArticlesPage() {
   async function load() {
     setLoading(true);
     try {
-      const res = await api.articles.list();
-      setArticles(res.data.articles);
+      const [articlesRes, categoriesRes] = await Promise.all([
+        api.articles.list(),
+        api.articleCategories.list(),
+      ]);
+      setArticles(articlesRes.data.articles);
+      setCategoryRecords(categoriesRes.data.categories);
       setError('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Алдаа');
@@ -162,6 +202,47 @@ export default function ArticlesPage() {
     load();
   }
 
+  async function handleCreateCategory(e: FormEvent) {
+    e.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) return;
+
+    setCategorySaving(true);
+    try {
+      await api.articleCategories.create({ name });
+      setShowCategoryForm(false);
+      setNewCategoryName('');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ангилал нэмэхэд алдаа');
+    } finally {
+      setCategorySaving(false);
+    }
+  }
+
+  async function handleDeleteCategory(category: { id: string; name: string; count: number }) {
+    if (!category.id) return;
+    if (category.count > 0) {
+      setError('Энэ ангилалд нийтлэл байгаа тул устгах боломжгүй');
+      return;
+    }
+
+    const ok = await confirm({
+      title: 'Ангилал устгах уу?',
+      description: `"${category.name}" ангиллыг устгах уу?`,
+      confirmLabel: 'Устгах',
+      destructive: true,
+    });
+    if (!ok) return;
+
+    try {
+      await api.articleCategories.remove(category.id);
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ангилал устгахад алдаа');
+    }
+  }
+
   if (loading) return <LoadingState />;
 
   return (
@@ -171,6 +252,16 @@ export default function ArticlesPage() {
           <PageHeader
             title={articleConfig.title}
             subtitle={`${categories.length} ангилал`}
+            action={
+              <AddButton
+                label="Ангилал нэмэх"
+                onClick={() => {
+                  setNewCategoryName('');
+                  setShowCategoryForm(true);
+                }}
+                disabled={categorySaving}
+              />
+            }
           />
 
           {error && (
@@ -181,29 +272,45 @@ export default function ArticlesPage() {
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {categories.map((category) => (
-              <button
-                key={category.name}
-                type="button"
-                onClick={() => setSelectedCategory(category.name)}
-                className="text-left"
-              >
-                <Card className="h-full border-border/80 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/20">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Newspaper className="size-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-foreground">
-                        {category.name}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {category.count} нийтлэл
-                      </p>
-                    </div>
-                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-                  </CardContent>
-                </Card>
-              </button>
+              <div key={category.name} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategory(category.name)}
+                  className="w-full text-left"
+                >
+                  <Card className="h-full border-border/80 shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/20">
+                    <CardContent className="flex items-center gap-4 p-5">
+                      <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                        <Newspaper className="size-5" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-semibold text-foreground">
+                          {category.name}
+                        </p>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          {category.count} нийтлэл
+                        </p>
+                      </div>
+                      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                </button>
+                {category.id && category.count === 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 size-8 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCategory(category);
+                    }}
+                    aria-label={`${category.name} устгах`}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                )}
+              </div>
             ))}
           </div>
         </>
@@ -284,7 +391,7 @@ export default function ArticlesPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {articleCategoryOptions.map((option) => (
+                    {categoryOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -419,6 +526,43 @@ export default function ArticlesPage() {
           </form>
         )}
       </AppDrawer>
+
+      <Dialog open={showCategoryForm} onOpenChange={setShowCategoryForm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Шинэ ангилал</DialogTitle>
+          </DialogHeader>
+          <form id="article-category-form" onSubmit={handleCreateCategory} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="category-name">Ангиллын нэр</Label>
+              <Input
+                id="category-name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                placeholder="Жишээ нь: Дасгал"
+                required
+                autoFocus
+              />
+            </div>
+          </form>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowCategoryForm(false)}
+            >
+              Болих
+            </Button>
+            <Button
+              type="submit"
+              form="article-category-form"
+              disabled={categorySaving || !newCategoryName.trim()}
+            >
+              {categorySaving ? 'Хадгалж байна...' : 'Нэмэх'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

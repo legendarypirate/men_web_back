@@ -299,6 +299,12 @@ export type HospitalCategoryRecord = {
   active: boolean;
 };
 
+export type ArticleCategoryRecord = {
+  id: string;
+  name: string;
+  sortOrder: number;
+};
+
 export type CoachSetting = {
   id: string;
   screenTitle: string;
@@ -553,6 +559,18 @@ export const api = {
     uploadVideoWithMeta: (file: File) =>
       uploadMultipart('/api/admin/upload/video', 'video', file),
     uploadImage: (file: File) => uploadMultipart('/api/admin/upload/image', 'image', file),
+  },
+
+  articleCategories: {
+    list: () =>
+      request<{ categories: ArticleCategoryRecord[] }>('/api/admin/article-categories'),
+    create: (data: { name: string; sortOrder?: number }) =>
+      request<{ category: ArticleCategoryRecord }>('/api/admin/article-categories', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    remove: (id: string) =>
+      request<null>(`/api/admin/article-categories/${id}`, { method: 'DELETE' }),
   },
 
   articles: {
