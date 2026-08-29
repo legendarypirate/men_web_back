@@ -104,6 +104,18 @@ export type WorkoutExercise = {
   phases?: WorkoutExercisePhase[];
 };
 
+export type SectionTiming = {
+  durationSeconds: number;
+  sets: number;
+  holdSeconds: number;
+  relaxSeconds: number;
+  vibrationEnabled: boolean;
+  vibrationIntervalMs: number;
+};
+
+/** Keys "1".."6" — matches app training difficulty levels. */
+export type WorkoutLevelPresets = Record<string, SectionTiming[]>;
+
 export type WorkoutProgram = {
   id: string;
   title: string;
@@ -117,6 +129,7 @@ export type WorkoutProgram = {
   videoUrl?: string | null;
   thumbnailUrl?: string | null;
   introSlides?: WorkoutIntroSlide[];
+  levelPresets?: WorkoutLevelPresets;
   exercises?: WorkoutExercise[];
 };
 

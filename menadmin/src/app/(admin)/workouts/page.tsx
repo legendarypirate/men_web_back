@@ -1,18 +1,21 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
-import { api, WorkoutProgram } from '@/lib/api';
+import { api, WorkoutLevelPresets, WorkoutProgram } from '@/lib/api';
 import { AppDrawer } from '@/components/custom/app-drawer';
 import { AppTable } from '@/components/custom/app-table';
 import { useConfirm } from '@/components/custom/confirm-provider';
 import { AddButton } from '@/components/custom/add-button';
 import { WorkoutSectionsEditor } from '@/components/admin/workout-sections-editor';
 import {
-  emptySection,
+  DEFAULT_TRAINING_LEVEL,
+  emptySectionDefinition,
   estimateProgramMinutes,
   exercisesFromSections,
-  sectionsFromExercises,
-  WorkoutSection,
+  loadProgramSections,
+  syncLevelPresets,
+  TRAINING_LEVELS,
+  WorkoutSectionDefinition,
 } from '@/lib/workout-sections';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
@@ -46,9 +49,13 @@ const TAG_OPTIONS = [
 
 const LEVEL_OPTIONS = ['Эхлэгч', 'Дунд', 'Ахисан түвшин', 'All Levels'] as const;
 
-type ProgramDraft = WorkoutProgram & { sections: WorkoutSection[] };
+type ProgramDraft = WorkoutProgram & {
+  sections: WorkoutSectionDefinition[];
+  levelPresets: WorkoutLevelPresets;
+};
 
 function emptyProgram(tag = 'KEGEL'): ProgramDraft {
+  const sections = [emptySectionDefinition()];
   return {
     id: '',
     title: '',
@@ -62,16 +69,18 @@ function emptyProgram(tag = 'KEGEL'): ProgramDraft {
     videoUrl: null,
     thumbnailUrl: null,
     introSlides: [],
+    levelPresets: syncLevelPresets(sections, {}),
     exercises: [],
-    sections: [emptySection()],
+    sections,
   };
 }
 
 function toDraft(program: WorkoutProgram): ProgramDraft {
-  const sections = sectionsFromExercises(program.exercises || []);
+  const { sections, levelPresets } = loadProgramSections(program);
   return {
     ...program,
-    sections: sections.length > 0 ? sections : [emptySection()],
+    sections,
+    levelPresets,
   };
 }
 
@@ -82,6 +91,7 @@ export default function WorkoutsPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<ProgramDraft | null>(null);
+  const [activeLevel, setActiveLevel] = useState(DEFAULT_TRAINING_LEVEL);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -113,13 +123,22 @@ export default function WorkoutsPage() {
 
     setSaving(true);
     try {
-      const exercises = exercisesFromSections(editing.sections);
+      const syncedPresets = syncLevelPresets(editing.sections, editing.levelPresets);
+      const exercises = exercisesFromSections(
+        editing.sections,
+        syncedPresets,
+        DEFAULT_TRAINING_LEVEL
+      );
       const payload: WorkoutProgram = {
         id: editing.id,
         title: editing.title,
         description: editing.description,
         level: editing.level,
-        durationMinutes: estimateProgramMinutes(editing.sections),
+        durationMinutes: estimateProgramMinutes(
+          editing.sections,
+          syncedPresets,
+          DEFAULT_TRAINING_LEVEL
+        ),
         equipment: 'None',
         tag: editing.tag,
         isToday: editing.isToday,
@@ -127,6 +146,7 @@ export default function WorkoutsPage() {
         videoUrl: null,
         thumbnailUrl: null,
         introSlides: [],
+        levelPresets: syncedPresets,
         exercises,
       };
 
@@ -159,6 +179,9 @@ export default function WorkoutsPage() {
 
   if (loading) return <LoadingState />;
 
+  const activeLevelLabel =
+    TRAINING_LEVELS.find((item) => item.level === activeLevel)?.label ?? '';
+
   return (
     <div>
       <PageHeader
@@ -172,6 +195,7 @@ export default function WorkoutsPage() {
           <AddButton
             label="Хөтөлбөр нэмэх"
             onClick={() => {
+              setActiveLevel(DEFAULT_TRAINING_LEVEL);
               setEditing({
                 ...emptyProgram(tagFilter || 'KEGEL'),
                 id: `program_${Date.now()}`,
@@ -238,6 +262,7 @@ export default function WorkoutsPage() {
         rows={programs}
         idKey="id"
         onEdit={(p) => {
+          setActiveLevel(DEFAULT_TRAINING_LEVEL);
           setEditing(toDraft(p));
           setShowForm(true);
         }}
@@ -250,7 +275,11 @@ export default function WorkoutsPage() {
           setShowForm(open);
           if (!open) setEditing(null);
         }}
-        title={editing?.id && programs.some((p) => p.id === editing.id) ? 'Хөтөлбөр засах' : 'Шинэ хөтөлбөр'}
+        title={
+          editing?.id && programs.some((p) => p.id === editing.id)
+            ? 'Хөтөлбөр засах'
+            : 'Шинэ хөтөлбөр'
+        }
         size="lg"
         footer={
           <>
@@ -283,7 +312,7 @@ export default function WorkoutsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Түвшин</Label>
+                <Label>Түвшин (шошго)</Label>
                 <Select
                   value={editing.level}
                   onValueChange={(value) => value && setEditing({ ...editing, level: value })}
@@ -366,18 +395,27 @@ export default function WorkoutsPage() {
 
             <WorkoutSectionsEditor
               sections={editing.sections}
-              onChange={(sections) =>
+              levelPresets={editing.levelPresets}
+              activeLevel={activeLevel}
+              onActiveLevelChange={setActiveLevel}
+              onChange={(sections, levelPresets) =>
                 setEditing({
                   ...editing,
                   sections,
-                  durationMinutes: estimateProgramMinutes(sections),
+                  levelPresets,
+                  durationMinutes: estimateProgramMinutes(
+                    sections,
+                    levelPresets,
+                    DEFAULT_TRAINING_LEVEL
+                  ),
                 })
               }
             />
 
             <p className="text-xs text-muted-foreground">
-              Тооцоолсон хугацаа: ~{estimateProgramMinutes(editing.sections)} мин ·{' '}
-              {editing.sections.map((s) => s.label || 'Хэсэг').join(' → ')}
+              Түвшин {activeLevel} ({activeLevelLabel}): ~{' '}
+              {estimateProgramMinutes(editing.sections, editing.levelPresets, activeLevel)} мин ·{' '}
+              {editing.sections.map((section) => section.label || 'Хэсэг').join(' → ')}
             </p>
           </form>
         )}

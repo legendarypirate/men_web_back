@@ -56,6 +56,7 @@ function mapProgram(program) {
     introSlides: (json.introSlides || []).sort(
       (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
     ),
+    levelPresets: json.levelPresets || {},
     exercises,
     totalSets,
     totalSeconds,

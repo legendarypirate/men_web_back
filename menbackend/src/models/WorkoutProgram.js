@@ -23,6 +23,11 @@ const WorkoutProgram = sequelize.define(
       allowNull: false,
       defaultValue: [],
     },
+    levelPresets: {
+      type: DataTypes.JSON,
+      allowNull: false,
+      defaultValue: {},
+    },
   },
   {
     tableName: 'workout_programs',
