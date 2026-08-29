@@ -45,13 +45,24 @@ export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): 
 }
 
 export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): SectionTiming {
-  return {
+  return normalizeSectionTiming({
     durationSeconds: type === 'breath' ? 30 : 25,
     sets: 3,
     holdSeconds: 5,
     relaxSeconds: 5,
     vibrationEnabled: type === 'kegelHold' || type === 'coreBrace',
     vibrationIntervalMs: 80,
+  });
+}
+
+export function normalizeSectionTiming(raw: Partial<SectionTiming>): SectionTiming {
+  return {
+    durationSeconds: Math.max(0, Number(raw.durationSeconds) || 0),
+    sets: Math.max(1, Number(raw.sets) || 1),
+    holdSeconds: Math.max(1, Number(raw.holdSeconds) || 1),
+    relaxSeconds: Math.max(1, Number(raw.relaxSeconds) || 1),
+    vibrationEnabled: raw.vibrationEnabled ?? true,
+    vibrationIntervalMs: Math.max(40, Number(raw.vibrationIntervalMs) || 80),
   };
 }
 
@@ -76,7 +87,7 @@ export function syncLevelPresets(
     const key = String(level);
     const current = next[key] ?? [];
     const synced = sections.map((section, index) => {
-      if (current[index]) return { ...current[index] };
+      if (current[index]) return normalizeSectionTiming(current[index]);
       return emptySectionTiming(section.type);
     });
     next[key] = synced;
@@ -186,14 +197,14 @@ function timingFromPhase(
   phase: WorkoutExercisePhase,
   exercise: WorkoutExercise
 ): SectionTiming {
-  return {
+  return normalizeSectionTiming({
     durationSeconds: phase.durationSeconds,
     sets: exercise.sets || 3,
     holdSeconds: phase.holdSeconds || 5,
     relaxSeconds: phase.relaxSeconds || 5,
     vibrationEnabled: phase.vibrationEnabled,
     vibrationIntervalMs: phase.vibrationIntervalMs,
-  };
+  });
 }
 
 export function loadProgramSections(program: WorkoutProgram): {
@@ -258,7 +269,9 @@ export function loadProgramSections(program: WorkoutProgram): {
 
   const levelPresets = buildLevelPresets(sections.length);
   for (const { level } of TRAINING_LEVELS) {
-    levelPresets[String(level)] = baseTimings.map((timing) => ({ ...timing }));
+    levelPresets[String(level)] = baseTimings.map((timing) =>
+      normalizeSectionTiming(timing)
+    );
   }
 
   return { sections, levelPresets };

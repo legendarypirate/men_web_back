@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import {
   emptySectionDefinition,
   emptySectionTiming,
+  normalizeSectionTiming,
   SECTION_TYPE_OPTIONS,
   TRAINING_LEVELS,
   WorkoutSectionDefinition,
@@ -24,6 +25,52 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+
+function parseDigits(value: string): number | null {
+  const digits = value.replace(/\D/g, '');
+  if (digits === '') return null;
+  return parseInt(digits, 10);
+}
+
+function NumericInput({
+  value,
+  onChange,
+  min,
+  max,
+  disabled,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  disabled?: boolean;
+}) {
+  return (
+    <Input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      disabled={disabled}
+      value={value === 0 ? '' : String(value)}
+      onChange={(e) => {
+        const parsed = parseDigits(e.target.value);
+        if (parsed == null) {
+          onChange(0);
+          return;
+        }
+        onChange(parsed);
+      }}
+      onBlur={() => {
+        if (min != null && (value === 0 || value < min)) {
+          onChange(min);
+        }
+        if (max != null && value > max) {
+          onChange(max);
+        }
+      }}
+    />
+  );
+}
 
 type Props = {
   sections: WorkoutSectionDefinition[];
@@ -66,7 +113,10 @@ export function WorkoutSectionsEditor({
   function updateTiming(index: number, patch: Partial<SectionTiming>) {
     const nextPresets = { ...levelPresets };
     const timings = [...(nextPresets[levelKey] ?? [])];
-    timings[index] = { ...(timings[index] ?? emptySectionTiming()), ...patch };
+    timings[index] = normalizeSectionTiming({
+      ...(timings[index] ?? emptySectionTiming()),
+      ...patch,
+    });
     nextPresets[levelKey] = timings;
     emit(sections, nextPresets);
   }
@@ -261,38 +311,33 @@ export function WorkoutSectionsEditor({
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="space-y-1.5">
                       <Label>Хугацаа (сек)</Label>
-                      <Input
-                        type="number"
+                      <NumericInput
                         min={5}
                         value={timing.durationSeconds}
-                        onChange={(e) =>
-                          updateTiming(index, { durationSeconds: Number(e.target.value) })
+                        onChange={(durationSeconds) =>
+                          updateTiming(index, { durationSeconds })
                         }
                       />
                     </div>
                     <div className="space-y-1.5">
                       <Label>Багц</Label>
-                      <Input
-                        type="number"
+                      <NumericInput
                         min={1}
                         value={timing.sets}
-                        onChange={(e) => updateTiming(index, { sets: Number(e.target.value) })}
+                        onChange={(sets) => updateTiming(index, { sets })}
                       />
                     </div>
                     {supportsVibration(section.type) && (
                       <div className="space-y-1.5">
                         <Label>Чичиргээ (ms)</Label>
-                        <Input
-                          type="number"
+                        <NumericInput
                           min={40}
                           max={500}
-                          value={timing.vibrationIntervalMs}
-                          onChange={(e) =>
-                            updateTiming(index, {
-                              vibrationIntervalMs: Number(e.target.value),
-                            })
-                          }
                           disabled={!timing.vibrationEnabled}
+                          value={timing.vibrationIntervalMs}
+                          onChange={(vibrationIntervalMs) =>
+                            updateTiming(index, { vibrationIntervalMs })
+                          }
                         />
                       </div>
                     )}
@@ -302,24 +347,18 @@ export function WorkoutSectionsEditor({
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <Label>Чангалах интервал (сек)</Label>
-                        <Input
-                          type="number"
+                        <NumericInput
                           min={1}
                           value={timing.holdSeconds}
-                          onChange={(e) =>
-                            updateTiming(index, { holdSeconds: Number(e.target.value) })
-                          }
+                          onChange={(holdSeconds) => updateTiming(index, { holdSeconds })}
                         />
                       </div>
                       <div className="space-y-1.5">
                         <Label>Амрах интервал (сек)</Label>
-                        <Input
-                          type="number"
+                        <NumericInput
                           min={1}
                           value={timing.relaxSeconds}
-                          onChange={(e) =>
-                            updateTiming(index, { relaxSeconds: Number(e.target.value) })
-                          }
+                          onChange={(relaxSeconds) => updateTiming(index, { relaxSeconds })}
                         />
                       </div>
                     </div>
