@@ -23,6 +23,9 @@ const Article = sequelize.define(
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
     published: { type: DataTypes.BOOLEAN, defaultValue: true },
     storySlides: { type: DataTypes.JSON, defaultValue: [] },
+    sourceTitle: { type: DataTypes.STRING, allowNull: true },
+    sourcePublisher: { type: DataTypes.STRING, allowNull: true },
+    sourceUrl: { type: DataTypes.STRING, allowNull: true },
   },
   {
     tableName: 'articles',

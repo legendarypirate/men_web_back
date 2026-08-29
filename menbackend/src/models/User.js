@@ -88,6 +88,10 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: 'email',
     },
+    providerId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     role: {
       type: DataTypes.ENUM('user', 'admin'),
       defaultValue: 'user',
