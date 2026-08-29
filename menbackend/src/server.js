@@ -14,6 +14,8 @@ async function start() {
     await ensureQuiz();
     const { ensureDemoUser } = require('./bootstrap/ensureAuth');
     await ensureDemoUser();
+    const { startReminderScheduler } = require('./jobs/reminderScheduler');
+    startReminderScheduler();
     console.log('Database connected');
     console.log(`Loaded env from: ${envPath}`);
 

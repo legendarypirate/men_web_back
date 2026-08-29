@@ -11,6 +11,7 @@ const {
   countSessionsToday,
   computeStreakDays,
 } = require('../utils/streak');
+const { onWorkoutSessionSaved } = require('../services/workoutReminders');
 
 const router = express.Router();
 
@@ -161,6 +162,8 @@ router.post('/sessions', authRequired, async (req, res, next) => {
     }
     user.vitalityScore = Math.min(100, user.vitalityScore + 1);
     await user.save();
+
+    await onWorkoutSessionSaved(user, session.id);
 
     return ok(
       res,

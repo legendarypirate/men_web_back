@@ -76,6 +76,14 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       defaultValue: 'mn',
     },
+    notificationsEnabled: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    timezone: {
+      type: DataTypes.STRING,
+      defaultValue: 'Asia/Ulaanbaatar',
+    },
     provider: {
       type: DataTypes.STRING,
       defaultValue: 'email',

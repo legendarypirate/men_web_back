@@ -2,6 +2,7 @@ const express = require('express');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
 const { enrichPublicUser } = require('../utils/membership');
+const { DeviceToken } = require('../models');
 
 const router = express.Router();
 
@@ -17,6 +18,8 @@ router.patch('/profile', authRequired, async (req, res, next) => {
       'primaryGoal',
       'darkMode',
       'language',
+      'notificationsEnabled',
+      'timezone',
     ];
     for (const key of allowed) {
       if (req.body[key] !== undefined) req.user[key] = req.body[key];
@@ -35,6 +38,48 @@ router.post('/goal', authRequired, async (req, res, next) => {
     req.user.primaryGoal = primaryGoal;
     await req.user.save();
     return ok(res, { user: publicUser(req.user) }, 'Зорилго хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/device-token', authRequired, async (req, res, next) => {
+  try {
+    const token = typeof req.body.token === 'string' ? req.body.token.trim() : '';
+    const platform =
+      typeof req.body.platform === 'string' ? req.body.platform.trim() : 'unknown';
+
+    if (!token) return fail(res, 'FCM token шаардлагатай');
+
+    const existing = await DeviceToken.findOne({ where: { token } });
+    if (existing && existing.userId !== req.user.id) {
+      await existing.update({ userId: req.user.id, platform });
+    } else if (existing) {
+      await existing.update({ platform });
+    } else {
+      await DeviceToken.create({
+        userId: req.user.id,
+        token,
+        platform,
+      });
+    }
+
+    return ok(res, { saved: true }, 'Төхөөрөмжийн token хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/device-token', authRequired, async (req, res, next) => {
+  try {
+    const token = typeof req.body.token === 'string' ? req.body.token.trim() : '';
+    if (!token) return fail(res, 'FCM token шаардлагатай');
+
+    await DeviceToken.destroy({
+      where: { userId: req.user.id, token },
+    });
+
+    return ok(res, { removed: true }, 'Token устгагдлаа');
   } catch (err) {
     next(err);
   }

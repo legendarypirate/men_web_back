@@ -24,6 +24,9 @@ const Feedback = require('./Feedback');
 const QuizStage = require('./QuizStage');
 const QuizQuestion = require('./QuizQuestion');
 const QuizConfig = require('./QuizConfig');
+const DeviceToken = require('./DeviceToken');
+const ScheduledReminder = require('./ScheduledReminder');
+const NotificationLog = require('./NotificationLog');
 
 WorkoutProgram.hasMany(WorkoutExercise, {
   foreignKey: 'programId',
@@ -57,6 +60,15 @@ OrderItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 
 User.hasMany(Feedback, { foreignKey: 'userId', as: 'feedback' });
 Feedback.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(DeviceToken, { foreignKey: 'userId', as: 'deviceTokens', onDelete: 'CASCADE' });
+DeviceToken.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(ScheduledReminder, { foreignKey: 'userId', as: 'scheduledReminders', onDelete: 'CASCADE' });
+ScheduledReminder.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(NotificationLog, { foreignKey: 'userId', as: 'notificationLogs', onDelete: 'CASCADE' });
+NotificationLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 QuizStage.hasMany(QuizQuestion, {
   foreignKey: 'stageId',
@@ -92,4 +104,7 @@ module.exports = {
   QuizStage,
   QuizQuestion,
   QuizConfig,
+  DeviceToken,
+  ScheduledReminder,
+  NotificationLog,
 };
