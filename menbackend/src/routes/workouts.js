@@ -12,6 +12,7 @@ const {
   computeStreakDays,
 } = require('../utils/streak');
 const { onWorkoutSessionSaved } = require('../services/workoutReminders');
+const { hasActivePremium, syncUserMembership } = require('../utils/membership');
 
 const router = express.Router();
 
@@ -120,6 +121,11 @@ router.get('/sessions/mine', authRequired, async (req, res, next) => {
 
 router.post('/sessions', authRequired, async (req, res, next) => {
   try {
+    await syncUserMembership(req.user);
+    if (!hasActivePremium(req.user)) {
+      return fail(res, 'Premium эрх шаардлагатай', 403);
+    }
+
     const {
       programId,
       programTitle,
