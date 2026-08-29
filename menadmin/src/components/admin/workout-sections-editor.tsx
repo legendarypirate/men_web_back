@@ -10,6 +10,7 @@ import {
   TRAINING_LEVELS,
   WorkoutSectionDefinition,
   WorkoutSectionType,
+  defaultEnabledForLevel,
 } from '@/lib/workout-sections';
 import { SectionTiming, WorkoutLevelPresets } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -114,11 +115,15 @@ export function WorkoutSectionsEditor({
     const nextPresets = { ...levelPresets };
     const timings = [...(nextPresets[levelKey] ?? [])];
     timings[index] = normalizeSectionTiming({
-      ...(timings[index] ?? emptySectionTiming()),
+      ...(timings[index] ?? emptySectionTiming(sections[index]?.type)),
       ...patch,
     });
     nextPresets[levelKey] = timings;
     emit(sections, nextPresets);
+  }
+
+  function toggleSectionEnabled(index: number, enabled: boolean) {
+    updateTiming(index, { enabled });
   }
 
   function addSection() {
@@ -127,7 +132,13 @@ export function WorkoutSectionsEditor({
     const nextPresets = { ...levelPresets };
     for (const { level } of TRAINING_LEVELS) {
       const key = String(level);
-      nextPresets[key] = [...(nextPresets[key] ?? []), emptySectionTiming(definition.type)];
+      nextPresets[key] = [
+        ...(nextPresets[key] ?? []),
+        normalizeSectionTiming({
+          ...emptySectionTiming(definition.type),
+          enabled: defaultEnabledForLevel(level),
+        }),
+      ];
     }
     emit(nextSections, nextPresets);
     setExpanded(nextSections.length - 1);
@@ -173,24 +184,30 @@ export function WorkoutSectionsEditor({
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-sm font-semibold">Түвшин бүрийн хугацаа</Label>
+        <Label className="text-sm font-semibold">Түвшин бүрийн тохиргоо</Label>
         <p className="mt-1 text-xs text-muted-foreground">
-          Апп дээр хэрэглэгч сонгосон түвшин (1–6) — түүний дагуу хугацаа, амралт, чичиргээ
-          автоматаар ачаална.
+          Түвшин бүрт ямар хэсэг орж, хугацаа хэд байхыг тохируулна. Хялбар түвшинд зарим хэсгийг
+          унтрааж болно.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {TRAINING_LEVELS.map(({ level, label }) => (
-            <Button
-              key={level}
-              type="button"
-              size="sm"
-              variant={activeLevel === level ? 'default' : 'outline'}
-              className={cn(activeLevel === level && 'bg-[#FF453A] hover:bg-[#e63e35]')}
-              onClick={() => onActiveLevelChange(level)}
-            >
-              {level}. {label}
-            </Button>
-          ))}
+          {TRAINING_LEVELS.map(({ level, label }) => {
+            const enabledCount = (levelPresets[String(level)] ?? []).filter(
+              (timing) => timing.enabled
+            ).length;
+            return (
+              <Button
+                key={level}
+                type="button"
+                size="sm"
+                variant={activeLevel === level ? 'default' : 'outline'}
+                className={cn(activeLevel === level && 'bg-[#FF453A] hover:bg-[#e63e35]')}
+                onClick={() => onActiveLevelChange(level)}
+              >
+                {level}. {label}
+                <span className="ml-1 opacity-75">({enabledCount})</span>
+              </Button>
+            );
+          })}
         </div>
         <div className="mt-2">
           <Button type="button" variant="ghost" size="sm" onClick={copyActiveLevelToAll}>
@@ -203,7 +220,7 @@ export function WorkoutSectionsEditor({
         <div>
           <Label className="text-sm font-semibold">Дасгалын хэсгүүд</Label>
           <p className="text-xs text-muted-foreground">
-            Нэр, төрөл — бүх түвшинд ижил. Доорх тоо — зөвхөн {activeLevel}-р түвшин.
+            Нэр, төрөл — бүх түвшинд ижил. Доор — зөвхөн {activeLevel}-р түвшин.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={addSection}>
@@ -220,10 +237,24 @@ export function WorkoutSectionsEditor({
         sections.map((section, index) => {
           const timing = activeTimings[index] ?? emptySectionTiming(section.type);
           const open = expanded === index;
+          const enabled = timing.enabled !== false;
 
           return (
-            <div key={section.id} className="overflow-hidden rounded-lg border bg-card shadow-sm">
+            <div
+              key={section.id}
+              className={cn(
+                'overflow-hidden rounded-lg border bg-card shadow-sm',
+                !enabled && 'opacity-60'
+              )}
+            >
               <div className="flex items-center gap-2 px-3 py-2">
+                <Checkbox
+                  checked={enabled}
+                  onCheckedChange={(checked) =>
+                    toggleSectionEnabled(index, checked === true)
+                  }
+                  aria-label={`${section.label} идэвхжүүлэх`}
+                />
                 <button
                   type="button"
                   className="flex min-w-0 flex-1 items-center gap-2 rounded-md text-left hover:bg-muted/40"
@@ -237,7 +268,9 @@ export function WorkoutSectionsEditor({
                       {section.label || 'Шинэ хэсэг'}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {timing.durationSeconds}с · {timing.sets} багц · амралт {timing.relaxSeconds}с
+                      {enabled
+                        ? `${timing.durationSeconds}с · ${timing.sets} багц · амралт ${timing.relaxSeconds}с`
+                        : 'Энэ түвшинд идэвхгүй'}
                     </p>
                   </div>
                   <ChevronDown
@@ -277,6 +310,19 @@ export function WorkoutSectionsEditor({
 
               {open && (
                 <div className="space-y-3 border-t p-4">
+                  <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
+                    <Checkbox
+                      id={`enabled-${section.id}-${activeLevel}`}
+                      checked={enabled}
+                      onCheckedChange={(checked) =>
+                        toggleSectionEnabled(index, checked === true)
+                      }
+                    />
+                    <Label htmlFor={`enabled-${section.id}-${activeLevel}`} className="font-normal">
+                      Энэ түвшинд оруулах
+                    </Label>
+                  </div>
+
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label>Төрөл</Label>
@@ -308,6 +354,7 @@ export function WorkoutSectionsEditor({
                     </div>
                   </div>
 
+                  <div className={cn('space-y-3', !enabled && 'pointer-events-none opacity-50')}>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <div className="space-y-1.5">
                       <Label>Хугацаа (сек)</Label>
@@ -381,6 +428,8 @@ export function WorkoutSectionsEditor({
                       </Label>
                     </div>
                   )}
+
+                  </div>
 
                   <div className="space-y-1.5">
                     <Label>Заавар (бүх түвшинд ижил)</Label>

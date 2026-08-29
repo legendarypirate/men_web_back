@@ -25,6 +25,7 @@ export const TRAINING_LEVELS = [
 ] as const;
 
 export const DEFAULT_TRAINING_LEVEL = 5;
+export const REFERENCE_TRAINING_LEVEL = 6;
 
 export const SECTION_TYPE_OPTIONS: { value: WorkoutSectionType; label: string }[] = [
   { value: 'kegelHold', label: 'Кегелийн барилт' },
@@ -46,6 +47,7 @@ export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): 
 
 export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): SectionTiming {
   return normalizeSectionTiming({
+    enabled: true,
     durationSeconds: type === 'breath' ? 30 : 25,
     sets: 3,
     holdSeconds: 5,
@@ -57,6 +59,7 @@ export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): Sect
 
 export function normalizeSectionTiming(raw: Partial<SectionTiming>): SectionTiming {
   return {
+    enabled: raw.enabled !== false,
     durationSeconds: Math.max(0, Number(raw.durationSeconds) || 0),
     sets: Math.max(1, Number(raw.sets) || 1),
     holdSeconds: Math.max(1, Number(raw.holdSeconds) || 1),
@@ -66,14 +69,23 @@ export function normalizeSectionTiming(raw: Partial<SectionTiming>): SectionTimi
   };
 }
 
+export function defaultEnabledForLevel(level: number): boolean {
+  // Easy levels start with fewer sections enabled; admin can override per section.
+  return level >= 4;
+}
+
 export function buildLevelPresets(
-  sectionCount: number,
+  sections: WorkoutSectionDefinition[],
   template?: SectionTiming
 ): WorkoutLevelPresets {
-  const timing = template ?? emptySectionTiming();
   const presets: WorkoutLevelPresets = {};
   for (const { level } of TRAINING_LEVELS) {
-    presets[String(level)] = Array.from({ length: sectionCount }, () => ({ ...timing }));
+    presets[String(level)] = sections.map((section) =>
+      normalizeSectionTiming({
+        ...(template ?? emptySectionTiming(section.type)),
+        enabled: defaultEnabledForLevel(level),
+      })
+    );
   }
   return presets;
 }
@@ -88,11 +100,31 @@ export function syncLevelPresets(
     const current = next[key] ?? [];
     const synced = sections.map((section, index) => {
       if (current[index]) return normalizeSectionTiming(current[index]);
-      return emptySectionTiming(section.type);
+      return normalizeSectionTiming({
+        ...emptySectionTiming(section.type),
+        enabled: defaultEnabledForLevel(level),
+      });
     });
     next[key] = synced;
   }
   return next;
+}
+
+export function countEnabledSections(levelPresets: WorkoutLevelPresets, level: number): number {
+  const timings = levelPresets[String(level)] ?? [];
+  return timings.filter((timing) => timing.enabled).length;
+}
+
+export function activeSectionLabels(
+  sections: WorkoutSectionDefinition[],
+  levelPresets: WorkoutLevelPresets,
+  level: number
+): string[] {
+  const timings = levelPresets[String(level)] ?? [];
+  return sections
+    .map((section, index) => ({ section, timing: timings[index] }))
+    .filter(({ timing }) => timing?.enabled !== false)
+    .map(({ section }) => section.label || 'Хэсэг');
 }
 
 function phaseTypeToSectionType(phaseType: string, motion: string): WorkoutSectionType {
@@ -193,11 +225,51 @@ function buildPhasesForSection(
   ]);
 }
 
+function buildExerciseFromSection(
+  section: WorkoutSectionDefinition,
+  timing: SectionTiming,
+  sortOrder: number
+): WorkoutExercise {
+  const motion = sectionTypeToMotion(section.type);
+  const phases =
+    section.type === 'stretch' && !section.instruction
+      ? templateForMotion('pushup').map((phase, phaseIndex) =>
+          phaseIndex === 0
+            ? {
+                ...phase,
+                label: section.label,
+                durationSeconds: timing.durationSeconds,
+                vibrationEnabled: timing.vibrationEnabled,
+                vibrationIntervalMs: timing.vibrationIntervalMs,
+              }
+            : phase
+        )
+      : buildPhasesForSection(section, timing);
+
+  return {
+    name: section.label,
+    category: 'ДАСГАЛ',
+    instruction:
+      section.instruction.trim() ||
+      `${section.label} — зөв хэлбэр, тогтвортой амьсгал хадгална.`,
+    durationSeconds: timing.durationSeconds,
+    sets: timing.sets,
+    motion,
+    motionHint: '',
+    sortOrder,
+    phases,
+    introSlides: [],
+    videoUrl: null,
+    thumbnailUrl: null,
+  };
+}
+
 function timingFromPhase(
   phase: WorkoutExercisePhase,
   exercise: WorkoutExercise
 ): SectionTiming {
   return normalizeSectionTiming({
+    enabled: true,
     durationSeconds: phase.durationSeconds,
     sets: exercise.sets || 3,
     holdSeconds: phase.holdSeconds || 5,
@@ -205,6 +277,18 @@ function timingFromPhase(
     vibrationEnabled: phase.vibrationEnabled,
     vibrationIntervalMs: phase.vibrationIntervalMs,
   });
+}
+
+function referenceTiming(
+  levelPresets: WorkoutLevelPresets,
+  sectionIndex: number,
+  section: WorkoutSectionDefinition
+): SectionTiming {
+  const fromSix = levelPresets[String(REFERENCE_TRAINING_LEVEL)]?.[sectionIndex];
+  if (fromSix) return normalizeSectionTiming(fromSix);
+  const fromFive = levelPresets[String(DEFAULT_TRAINING_LEVEL)]?.[sectionIndex];
+  if (fromFive) return normalizeSectionTiming(fromFive);
+  return emptySectionTiming(section.type);
 }
 
 export function loadProgramSections(program: WorkoutProgram): {
@@ -227,14 +311,17 @@ export function loadProgramSections(program: WorkoutProgram): {
         type: phaseTypeToSectionType('hold', exercise.motion),
         instruction: exercise.instruction || '',
       });
-      baseTimings.push({
-        durationSeconds: exercise.durationSeconds || 25,
-        sets: exercise.sets || 3,
-        holdSeconds: 5,
-        relaxSeconds: 5,
-        vibrationEnabled: exercise.motion === 'kegelHold' || exercise.motion === 'coreBrace',
-        vibrationIntervalMs: 80,
-      });
+      baseTimings.push(
+        normalizeSectionTiming({
+          enabled: true,
+          durationSeconds: exercise.durationSeconds || 25,
+          sets: exercise.sets || 3,
+          holdSeconds: 5,
+          relaxSeconds: 5,
+          vibrationEnabled: exercise.motion === 'kegelHold' || exercise.motion === 'coreBrace',
+          vibrationIntervalMs: 80,
+        })
+      );
       continue;
     }
 
@@ -267,58 +354,49 @@ export function loadProgramSections(program: WorkoutProgram): {
     }
   }
 
-  const levelPresets = buildLevelPresets(sections.length);
+  const levelPresets = buildLevelPresets(sections);
   for (const { level } of TRAINING_LEVELS) {
-    levelPresets[String(level)] = baseTimings.map((timing) =>
-      normalizeSectionTiming(timing)
+    levelPresets[String(level)] = sections.map((section, index) =>
+      normalizeSectionTiming({
+        ...baseTimings[index],
+        enabled: true,
+      })
     );
   }
 
   return { sections, levelPresets };
 }
 
+/** Full section templates stored on the program (all sections, regardless of level). */
+export function templateExercisesFromSections(
+  sections: WorkoutSectionDefinition[],
+  levelPresets: WorkoutLevelPresets
+): WorkoutExercise[] {
+  return sections.map((section, index) =>
+    buildExerciseFromSection(
+      section,
+      referenceTiming(levelPresets, index, section),
+      index
+    )
+  );
+}
+
+/** Exercises actually used for a given training level (enabled sections only). */
 export function exercisesFromSections(
   sections: WorkoutSectionDefinition[],
   levelPresets: WorkoutLevelPresets,
   level = DEFAULT_TRAINING_LEVEL
 ): WorkoutExercise[] {
-  const timings = levelPresets[String(level)] ?? levelPresets['5'] ?? [];
+  const timings = levelPresets[String(level)] ?? levelPresets[String(DEFAULT_TRAINING_LEVEL)] ?? [];
+  const exercises: WorkoutExercise[] = [];
 
-  return sections.map((section, index) => {
-    const timing = timings[index] ?? emptySectionTiming(section.type);
-    const motion = sectionTypeToMotion(section.type);
-    const phases =
-      section.type === 'stretch' && !section.instruction
-        ? templateForMotion('pushup').map((phase, phaseIndex) =>
-            phaseIndex === 0
-              ? {
-                  ...phase,
-                  label: section.label,
-                  durationSeconds: timing.durationSeconds,
-                  vibrationEnabled: timing.vibrationEnabled,
-                  vibrationIntervalMs: timing.vibrationIntervalMs,
-                }
-              : phase
-          )
-        : buildPhasesForSection(section, timing);
-
-    return {
-      name: section.label,
-      category: 'ДАСГАЛ',
-      instruction:
-        section.instruction.trim() ||
-        `${section.label} — зөв хэлбэр, тогтвортой амьсгал хадгална.`,
-      durationSeconds: timing.durationSeconds,
-      sets: timing.sets,
-      motion,
-      motionHint: '',
-      sortOrder: index,
-      phases,
-      introSlides: [],
-      videoUrl: null,
-      thumbnailUrl: null,
-    };
+  sections.forEach((section, index) => {
+    const timing = normalizeSectionTiming(timings[index] ?? emptySectionTiming(section.type));
+    if (!timing.enabled) return;
+    exercises.push(buildExerciseFromSection(section, timing, exercises.length));
   });
+
+  return exercises;
 }
 
 export function estimateProgramMinutes(
@@ -328,9 +406,27 @@ export function estimateProgramMinutes(
 ): number {
   const timings = levelPresets[String(level)] ?? [];
   if (timings.length === 0) return 5;
-  const totalSeconds = timings.reduce(
-    (sum, timing) => sum + timing.durationSeconds * Math.max(1, timing.sets),
-    0
-  );
+  const totalSeconds = timings.reduce((sum, timing, index) => {
+    if (!timing?.enabled) return sum;
+    const duration =
+      timing.durationSeconds ||
+      (sections[index]?.type === 'breath' ? 30 : 25);
+    return sum + duration * Math.max(1, timing.sets || 1);
+  }, 0);
   return Math.max(1, Math.round(totalSeconds / 60));
+}
+
+export function validateLevelPresets(
+  sections: WorkoutSectionDefinition[],
+  levelPresets: WorkoutLevelPresets
+): string | null {
+  for (const { level, label } of TRAINING_LEVELS) {
+    if (countEnabledSections(levelPresets, level) === 0) {
+      return `${label} түвшинд дор хаяж нэг идэвхтэй хэсэг байх ёстой.`;
+    }
+  }
+  if (sections.length === 0) {
+    return 'Дор хаяж нэг хэсэг нэмнэ үү.';
+  }
+  return null;
 }

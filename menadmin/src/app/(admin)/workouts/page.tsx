@@ -9,12 +9,14 @@ import { AddButton } from '@/components/custom/add-button';
 import { WorkoutSectionsEditor } from '@/components/admin/workout-sections-editor';
 import {
   DEFAULT_TRAINING_LEVEL,
+  activeSectionLabels,
   emptySectionDefinition,
   estimateProgramMinutes,
-  exercisesFromSections,
   loadProgramSections,
   syncLevelPresets,
+  templateExercisesFromSections,
   TRAINING_LEVELS,
+  validateLevelPresets,
   WorkoutSectionDefinition,
 } from '@/lib/workout-sections';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
@@ -116,19 +118,16 @@ export default function WorkoutsPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!editing) return;
-    if (editing.sections.length === 0) {
-      setError('Дор хаяж нэг хэсэг нэмнэ үү.');
+    const syncedPresets = syncLevelPresets(editing.sections, editing.levelPresets);
+    const validationError = validateLevelPresets(editing.sections, syncedPresets);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     setSaving(true);
     try {
-      const syncedPresets = syncLevelPresets(editing.sections, editing.levelPresets);
-      const exercises = exercisesFromSections(
-        editing.sections,
-        syncedPresets,
-        DEFAULT_TRAINING_LEVEL
-      );
+      const exercises = templateExercisesFromSections(editing.sections, syncedPresets);
       const payload: WorkoutProgram = {
         id: editing.id,
         title: editing.title,
@@ -415,7 +414,9 @@ export default function WorkoutsPage() {
             <p className="text-xs text-muted-foreground">
               Түвшин {activeLevel} ({activeLevelLabel}): ~{' '}
               {estimateProgramMinutes(editing.sections, editing.levelPresets, activeLevel)} мин ·{' '}
-              {editing.sections.map((section) => section.label || 'Хэсэг').join(' → ')}
+              {activeSectionLabels(editing.sections, editing.levelPresets, activeLevel).join(
+                ' → '
+              ) || 'Идэвхтэй хэсэг байхгүй'}
             </p>
           </form>
         )}

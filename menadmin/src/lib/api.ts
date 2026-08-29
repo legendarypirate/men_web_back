@@ -105,6 +105,7 @@ export type WorkoutExercise = {
 };
 
 export type SectionTiming = {
+  enabled: boolean;
   durationSeconds: number;
   sets: number;
   holdSeconds: number;
