@@ -171,12 +171,13 @@ export default function ArticlesPage() {
     if (!editing) return;
     setSaving(true);
     try {
+      const { id, ...rest } = editing;
       const payload = {
-        ...editing,
+        ...rest,
         storySlides: editing.storySlides || [],
       };
-      if (editing.id && articles.some((a) => a.id === editing.id)) {
-        await api.articles.update(editing.id, payload);
+      if (id && articles.some((a) => a.id === id)) {
+        await api.articles.update(id, payload);
       } else {
         await api.articles.create(payload);
       }

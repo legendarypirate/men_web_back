@@ -372,7 +372,11 @@ router.get('/articles', adminRequired, async (req, res, next) => {
 
 router.post('/articles', adminRequired, async (req, res, next) => {
   try {
-    const article = await Article.create(req.body);
+    const data = { ...req.body };
+    if (!data.id || String(data.id).trim() === '') {
+      delete data.id;
+    }
+    const article = await Article.create(data);
     return ok(res, { article }, 'Нийтлэл нэмэгдлээ', 201);
   } catch (err) {
     next(err);
@@ -383,7 +387,8 @@ router.put('/articles/:id', adminRequired, async (req, res, next) => {
   try {
     const article = await Article.findByPk(req.params.id);
     if (!article) return fail(res, 'Нийтлэл олдсонгүй', 404);
-    await article.update(req.body);
+    const { id: _ignoredId, ...updates } = req.body;
+    await article.update(updates);
     return ok(res, { article }, 'Нийтлэл шинэчлэгдлээ');
   } catch (err) {
     next(err);
