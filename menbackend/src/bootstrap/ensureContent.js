@@ -66,33 +66,6 @@ async function ensureArticles() {
   console.log(`Seeded ${articles.length} articles`);
 }
 
-async function ensureSexualHealthStoryArticles() {
-  const { sexualHealthStoryArticles } = require('../data/sexualHealthStoryArticles');
-
-  for (const data of sexualHealthStoryArticles) {
-    const existing = await Article.findOne({
-      where: { title: data.title, category: data.category },
-    });
-    if (existing) {
-      await existing.update({
-        excerpt: data.excerpt,
-        body: data.body,
-        storySlides: data.storySlides,
-        readMinutes: data.readMinutes,
-        tag: data.tag,
-        published: data.published,
-        isNew: data.isNew,
-        sortOrder: data.sortOrder,
-        featured: data.featured,
-        imageUrl: data.imageUrl,
-      });
-    } else {
-      await Article.create(data);
-    }
-  }
-  console.log(`Ensured ${sexualHealthStoryArticles.length} Бэлгийн эрүүл мэнд story articles`);
-}
-
 async function ensureHomeProTips() {
   const count = await HomeProTip.count();
   if (count > 0) return;
@@ -157,7 +130,6 @@ async function ensureContent() {
   await ensureCoachContent();
   await ensureProductDetailSections();
   await ensureArticles();
-  await ensureSexualHealthStoryArticles();
   await ensureHomeProTips();
 }
 
