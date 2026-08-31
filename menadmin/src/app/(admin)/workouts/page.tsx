@@ -20,6 +20,7 @@ import {
   WorkoutSectionDefinition,
 } from '@/lib/workout-sections';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -49,7 +50,8 @@ const TAG_OPTIONS = [
   'ӨНӨӨДРИЙН ДАСГАЛ',
 ] as const;
 
-const LEVEL_OPTIONS = ['Эхлэгч', 'Дунд', 'Ахисан түвшин', 'All Levels'] as const;
+
+const DEFAULT_PROGRAM_LEVEL = '—';
 
 type ProgramDraft = WorkoutProgram & {
   sections: WorkoutSectionDefinition[];
@@ -62,7 +64,7 @@ function emptyProgram(tag = 'KEGEL'): ProgramDraft {
     id: '',
     title: '',
     description: '',
-    level: 'Эхлэгч',
+    level: DEFAULT_PROGRAM_LEVEL,
     durationMinutes: 5,
     equipment: 'None',
     tag,
@@ -132,7 +134,7 @@ export default function WorkoutsPage() {
         id: editing.id,
         title: editing.title,
         description: editing.description,
-        level: editing.level,
+        level: editing.level?.trim() || DEFAULT_PROGRAM_LEVEL,
         durationMinutes: estimateProgramMinutes(
           editing.sections,
           syncedPresets,
@@ -142,9 +144,9 @@ export default function WorkoutsPage() {
         tag: editing.tag,
         isToday: editing.isToday,
         sortOrder: editing.sortOrder,
-        videoUrl: null,
-        thumbnailUrl: null,
-        introSlides: [],
+        videoUrl: editing.videoUrl ?? null,
+        thumbnailUrl: editing.thumbnailUrl ?? null,
+        introSlides: editing.introSlides ?? [],
         levelPresets: syncedPresets,
         exercises,
       };
@@ -229,7 +231,22 @@ export default function WorkoutsPage() {
       <AppTable
         columns={[
           { key: 'title', label: 'Нэр', className: 'font-semibold text-[#2c3e50]' },
-          { key: 'level', label: 'Түвшин' },
+          {
+            key: 'thumbnailUrl',
+            label: 'Cover',
+            sortable: false,
+            render: (p) =>
+              p.thumbnailUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={p.thumbnailUrl}
+                  alt=""
+                  className="h-10 w-16 rounded object-cover"
+                />
+              ) : (
+                <span className="text-xs text-muted-foreground">—</span>
+              ),
+          },
           {
             key: 'tag',
             label: 'Tag',
@@ -311,24 +328,26 @@ export default function WorkoutsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Түвшин (шошго)</Label>
-                <Select
-                  value={editing.level}
-                  onValueChange={(value) => value && setEditing({ ...editing, level: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LEVEL_OPTIONS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {level}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Эрэмбэ</Label>
+                <Input
+                  type="number"
+                  value={editing.sortOrder}
+                  onChange={(e) =>
+                    setEditing({ ...editing, sortOrder: Number(e.target.value) })
+                  }
+                />
               </div>
             </div>
+
+            <ImageUploadField
+              label="Cover зураг"
+              value={editing.thumbnailUrl}
+              onChange={(url) => setEditing({ ...editing, thumbnailUrl: url })}
+              onUpload={async (file) => {
+                const result = await api.upload.image(file);
+                return result.url;
+              }}
+            />
 
             <div className="space-y-2">
               <Label>Гарчиг</Label>
@@ -348,35 +367,23 @@ export default function WorkoutsPage() {
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Tag</Label>
-                <Select
-                  value={editing.tag}
-                  onValueChange={(value) => value && setEditing({ ...editing, tag: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TAG_OPTIONS.map((tag) => (
-                      <SelectItem key={tag} value={tag}>
-                        {tag}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Эрэмбэ</Label>
-                <Input
-                  type="number"
-                  value={editing.sortOrder}
-                  onChange={(e) =>
-                    setEditing({ ...editing, sortOrder: Number(e.target.value) })
-                  }
-                />
-              </div>
+            <div className="space-y-2">
+              <Label>Tag</Label>
+              <Select
+                value={editing.tag}
+                onValueChange={(value) => value && setEditing({ ...editing, tag: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TAG_OPTIONS.map((tag) => (
+                    <SelectItem key={tag} value={tag}>
+                      {tag}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex items-center gap-2 rounded-lg border p-3">
