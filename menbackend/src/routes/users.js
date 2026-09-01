@@ -2,6 +2,7 @@ const express = require('express');
 const { ok, fail, publicUser } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
 const { enrichPublicUser } = require('../utils/membership');
+const { deleteUserAccount } = require('../services/deleteUserAccount');
 const { DeviceToken } = require('../models');
 
 const router = express.Router();
@@ -80,6 +81,22 @@ router.delete('/device-token', authRequired, async (req, res, next) => {
     });
 
     return ok(res, { removed: true }, 'Token устгагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/account', authRequired, async (req, res, next) => {
+  try {
+    if (req.user.role === 'admin') {
+      return fail(res, 'Админ бүртгэлийг энэ замаар устгах боломжгүй');
+    }
+    if (req.body?.confirm !== true) {
+      return fail(res, 'Баталгаажуулалт шаардлагатай');
+    }
+
+    await deleteUserAccount(req.user);
+    return ok(res, { deleted: true }, 'Бүртгэл амжилттай устгагдлаа');
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { Op } = require('sequelize');
+const { deleteUserAccount } = require('../services/deleteUserAccount');
 const {
   User,
   WorkoutProgram,
@@ -199,7 +200,7 @@ router.delete('/users/:id', adminRequired, async (req, res, next) => {
     if (user.role === 'admin') {
       return fail(res, 'Админ хэрэглэгчийг устгах боломжгүй');
     }
-    await user.destroy();
+    await deleteUserAccount(user);
     return ok(res, null, 'Хэрэглэгч устгагдлаа');
   } catch (err) {
     next(err);
