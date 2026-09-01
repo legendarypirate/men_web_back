@@ -111,15 +111,25 @@ async function sendToTokens(tokens, { title, body, data = {} }) {
   const payload = {
     notification: { title, body },
     data: Object.fromEntries(
-      Object.entries(data).map(([key, value]) => [key, String(value)])
+      Object.entries({ ...data, title, body }).map(([key, value]) => [
+        key,
+        String(value),
+      ])
     ),
     android: {
       priority: 'high',
       notification: { channelId: 'workout_reminders' },
     },
     apns: {
+      headers: {
+        'apns-priority': '10',
+      },
       payload: {
         aps: {
+          alert: {
+            title,
+            body,
+          },
           sound: 'default',
         },
       },
