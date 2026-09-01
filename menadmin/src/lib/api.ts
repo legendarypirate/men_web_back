@@ -41,6 +41,31 @@ async function parseApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
   }
 }
 
+export type PushNotificationStats = {
+  fcmConfigured: boolean;
+  registeredDevices: number;
+  usersWithTokens: number;
+  iosDevices: number;
+  androidDevices: number;
+};
+
+export type SendPushNotificationPayload = {
+  title: string;
+  body: string;
+  target?: 'all' | 'user';
+  userId?: string;
+  membership?: string;
+  data?: Record<string, string>;
+};
+
+export type SendPushNotificationResult = {
+  sent: number;
+  failed: number;
+  recipientCount: number;
+  tokenCount: number;
+  fcmConfigured: boolean;
+};
+
 export type ApiResponse<T> = {
   success: boolean;
   message: string;
@@ -820,6 +845,15 @@ export const api = {
       }),
     remove: (id: string) =>
       request<null>(`/api/admin/feedback/${id}`, { method: 'DELETE' }),
+  },
+
+  notifications: {
+    stats: () => request<PushNotificationStats>('/api/admin/notifications/stats'),
+    send: (data: SendPushNotificationPayload) =>
+      request<SendPushNotificationResult>('/api/admin/notifications/send', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
   },
 
   quizStages: {

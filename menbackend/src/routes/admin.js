@@ -34,6 +34,7 @@ const { adminRequired, signToken } = require('../middleware/auth');
 const { uploadVideo, uploadImage } = require('../middleware/upload');
 const { handleImageUpload, handleVideoUpload } = require('./upload');
 const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
+const { getPushStats, sendAdminPush } = require('../services/adminPushNotifications');
 const {
   applyAdminMembershipUpdate,
   computeMembershipExpiry,
@@ -1275,6 +1276,39 @@ router.put('/quiz/config', adminRequired, async (req, res, next) => {
     }
     return ok(res, { config }, 'Тохиргоо хадгалагдлаа');
   } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/notifications/stats', adminRequired, async (req, res, next) => {
+  try {
+    const stats = await getPushStats();
+    return ok(res, stats);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/notifications/send', adminRequired, async (req, res, next) => {
+  try {
+    const { title, body, data, target, userId, membership } = req.body || {};
+    const result = await sendAdminPush({
+      title,
+      body,
+      data,
+      target,
+      userId,
+      membership,
+    });
+    return ok(
+      res,
+      result,
+      `${result.sent} төхөөрөмжид мэдэгдэл илгээгдлээ`
+    );
+  } catch (err) {
+    if (err.statusCode) {
+      return fail(res, err.message, err.statusCode);
+    }
     next(err);
   }
 });

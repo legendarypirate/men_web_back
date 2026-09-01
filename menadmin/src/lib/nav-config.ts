@@ -6,6 +6,7 @@ import {
   Lightbulb,
   MessageSquareQuote,
   MessageSquare,
+  Bell,
   Star,
   CreditCard,
   Settings,
@@ -30,6 +31,7 @@ export type NavItem = {
 export const adminNav: NavItem[] = [
   { href: '/dashboard', label: 'Хяналт', icon: LayoutDashboard, group: 'overview' },
   { href: '/users', label: 'Хэрэглэгчид', icon: Users, group: 'users' },
+  { href: '/notifications', label: 'Push мэдэгдэл', icon: Bell, group: 'users' },
   { href: '/feedback', label: 'Санал хүсэлт', icon: MessageSquare, group: 'users' },
   { href: '/sessions', label: 'Дасгалын сесс', icon: Activity, group: 'users' },
   { href: '/workouts', label: 'Дасгалууд', icon: Dumbbell, group: 'content' },
