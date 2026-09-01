@@ -150,6 +150,8 @@ async function sendToTokens(tokenEntries, { title, body, data = {} }) {
     apns: {
       headers: {
         'apns-priority': '10',
+        'apns-push-type': 'alert',
+        'apns-topic': 'mn.vitalmen.mgl',
       },
       payload: {
         aps: {
@@ -158,6 +160,7 @@ async function sendToTokens(tokenEntries, { title, body, data = {} }) {
             body,
           },
           sound: 'default',
+          'content-available': 1,
         },
       },
     },
