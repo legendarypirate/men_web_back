@@ -119,11 +119,28 @@ export default function NotificationsPage() {
 
       {!stats?.fcmConfigured && (
         <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Backend дээр Firebase service account тохируулаагүй байна.{' '}
-          <code className="rounded bg-amber-100 px-1">FIREBASE_SERVICE_ACCOUNT_PATH</code>{' '}
-          эсвэл{' '}
-          <code className="rounded bg-amber-100 px-1">FIREBASE_SERVICE_ACCOUNT_JSON</code>{' '}
-          .env-д нэмнэ үү.
+          <p className="font-medium">FCM ажиллахгүй байна</p>
+          {stats?.fcmInitError && (
+            <p className="mt-2 font-mono text-xs break-all">{stats.fcmInitError}</p>
+          )}
+          {stats?.credentialsPath && (
+            <p className="mt-2 font-mono text-xs break-all">
+              Хайж байгаа файл: {stats.credentialsPath}
+            </p>
+          )}
+          <p className="mt-3">
+            Production сервер дээр Firebase service account JSON файлыг backend root
+            folder-т байрлуулна. Жишээ нь:
+          </p>
+          <p className="mt-1 font-mono text-xs">
+            FIREBASE_SERVICE_ACCOUNT_PATH=./firebase-service-account.json
+          </p>
+          <p className="mt-2">
+            Эсвэл нэг мөр JSON:
+            <code className="ml-1 rounded bg-amber-100 px-1">
+              FIREBASE_SERVICE_ACCOUNT_JSON=
+            </code>
+          </p>
         </div>
       )}
 

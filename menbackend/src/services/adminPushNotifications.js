@@ -1,15 +1,18 @@
 const { Op } = require('sequelize');
 const { User, DeviceToken } = require('../models');
-const { isFcmConfigured, sendToTokens } = require('./fcm');
+const { isFcmConfigured, sendToTokens, getFcmStatus } = require('./fcm');
 
 async function getPushStats() {
   const tokenRows = await DeviceToken.findAll({
     attributes: ['userId', 'token', 'platform'],
   });
   const userIds = new Set(tokenRows.map((row) => row.userId));
+  const fcmStatus = getFcmStatus();
 
   return {
     fcmConfigured: isFcmConfigured(),
+    fcmInitError: fcmStatus.error,
+    credentialsPath: fcmStatus.credentialsPath,
     registeredDevices: tokenRows.length,
     usersWithTokens: userIds.size,
     iosDevices: tokenRows.filter((row) => row.platform === 'ios').length,
@@ -50,8 +53,10 @@ async function sendAdminPush({
   membership,
 }) {
   if (!isFcmConfigured()) {
+    const { error } = getFcmStatus();
     const err = new Error(
-      'FCM тохиргоо хийгдээгүй байна (FIREBASE_SERVICE_ACCOUNT_JSON эсвэл FIREBASE_SERVICE_ACCOUNT_PATH)'
+      error ||
+        'FCM тохиргоо хийгдээгүй байна (FIREBASE_SERVICE_ACCOUNT_JSON эсвэл FIREBASE_SERVICE_ACCOUNT_PATH)'
     );
     err.statusCode = 503;
     throw err;

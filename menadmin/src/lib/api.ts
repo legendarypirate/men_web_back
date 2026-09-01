@@ -43,6 +43,8 @@ async function parseApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
 
 export type PushNotificationStats = {
   fcmConfigured: boolean;
+  fcmInitError?: string | null;
+  credentialsPath?: string | null;
   registeredDevices: number;
   usersWithTokens: number;
   iosDevices: number;

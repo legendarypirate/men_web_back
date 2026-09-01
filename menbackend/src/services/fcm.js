@@ -1,14 +1,64 @@
+const fs = require('fs');
+const path = require('path');
+
+const projectRoot = path.resolve(__dirname, '..', '..');
+
 let admin = null;
 let messaging = null;
 let initialized = false;
+let lastInitError = null;
+let resolvedCredentialsPath = null;
+
+function trimEnv(value) {
+  if (value == null) return '';
+  return String(value).trim().replace(/^['"]|['"]$/g, '');
+}
+
+function resolveServiceAccountPath(configPath) {
+  const trimmed = trimEnv(configPath);
+  if (!trimmed) return null;
+  if (path.isAbsolute(trimmed)) return trimmed;
+  return path.resolve(projectRoot, trimmed);
+}
+
+function loadServiceAccountCredentials() {
+  const inlineJson = trimEnv(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+  if (inlineJson) {
+    try {
+      resolvedCredentialsPath = '(inline FIREBASE_SERVICE_ACCOUNT_JSON)';
+      return JSON.parse(inlineJson);
+    } catch (err) {
+      lastInitError = `FIREBASE_SERVICE_ACCOUNT_JSON parse failed: ${err.message}`;
+      return null;
+    }
+  }
+
+  const configuredPath = trimEnv(process.env.FIREBASE_SERVICE_ACCOUNT_PATH);
+  if (!configuredPath) {
+    lastInitError =
+      'FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH is not set';
+    return null;
+  }
+
+  resolvedCredentialsPath = resolveServiceAccountPath(configuredPath);
+  if (!fs.existsSync(resolvedCredentialsPath)) {
+    lastInitError = `Service account file not found: ${resolvedCredentialsPath}`;
+    return null;
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(resolvedCredentialsPath, 'utf8'));
+  } catch (err) {
+    lastInitError = `Failed to read ${resolvedCredentialsPath}: ${err.message}`;
+    return null;
+  }
+}
 
 function initFirebaseAdmin() {
   if (initialized) return messaging;
 
-  const json = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-  const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-
-  if (!json && !path) {
+  const credentials = loadServiceAccountCredentials();
+  if (!credentials) {
     initialized = true;
     return null;
   }
@@ -18,19 +68,17 @@ function initFirebaseAdmin() {
     admin = require('firebase-admin');
 
     if (admin.apps.length === 0) {
-      if (json) {
-        const credentials = JSON.parse(json);
-        admin.initializeApp({ credential: admin.credential.cert(credentials) });
-      } else {
-        // eslint-disable-next-line global-require
-        const serviceAccount = require(path);
-        admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-      }
+      admin.initializeApp({ credential: admin.credential.cert(credentials) });
     }
 
     messaging = admin.messaging();
+    lastInitError = null;
     console.log('[FCM] Firebase Admin initialized');
+    if (resolvedCredentialsPath) {
+      console.log(`[FCM] Credentials loaded from: ${resolvedCredentialsPath}`);
+    }
   } catch (err) {
+    lastInitError = err.message;
     console.warn('[FCM] Firebase Admin init failed:', err.message);
     messaging = null;
   }
@@ -41,6 +89,16 @@ function initFirebaseAdmin() {
 
 function isFcmConfigured() {
   return initFirebaseAdmin() != null;
+}
+
+function getFcmStatus() {
+  initFirebaseAdmin();
+  return {
+    configured: messaging != null,
+    error: lastInitError,
+    credentialsPath: resolvedCredentialsPath,
+    projectRoot,
+  };
 }
 
 async function sendToTokens(tokens, { title, body, data = {} }) {
@@ -95,5 +153,6 @@ async function sendToTokens(tokens, { title, body, data = {} }) {
 module.exports = {
   initFirebaseAdmin,
   isFcmConfigured,
+  getFcmStatus,
   sendToTokens,
 };
