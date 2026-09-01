@@ -101,12 +101,39 @@ function getFcmStatus() {
   };
 }
 
-async function sendToTokens(tokens, { title, body, data = {} }) {
+async function sendToTokens(tokenEntries, { title, body, data = {} }) {
   const fcm = initFirebaseAdmin();
-  if (!fcm || !tokens.length) return { sent: 0, failed: tokens.length };
+  const entries = (Array.isArray(tokenEntries) ? tokenEntries : [])
+    .map((entry) =>
+      typeof entry === 'string'
+        ? { token: entry, platform: 'unknown' }
+        : {
+            token: entry.token,
+            platform: entry.platform || 'unknown',
+          }
+    )
+    .filter((entry) => entry.token);
 
-  const uniqueTokens = [...new Set(tokens.filter(Boolean))];
-  if (!uniqueTokens.length) return { sent: 0, failed: 0 };
+  if (!fcm || !entries.length) {
+    return {
+      sent: 0,
+      failed: entries.length,
+      errors: entries.map((entry) => ({
+        platform: entry.platform,
+        tokenSuffix: entry.token.slice(-8),
+        code: 'fcm-not-configured',
+        message: 'FCM not configured',
+      })),
+    };
+  }
+
+  const uniqueEntries = [];
+  const seen = new Set();
+  for (const entry of entries) {
+    if (seen.has(entry.token)) continue;
+    seen.add(entry.token);
+    uniqueEntries.push(entry);
+  }
 
   const payload = {
     notification: { title, body },
@@ -138,26 +165,38 @@ async function sendToTokens(tokens, { title, body, data = {} }) {
 
   let sent = 0;
   let failed = 0;
+  const errors = [];
 
-  for (const token of uniqueTokens) {
+  for (const entry of uniqueEntries) {
     try {
-      await fcm.send({ token, ...payload });
+      await fcm.send({ token: entry.token, ...payload });
       sent += 1;
     } catch (err) {
       failed += 1;
+      errors.push({
+        platform: entry.platform,
+        tokenSuffix: entry.token.slice(-8),
+        code: err.code || 'send-failed',
+        message: err.message || String(err),
+      });
       if (
         err.code === 'messaging/registration-token-not-registered' ||
         err.code === 'messaging/invalid-registration-token'
       ) {
         // eslint-disable-next-line global-require
         const { DeviceToken } = require('../models');
-        await DeviceToken.destroy({ where: { token } }).catch(() => {});
+        await DeviceToken.destroy({ where: { token: entry.token } }).catch(() => {});
       }
-      console.warn('[FCM] send failed:', err.code || err.message);
+      console.warn(
+        '[FCM] send failed:',
+        entry.platform,
+        `...${entry.token.slice(-8)}`,
+        err.code || err.message
+      );
     }
   }
 
-  return { sent, failed };
+  return { sent, failed, errors };
 }
 
 module.exports = {

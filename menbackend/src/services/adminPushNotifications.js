@@ -4,7 +4,15 @@ const { isFcmConfigured, sendToTokens, getFcmStatus } = require('./fcm');
 
 async function getPushStats() {
   const tokenRows = await DeviceToken.findAll({
-    attributes: ['userId', 'token', 'platform'],
+    attributes: ['userId', 'token', 'platform', 'updatedAt', 'createdAt'],
+    include: [
+      {
+        model: User,
+        as: 'user',
+        attributes: ['email', 'name'],
+      },
+    ],
+    order: [['updatedAt', 'DESC']],
   });
   const userIds = new Set(tokenRows.map((row) => row.userId));
   const fcmStatus = getFcmStatus();
@@ -17,6 +25,14 @@ async function getPushStats() {
     usersWithTokens: userIds.size,
     iosDevices: tokenRows.filter((row) => row.platform === 'ios').length,
     androidDevices: tokenRows.filter((row) => row.platform === 'android').length,
+    devices: tokenRows.map((row) => ({
+      userId: row.userId,
+      userEmail: row.user?.email || null,
+      userName: row.user?.name || null,
+      platform: row.platform,
+      tokenSuffix: row.token.slice(-8),
+      updatedAt: row.updatedAt,
+    })),
   };
 }
 
@@ -78,14 +94,14 @@ async function sendAdminPush({
       recipientCount: 0,
       tokenCount: 0,
       fcmConfigured: true,
+      errors: [],
     };
   }
 
   const tokenRows = await DeviceToken.findAll({
     where: { userId: { [Op.in]: userIds } },
-    attributes: ['token'],
+    attributes: ['token', 'platform'],
   });
-  const tokens = tokenRows.map((row) => row.token).filter(Boolean);
 
   const payloadData = {
     type: 'admin_broadcast',
@@ -94,7 +110,7 @@ async function sendAdminPush({
     ),
   };
 
-  const result = await sendToTokens(tokens, {
+  const result = await sendToTokens(tokenRows, {
     title: trimmedTitle,
     body: trimmedBody,
     data: payloadData,
@@ -103,8 +119,9 @@ async function sendAdminPush({
   return {
     sent: result.sent,
     failed: result.failed,
+    errors: result.errors || [],
     recipientCount: userIds.length,
-    tokenCount: tokens.length,
+    tokenCount: tokenRows.length,
     fcmConfigured: true,
   };
 }

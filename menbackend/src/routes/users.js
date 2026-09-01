@@ -65,7 +65,15 @@ router.post('/device-token', authRequired, async (req, res, next) => {
       });
     }
 
-    return ok(res, { saved: true }, 'Төхөөрөмжийн token хадгалагдлаа');
+    console.log(
+      `[FCM] device token saved user=${req.user.id} platform=${platform} suffix=...${token.slice(-8)}`
+    );
+
+    return ok(
+      res,
+      { saved: true, platform, tokenSuffix: token.slice(-8) },
+      'Төхөөрөмжийн token хадгалагдлаа'
+    );
   } catch (err) {
     next(err);
   }

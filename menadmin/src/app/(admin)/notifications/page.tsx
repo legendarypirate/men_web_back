@@ -99,6 +99,22 @@ export default function NotificationsPage() {
               {result.recipientCount} · Төхөөрөмж: {result.tokenCount}
             </div>
           )}
+          {result?.errors && result.errors.length > 0 && (
+            <div className="mt-3 space-y-1 rounded-md border border-red-200 bg-red-50 p-3 text-red-900">
+              <p className="font-medium">Алдаатай token-ууд:</p>
+              {result.errors.map((item) => (
+                <p key={`${item.platform}-${item.tokenSuffix}-${item.code}`} className="font-mono text-xs">
+                  {item.platform} · ...{item.tokenSuffix} · {item.code}
+                </p>
+              ))}
+              {result.errors.some((item) => item.platform === 'ios') && (
+                <p className="pt-2 text-xs">
+                  iOS алдаа ихэвчлэн Firebase Console дээр APNs .p8 key оруулаагүй
+                  эсвэл хуучин token байхад гардаг.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -114,6 +130,42 @@ export default function NotificationsPage() {
             label="iOS / Android"
             value={`${stats.iosDevices} / ${stats.androidDevices}`}
           />
+        </div>
+      )}
+
+      {stats?.devices && stats.devices.length > 0 && (
+        <div className="mb-6 overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="border-b px-4 py-3 text-sm font-medium">
+            Бүртгэлтэй FCM token-ууд
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-2">Хэрэглэгч</th>
+                  <th className="px-4 py-2">Platform</th>
+                  <th className="px-4 py-2">Token suffix</th>
+                  <th className="px-4 py-2">Шинэчлэгдсэн</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.devices.map((device) => (
+                  <tr key={`${device.userId}-${device.tokenSuffix}`} className="border-t">
+                    <td className="px-4 py-2">
+                      {device.userName || device.userEmail || device.userId}
+                    </td>
+                    <td className="px-4 py-2">{device.platform}</td>
+                    <td className="px-4 py-2 font-mono">...{device.tokenSuffix}</td>
+                    <td className="px-4 py-2">
+                      {device.updatedAt
+                        ? new Date(device.updatedAt).toLocaleString('mn-MN')
+                        : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

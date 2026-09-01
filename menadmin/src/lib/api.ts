@@ -41,6 +41,15 @@ async function parseApiResponse<T>(res: Response): Promise<ApiResponse<T>> {
   }
 }
 
+export type PushNotificationDevice = {
+  userId: string;
+  userEmail: string | null;
+  userName: string | null;
+  platform: string;
+  tokenSuffix: string;
+  updatedAt: string;
+};
+
 export type PushNotificationStats = {
   fcmConfigured: boolean;
   fcmInitError?: string | null;
@@ -49,6 +58,23 @@ export type PushNotificationStats = {
   usersWithTokens: number;
   iosDevices: number;
   androidDevices: number;
+  devices?: PushNotificationDevice[];
+};
+
+export type PushNotificationSendError = {
+  platform: string;
+  tokenSuffix: string;
+  code: string;
+  message: string;
+};
+
+export type SendPushNotificationResult = {
+  sent: number;
+  failed: number;
+  recipientCount: number;
+  tokenCount: number;
+  fcmConfigured: boolean;
+  errors?: PushNotificationSendError[];
 };
 
 export type SendPushNotificationPayload = {
@@ -58,14 +84,6 @@ export type SendPushNotificationPayload = {
   userId?: string;
   membership?: string;
   data?: Record<string, string>;
-};
-
-export type SendPushNotificationResult = {
-  sent: number;
-  failed: number;
-  recipientCount: number;
-  tokenCount: number;
-  fcmConfigured: boolean;
 };
 
 export type ApiResponse<T> = {
