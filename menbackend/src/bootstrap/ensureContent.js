@@ -8,6 +8,7 @@ const {
   ArticleCategory,
   HomeProTip,
   HospitalCategory,
+  OnboardingStorySetting,
 } = require('../models');
 const {
   hospitals,
@@ -18,6 +19,7 @@ const {
   promoCodes,
   articles,
   homeProTips,
+  onboardingStorySetting,
 } = require('../data/seedContent');
 
 async function ensureHospitals() {
@@ -122,6 +124,14 @@ async function ensureArticleCategories() {
   }
 }
 
+async function ensureOnboardingStory() {
+  const settings = await OnboardingStorySetting.findByPk('default');
+  if (!settings) {
+    await OnboardingStorySetting.create(onboardingStorySetting);
+    console.log('Seeded onboarding story');
+  }
+}
+
 async function ensureContent() {
   await ensureHospitalCategories();
   await ensureArticleCategories();
@@ -131,6 +141,7 @@ async function ensureContent() {
   await ensureProductDetailSections();
   await ensureArticles();
   await ensureHomeProTips();
+  await ensureOnboardingStory();
 }
 
 module.exports = { ensureContent };

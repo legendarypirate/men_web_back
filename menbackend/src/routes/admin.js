@@ -22,6 +22,7 @@ const {
   HospitalCategory,
   CoachProgram,
   CoachSetting,
+  OnboardingStorySetting,
   PromoCode,
   Feedback,
   QuizStage,
@@ -1309,6 +1310,56 @@ router.post('/notifications/send', adminRequired, async (req, res, next) => {
     if (err.statusCode) {
       return fail(res, err.message, err.statusCode);
     }
+    next(err);
+  }
+});
+
+function normalizeStorySlides(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((slide, index) => ({
+      ...slide,
+      sortOrder: slide.sortOrder ?? index,
+    }))
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
+
+// --- Onboarding story ---
+router.get('/onboarding-story', adminRequired, async (req, res, next) => {
+  try {
+    let settings = await OnboardingStorySetting.findByPk('default');
+    if (!settings) {
+      settings = await OnboardingStorySetting.create({ id: 'default' });
+    }
+    return ok(res, { story: settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/onboarding-story', adminRequired, async (req, res, next) => {
+  try {
+    let settings = await OnboardingStorySetting.findByPk('default');
+    if (!settings) {
+      settings = await OnboardingStorySetting.create({ id: 'default' });
+    }
+
+    const nextSlides = normalizeStorySlides(req.body.slides ?? settings.slides);
+    const slidesChanged =
+      JSON.stringify(nextSlides) !== JSON.stringify(settings.slides || []);
+
+    const payload = {
+      active: req.body.active ?? settings.active,
+      headerTitle: req.body.headerTitle ?? settings.headerTitle,
+      headerSubtitle: req.body.headerSubtitle ?? settings.headerSubtitle,
+      finalButtonLabel: req.body.finalButtonLabel ?? settings.finalButtonLabel,
+      slides: nextSlides,
+      version: slidesChanged ? (settings.version || 1) + 1 : settings.version,
+    };
+
+    await settings.update(payload);
+    return ok(res, { story: settings }, 'Story хадгалагдлаа');
+  } catch (err) {
     next(err);
   }
 });
