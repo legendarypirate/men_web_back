@@ -636,6 +636,103 @@ const onboardingStorySetting = {
   ],
 };
 
+const faqArticles = [
+  {
+    id: 'a1f0c0de-0001-4b11-8c01-000000000001',
+    category: 'FAQ',
+    title: 'Кегел дасгал гэж юу вэ?',
+    excerpt: 'Хэрхэн ажилладаг, ямар үр дүн өгөхийг үзнэ үү.',
+    tag: 'FAQ',
+    readMinutes: 3,
+    sortOrder: 0,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&h=720',
+    storySlides: [
+      {
+        isCover: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&h=1400',
+        accentLine: 'КЕГЕЛ',
+        line2: 'ДАСГАЛ ГЭЖ ЮУ ВЭ?',
+        line3: 'Өдөр бүрийн 5–10 минутын дасгал',
+      },
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '1',
+        line2: 'Аарцагны булчинг бэхжүүлнэ',
+        body: 'Кегел нь аарцагны ёроолын булчинг чангалж, тайвшруулах дасгал юм.',
+      },
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '2',
+        line2: 'Хаана ч хийж болно',
+        body: 'Сууж, хэвтэж, зогсож хийж болно. Tenkhee таны түвшинд тохирсон төлөвлөгөө өгнө.',
+      },
+    ],
+  },
+  {
+    id: 'a1f0c0de-0001-4b11-8c01-000000000002',
+    category: 'FAQ',
+    title: 'Хөндгөрийн фитнес гэж юу вэ?',
+    excerpt: 'Хэрхэн ажилладаг, ямар үр дүн өгөхийг үзнэ үү.',
+    tag: 'FAQ',
+    readMinutes: 3,
+    sortOrder: 1,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&h=720',
+    storySlides: [
+      {
+        isCover: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&h=1400',
+        accentLine: 'GROIN',
+        line2: 'ХӨНДГӨРИЙН ФИТНЕС',
+        line3: 'Кегелийн үр дүнг нэмэгдүүлнэ',
+      },
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '1',
+        line2: 'Гуя, таз, аарцагыг хамтад нь',
+        body: 'Хөндгөрийн фитнес нь гуяны дотор тал, таз, аарцагны булчинг хамтад нь ажиллуулна.',
+      },
+    ],
+  },
+  {
+    id: 'a1f0c0de-0001-4b11-8c01-000000000003',
+    category: 'FAQ',
+    title: 'Өдөр тутмын сорил гэж юу вэ?',
+    excerpt: 'Хэрхэн ажилладаг, ямар үр дүн өгөхийг үзнэ үү.',
+    tag: 'FAQ',
+    readMinutes: 3,
+    sortOrder: 2,
+    published: true,
+    imageUrl:
+      'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=900&h=720',
+    storySlides: [
+      {
+        isCover: true,
+        imageUrl:
+          'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=900&h=1400',
+        accentLine: 'CHALLENGE',
+        line2: 'ӨДӨР ТУТМЫН СОРИЛ',
+        line3: 'Жижиг дадал, том өөрчлөлт',
+      },
+      {
+        imageUrl:
+          'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&h=1400',
+        accentLine: '1',
+        line2: 'Нойр, ус, сэргээлт',
+        body: 'Өдөр тутмын сорил нь дасгалаас гадна нойр, ус, амралт зэрэг эрүүл дадлыг бэхжүүлнэ.',
+      },
+    ],
+  },
+];
+
 module.exports = {
   hospitals,
   hospitalCategories,
@@ -644,6 +741,7 @@ module.exports = {
   kegelDetailSections,
   promoCodes,
   articles,
+  faqArticles,
   homeProTips,
   onboardingStorySetting,
 };

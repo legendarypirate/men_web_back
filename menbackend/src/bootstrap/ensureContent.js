@@ -18,6 +18,7 @@ const {
   kegelDetailSections,
   promoCodes,
   articles,
+  faqArticles,
   homeProTips,
   onboardingStorySetting,
 } = require('../data/seedContent');
@@ -84,6 +85,7 @@ async function ensureHospitalCategories() {
 
 const DEFAULT_ARTICLE_CATEGORIES = [
   'Шилдэг сонголтууд',
+  'FAQ',
   'Бэлгийн эрүүл мэнд',
   'Сэргээлт',
   'Хоол тэжээл',
@@ -124,6 +126,28 @@ async function ensureArticleCategories() {
   }
 }
 
+async function ensureFaqArticles() {
+  const { randomUUID } = require('crypto');
+  let created = 0;
+  for (const article of faqArticles) {
+    const existing = await Article.findByPk(article.id);
+    if (existing) continue;
+    await Article.create(article);
+    created += 1;
+  }
+  if (created > 0) {
+    console.log(`Seeded ${created} FAQ articles`);
+  }
+
+  const [, categoryCreated] = await ArticleCategory.findOrCreate({
+    where: { name: 'FAQ' },
+    defaults: { id: randomUUID(), sortOrder: 1 },
+  });
+  if (categoryCreated) {
+    console.log('Seeded FAQ article category');
+  }
+}
+
 async function ensureOnboardingStory() {
   const settings = await OnboardingStorySetting.findByPk('default');
   if (!settings) {
@@ -140,6 +164,7 @@ async function ensureContent() {
   await ensureCoachContent();
   await ensureProductDetailSections();
   await ensureArticles();
+  await ensureFaqArticles();
   await ensureHomeProTips();
   await ensureOnboardingStory();
 }
