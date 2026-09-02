@@ -19,6 +19,7 @@ const HospitalCategory = require('./HospitalCategory');
 const CoachSetting = require('./CoachSetting');
 const CoachProgram = require('./CoachProgram');
 const PromoCode = require('./PromoCode');
+const HomeProTip = require('./HomeProTip');
 const OnboardingStorySetting = require('./OnboardingStorySetting');
 const Feedback = require('./Feedback');
 const QuizStage = require('./QuizStage');
