@@ -508,6 +508,14 @@ export default function ArticlesPage() {
                 const result = await api.upload.image(file);
                 return result.url;
               }}
+              onUploadVideo={async (file) => {
+                const result = await api.upload.video(file);
+                return {
+                  url: result.url,
+                  thumbnailUrl: result.thumbnailUrl,
+                  duration: result.duration,
+                };
+              }}
             />
 
             {(editing.storySlides?.length || 0) === 0 && editing.title.trim() && (

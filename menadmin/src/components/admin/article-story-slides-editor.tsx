@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Plus, Sparkles, Trash2, Video } from 'lucide-react';
 import {
   ArticleStorySlide,
   buildStorySlidesFromArticle,
@@ -9,6 +9,7 @@ import {
 } from '@/lib/article-story-slides';
 import { Article } from '@/lib/api';
 import { ImageUploadField } from '@/components/admin/image-upload-field';
+import { VideoUploadField } from '@/components/admin/video-upload-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,9 @@ type Props = {
   slides: ArticleStorySlide[];
   onChange: (slides: ArticleStorySlide[]) => void;
   onUploadImage: (file: File) => Promise<string>;
+  onUploadVideo: (
+    file: File
+  ) => Promise<{ url: string; thumbnailUrl?: string; duration?: number }>;
 };
 
 export function ArticleStorySlidesEditor({
@@ -27,6 +31,7 @@ export function ArticleStorySlidesEditor({
   slides,
   onChange,
   onUploadImage,
+  onUploadVideo,
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(slides.length ? 0 : null);
 
@@ -65,8 +70,7 @@ export function ArticleStorySlidesEditor({
         <div>
           <h3 className="font-semibold">Story slides</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Мэдлэг tab дахь story слайдууд. Cover slide-д accentLine улаан, line2/line3 цагаан
-            гарчиг болно.
+            Мэдлэг/FAQ story слайдууд. Слайд бүрт зураг эсвэл видео байршуулж болно.
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={generateFromArticle}>
@@ -95,7 +99,10 @@ export function ArticleStorySlidesEditor({
               onClick={() => setExpanded(isOpen ? null : index)}
             >
               <span className="truncate text-sm font-medium">{label}</span>
-              {isOpen ? <ChevronUp className="h-4 w-4 shrink-0" /> : <ChevronDown className="h-4 w-4 shrink-0" />}
+              <span className="flex shrink-0 items-center gap-2">
+                {slide.videoUrl ? <Video className="h-4 w-4 text-emerald-600" /> : null}
+                {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </span>
             </button>
 
             {isOpen && (
@@ -146,23 +153,43 @@ export function ArticleStorySlidesEditor({
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <ImageUploadField
-                    label="Slide зураг"
-                    value={slide.imageUrl}
-                    onChange={(url) => update(index, { imageUrl: url })}
-                    onUpload={onUploadImage}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <VideoUploadField
+                    label="Slide видео"
+                    value={slide.videoUrl}
+                    onUpload={onUploadVideo}
+                    onChange={(url, meta) => {
+                      if (!url) {
+                        update(index, { videoUrl: null });
+                        return;
+                      }
+                      update(index, {
+                        videoUrl: url,
+                        imageUrl: meta?.thumbnailUrl || slide.imageUrl || null,
+                        durationSeconds: meta?.duration
+                          ? Math.max(2, Math.round(meta.duration))
+                          : slide.durationSeconds,
+                      });
+                    }}
                   />
-                  {article.imageUrl && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => update(index, { imageUrl: article.imageUrl || null })}
-                    >
-                      Cover зураг ашиглах
-                    </Button>
-                  )}
+                  <div className="space-y-2">
+                    <ImageUploadField
+                      label="Slide зураг"
+                      value={slide.imageUrl}
+                      onChange={(url) => update(index, { imageUrl: url })}
+                      onUpload={onUploadImage}
+                    />
+                    {article.imageUrl && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => update(index, { imageUrl: article.imageUrl || null })}
+                      >
+                        Cover зураг ашиглах
+                      </Button>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">

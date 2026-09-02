@@ -303,6 +303,14 @@ export default function FaqStoriesPage() {
               const result = await api.upload.image(file);
               return result.url;
             }}
+            onUploadVideo={async (file) => {
+              const result = await api.upload.video(file);
+              return {
+                url: result.url,
+                thumbnailUrl: result.thumbnailUrl,
+                duration: result.duration,
+              };
+            }}
           />
 
           <div className="flex gap-2">

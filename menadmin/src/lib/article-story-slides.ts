@@ -2,6 +2,8 @@ import { Article } from '@/lib/api';
 
 export type ArticleStorySlide = {
   imageUrl?: string | null;
+  videoUrl?: string | null;
+  durationSeconds?: number;
   accentLine?: string | null;
   line2?: string | null;
   line3?: string | null;
@@ -12,7 +14,8 @@ export type ArticleStorySlide = {
 function slidesHaveContent(slides: ArticleStorySlide[]): boolean {
   return slides.some((slide) => {
     const imageUrl = typeof slide.imageUrl === 'string' ? slide.imageUrl.trim() : '';
-    if (imageUrl) return true;
+    const videoUrl = typeof slide.videoUrl === 'string' ? slide.videoUrl.trim() : '';
+    if (imageUrl || videoUrl) return true;
     return [slide.line2, slide.line3, slide.body].some(
       (value) => typeof value === 'string' && value.trim().length > 0
     );
@@ -24,6 +27,7 @@ export { slidesHaveContent };
 export function emptyStorySlide(isCover = false): ArticleStorySlide {
   return {
     imageUrl: null,
+    videoUrl: null,
     accentLine: isCover ? null : '1',
     line2: null,
     line3: null,

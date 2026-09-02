@@ -185,6 +185,8 @@ export type WorkoutProgram = {
 
 export type ArticleStorySlide = {
   imageUrl?: string | null;
+  videoUrl?: string | null;
+  durationSeconds?: number;
   accentLine?: string | null;
   line2?: string | null;
   line3?: string | null;
