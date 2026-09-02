@@ -28,6 +28,7 @@ const emptyFaq = (): Article => ({
   isNew: false,
   sortOrder: 0,
   published: true,
+  isOnboarding: false,
   storySlides: [],
 });
 
@@ -100,13 +101,34 @@ export default function FaqStoriesPage() {
     await load();
   }
 
+  async function handleSetOnboarding(article: Article) {
+    if (article.isOnboarding) return;
+    try {
+      await api.articles.update(article.id, {
+        isOnboarding: true,
+        published: true,
+      });
+      setEditing((current) => {
+        if (!current) return current;
+        if (current.id === article.id) {
+          return { ...current, isOnboarding: true, published: true };
+        }
+        return { ...current, isOnboarding: false };
+      });
+      setError('');
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Эхлэл болгоход алдаа');
+    }
+  }
+
   if (loading) return <LoadingState />;
 
   return (
     <div className="space-y-6 max-w-4xl">
       <PageHeader
         title="FAQ story"
-        subtitle="Нүүр дээрх info товч → энэ жагсаалт. Карт дарахад story нээгдэнэ."
+        subtitle="Нүүр дээрх info товч → энэ жагсаалт. «Эхлэл болгох» нь апп анх нээгдэхэд заавал үзүүлэх story. Зөвхөн нэг FAQ эхлэл байж болно."
         action={
           <AddButton
             label="FAQ нэмэх"
@@ -144,11 +166,32 @@ export default function FaqStoriesPage() {
               <div className="h-16 w-24 rounded-lg bg-muted" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-semibold truncate">{article.title}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-semibold truncate">{article.title}</p>
+                {article.isOnboarding && (
+                  <span className="shrink-0 rounded-full bg-red-500/10 px-2 py-0.5 text-xs font-semibold text-red-600">
+                    Эхлэл
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-muted-foreground truncate">
                 {article.excerpt}
               </p>
             </div>
+            {article.isOnboarding ? (
+              <Button type="button" variant="secondary" size="sm" disabled>
+                Эхлэл
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleSetOnboarding(article)}
+              >
+                Эхлэл болгох
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -225,6 +268,27 @@ export default function FaqStoriesPage() {
                   checked={editing.published}
                   onCheckedChange={(checked) =>
                     setEditing({ ...editing, published: checked })
+                  }
+                />
+              </div>
+            </div>
+            <div className="flex items-end sm:col-span-2">
+              <div className="flex items-center justify-between rounded-lg border p-3 w-full gap-4">
+                <div>
+                  <Label htmlFor="faq-onboarding">Эхлэл (onboarding)</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Апп анх нээгдэхэд энэ story-г заавал үзүүлнэ. Өмнөх эхлэл автоматаар цуцлагдана.
+                  </p>
+                </div>
+                <Switch
+                  id="faq-onboarding"
+                  checked={Boolean(editing.isOnboarding)}
+                  onCheckedChange={(checked) =>
+                    setEditing({
+                      ...editing,
+                      isOnboarding: checked,
+                      published: checked ? true : editing.published,
+                    })
                   }
                 />
               </div>

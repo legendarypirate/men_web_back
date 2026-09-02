@@ -8,7 +8,6 @@ const {
   ArticleCategory,
   HomeProTip,
   HospitalCategory,
-  OnboardingStorySetting,
 } = require('../models');
 const {
   hospitals,
@@ -20,7 +19,6 @@ const {
   articles,
   faqArticles,
   homeProTips,
-  onboardingStorySetting,
 } = require('../data/seedContent');
 
 async function ensureHospitals() {
@@ -146,13 +144,17 @@ async function ensureFaqArticles() {
   if (categoryCreated) {
     console.log('Seeded FAQ article category');
   }
-}
 
-async function ensureOnboardingStory() {
-  const settings = await OnboardingStorySetting.findByPk('default');
-  if (!settings) {
-    await OnboardingStorySetting.create(onboardingStorySetting);
-    console.log('Seeded onboarding story');
+  const onboardingCount = await Article.count({ where: { isOnboarding: true } });
+  if (onboardingCount === 0) {
+    const firstFaq = await Article.findOne({
+      where: { category: 'FAQ' },
+      order: [['sortOrder', 'ASC']],
+    });
+    if (firstFaq) {
+      await firstFaq.update({ isOnboarding: true });
+      console.log('Marked first FAQ as onboarding story');
+    }
   }
 }
 
@@ -166,7 +168,6 @@ async function ensureContent() {
   await ensureArticles();
   await ensureFaqArticles();
   await ensureHomeProTips();
-  await ensureOnboardingStory();
 }
 
 module.exports = { ensureContent };

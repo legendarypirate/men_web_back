@@ -18,7 +18,6 @@ import {
   Hospital,
   Stethoscope,
   UserCircle2,
-  BookOpen,
   CircleHelp,
   type LucideIcon,
 } from 'lucide-react';
@@ -38,7 +37,6 @@ export const adminNav: NavItem[] = [
   { href: '/sessions', label: 'Дасгалын сесс', icon: Activity, group: 'users' },
   { href: '/workouts', label: 'Дасгалууд', icon: Dumbbell, group: 'content' },
   { href: '/coach', label: 'Коуч', icon: UserCircle2, group: 'content' },
-  { href: '/onboarding-story', label: 'Нүүр story', icon: BookOpen, group: 'content' },
   { href: '/faq', label: 'FAQ story', icon: CircleHelp, group: 'content' },
   { href: '/hospital-categories', label: 'Эмнэлгийн төрөл', icon: Stethoscope, group: 'content' },
   { href: '/hospitals', label: 'Эмнэлэг', icon: Hospital, group: 'content' },

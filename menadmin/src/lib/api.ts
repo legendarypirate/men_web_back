@@ -134,16 +134,6 @@ export type WorkoutIntroSlide = {
   gradientEnd?: string;
 };
 
-export type OnboardingStory = {
-  id?: string;
-  active: boolean;
-  version: number;
-  headerTitle: string;
-  headerSubtitle: string;
-  finalButtonLabel: string;
-  slides: WorkoutIntroSlide[];
-};
-
 export type WorkoutExercise = {
   id?: string;
   name: string;
@@ -218,6 +208,7 @@ export type Article = {
   isNew: boolean;
   sortOrder: number;
   published: boolean;
+  isOnboarding?: boolean;
 };
 
 export type HealthBite = {
@@ -705,15 +696,6 @@ export const api = {
       }),
     remove: (id: string) =>
       request<null>(`/api/admin/home-pro-tips/${id}`, { method: 'DELETE' }),
-  },
-
-  onboardingStory: {
-    get: () => request<{ story: OnboardingStory }>('/api/admin/onboarding-story'),
-    update: (data: Partial<OnboardingStory>) =>
-      request<{ story: OnboardingStory }>('/api/admin/onboarding-story', {
-        method: 'PUT',
-        body: JSON.stringify(data),
-      }),
   },
 
   plans: {

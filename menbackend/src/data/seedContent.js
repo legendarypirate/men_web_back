@@ -595,47 +595,6 @@ const hospitalCategories = [
   },
 ];
 
-const onboardingStorySetting = {
-  id: 'default',
-  active: true,
-  version: 1,
-  headerTitle: 'Tenkhee',
-  headerSubtitle: 'Танилцуулга',
-  finalButtonLabel: 'Эхлэх',
-  slides: [
-    {
-      sortOrder: 0,
-      title: 'Ямар ч газар, ямар ч нөхцөлд дасгал хий',
-      subtitle: 'Ойролцоох хүн анзаарахгүй',
-      body: 'Tenkhee-ийн дасгалуудыг хаана ч, хэзээ ч хийж болно.',
-      durationSeconds: 8,
-      gradientStart: '#0A0A0A',
-      gradientMid: '#1A1A2E',
-      gradientEnd: '#000000',
-    },
-    {
-      sortOrder: 1,
-      title: 'Өдөр бүр Кегел дасгал',
-      subtitle: 'Хувийн төлөвлөгөө',
-      body: 'Таны түвшинд тохирсон дасгалын төлөвлөгөөг өдөр бүр хүлээн авна.',
-      durationSeconds: 8,
-      gradientStart: '#1A0A2E',
-      gradientMid: '#2D1B69',
-      gradientEnd: '#11022A',
-    },
-    {
-      sortOrder: 2,
-      title: 'Бэлгийн эрүүл мэндээ сайжруул',
-      subtitle: 'Мэргэжлийн мэдээлэл',
-      body: 'Insights, коуч, эмнэлгийн мэдээлэл — бүгд нэг апп-д.',
-      durationSeconds: 8,
-      gradientStart: '#0A2E1A',
-      gradientMid: '#1B6939',
-      gradientEnd: '#02220D',
-    },
-  ],
-};
-
 const faqArticles = [
   {
     id: 'a1f0c0de-0001-4b11-8c01-000000000001',
@@ -646,6 +605,7 @@ const faqArticles = [
     readMinutes: 3,
     sortOrder: 0,
     published: true,
+    isOnboarding: true,
     imageUrl:
       'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&h=720',
     storySlides: [
@@ -743,5 +703,4 @@ module.exports = {
   articles,
   faqArticles,
   homeProTips,
-  onboardingStorySetting,
 };

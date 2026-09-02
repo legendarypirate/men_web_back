@@ -22,7 +22,6 @@ const {
   HospitalCategory,
   CoachProgram,
   CoachSetting,
-  OnboardingStorySetting,
   PromoCode,
   Feedback,
   QuizStage,
@@ -453,6 +452,11 @@ router.get('/articles', adminRequired, async (req, res, next) => {
   }
 });
 
+async function setExclusiveOnboarding(articleId) {
+  await Article.update({ isOnboarding: false }, { where: {} });
+  await Article.update({ isOnboarding: true }, { where: { id: articleId } });
+}
+
 router.post('/articles', adminRequired, async (req, res, next) => {
   try {
     const data = { ...req.body };
@@ -460,6 +464,9 @@ router.post('/articles', adminRequired, async (req, res, next) => {
       delete data.id;
     }
     const article = await Article.create(data);
+    if (data.isOnboarding) {
+      await setExclusiveOnboarding(article.id);
+    }
     return ok(res, { article }, 'Нийтлэл нэмэгдлээ', 201);
   } catch (err) {
     next(err);
@@ -472,6 +479,14 @@ router.put('/articles/:id', adminRequired, async (req, res, next) => {
     if (!article) return fail(res, 'Нийтлэл олдсонгүй', 404);
     const { id: _ignoredId, ...updates } = req.body;
     await article.update(updates);
+    if (Object.prototype.hasOwnProperty.call(updates, 'isOnboarding')) {
+      if (updates.isOnboarding) {
+        await setExclusiveOnboarding(article.id);
+      } else {
+        await article.update({ isOnboarding: false });
+      }
+    }
+    await article.reload();
     return ok(res, { article }, 'Нийтлэл шинэчлэгдлээ');
   } catch (err) {
     next(err);
@@ -1310,56 +1325,6 @@ router.post('/notifications/send', adminRequired, async (req, res, next) => {
     if (err.statusCode) {
       return fail(res, err.message, err.statusCode);
     }
-    next(err);
-  }
-});
-
-function normalizeStorySlides(raw) {
-  if (!Array.isArray(raw)) return [];
-  return raw
-    .map((slide, index) => ({
-      ...slide,
-      sortOrder: slide.sortOrder ?? index,
-    }))
-    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
-}
-
-// --- Onboarding story ---
-router.get('/onboarding-story', adminRequired, async (req, res, next) => {
-  try {
-    let settings = await OnboardingStorySetting.findByPk('default');
-    if (!settings) {
-      settings = await OnboardingStorySetting.create({ id: 'default' });
-    }
-    return ok(res, { story: settings });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.put('/onboarding-story', adminRequired, async (req, res, next) => {
-  try {
-    let settings = await OnboardingStorySetting.findByPk('default');
-    if (!settings) {
-      settings = await OnboardingStorySetting.create({ id: 'default' });
-    }
-
-    const nextSlides = normalizeStorySlides(req.body.slides ?? settings.slides);
-    const slidesChanged =
-      JSON.stringify(nextSlides) !== JSON.stringify(settings.slides || []);
-
-    const payload = {
-      active: req.body.active ?? settings.active,
-      headerTitle: req.body.headerTitle ?? settings.headerTitle,
-      headerSubtitle: req.body.headerSubtitle ?? settings.headerSubtitle,
-      finalButtonLabel: req.body.finalButtonLabel ?? settings.finalButtonLabel,
-      slides: nextSlides,
-      version: slidesChanged ? (settings.version || 1) + 1 : settings.version,
-    };
-
-    await settings.update(payload);
-    return ok(res, { story: settings }, 'Story хадгалагдлаа');
-  } catch (err) {
     next(err);
   }
 });
