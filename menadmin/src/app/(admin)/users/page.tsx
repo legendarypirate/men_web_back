@@ -7,7 +7,8 @@ import { TableSelect } from '@/components/custom/table-select';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
 import { useConfirm } from '@/components/custom/confirm-provider';
 
-const premiumMemberships = new Set(['monthly', 'yearly', 'lifetime', 'platinum']);
+const premiumMemberships = new Set(['monthly', 'yearly']);
+const userMembershipOptions = ['free', 'monthly', 'yearly'] as const;
 
 function membershipAllowsDates(membership: string) {
   return premiumMemberships.has(membership);
@@ -17,9 +18,23 @@ const membershipLabels: Record<string, string> = {
   free: 'Free',
   monthly: 'Сар бүр',
   yearly: 'Жил бүр',
-  lifetime: 'Насан турш',
-  platinum: 'Platinum',
 };
+
+function isAdminUser(user: User) {
+  return user.role === 'admin';
+}
+
+function isAdminUser(user: User) {
+  return user.role === 'admin';
+}
+
+function isAssignableMembership(
+  membership: string
+): membership is (typeof userMembershipOptions)[number] {
+  return userMembershipOptions.includes(
+    membership as (typeof userMembershipOptions)[number]
+  );
+}
 
 function toDateInput(value?: string | null) {
   if (!value) return '';
@@ -50,6 +65,8 @@ export default function UsersPage() {
   }, []);
 
   async function handleMembership(id: string, membership: string) {
+    const current = users.find((u) => u.id === id);
+    if (current && isAdminUser(current)) return;
     await api.users.update(id, { membership } as Partial<User>);
     load();
   }
@@ -60,6 +77,7 @@ export default function UsersPage() {
     value: string
   ) {
     const current = users.find((u) => u.id === id);
+    if (current && isAdminUser(current)) return;
     if (current && !membershipAllowsDates(current.membership)) {
       setError('Эхлээд гишүүнчлэлийг free-ээс өөр сонгоно уу');
       return;
@@ -110,43 +128,60 @@ export default function UsersPage() {
           {
             key: 'membership',
             label: 'Гишүүнчлэл',
-            render: (u) => (
-              <TableSelect
-                value={u.membership}
-                onValueChange={(v) => handleMembership(u.id, v)}
-                options={['free', 'monthly', 'yearly', 'lifetime', 'platinum'].map((m) => ({
-                  value: m,
-                  label: membershipLabels[m] || m,
-                }))}
-              />
-            ),
+            render: (u) => {
+              if (isAdminUser(u)) {
+                return <StatusBadge status="platinum" />;
+              }
+              if (!isAssignableMembership(u.membership)) {
+                return <StatusBadge status={u.membership} />;
+              }
+              return (
+                <TableSelect
+                  value={u.membership}
+                  onValueChange={(v) => handleMembership(u.id, v)}
+                  options={userMembershipOptions.map((m) => ({
+                    value: m,
+                    label: membershipLabels[m] || m,
+                  }))}
+                />
+              );
+            },
           },
           {
             key: 'membershipStartedAt',
             label: 'Эхлэх',
-            render: (u) => (
-              <input
-                type="date"
-                className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50] disabled:cursor-not-allowed disabled:opacity-50"
-                value={toDateInput(u.membershipStartedAt)}
-                disabled={!membershipAllowsDates(u.membership)}
-                title={
-                  membershipAllowsDates(u.membership)
-                    ? undefined
-                    : 'Эхлээд гишүүнчлэл сонгоно уу'
-                }
-                onChange={(e) =>
-                  handleDate(u.id, 'membershipStartedAt', e.target.value)
-                }
-              />
-            ),
+            render: (u) =>
+              isAdminUser(u) ? (
+                <input
+                  type="date"
+                  className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50] disabled:cursor-not-allowed disabled:opacity-50"
+                  value={toDateInput(u.membershipStartedAt)}
+                  disabled
+                  title="Админ гишүүнчлэлийг засах боломжгүй"
+                />
+              ) : (
+                <input
+                  type="date"
+                  className="h-8 rounded border border-[#dfe6e9] px-2 text-[12px] text-[#2c3e50] disabled:cursor-not-allowed disabled:opacity-50"
+                  value={toDateInput(u.membershipStartedAt)}
+                  disabled={!membershipAllowsDates(u.membership)}
+                  title={
+                    membershipAllowsDates(u.membership)
+                      ? undefined
+                      : 'Эхлээд гишүүнчлэл сонгоно уу'
+                  }
+                  onChange={(e) =>
+                    handleDate(u.id, 'membershipStartedAt', e.target.value)
+                  }
+                />
+              ),
           },
           {
             key: 'membershipExpiresAt',
             label: 'Дуусах',
             render: (u) =>
-              u.membership === 'platinum' || u.membership === 'lifetime' ? (
-                <span className="text-[12px] text-[#95a5a6]">Насан турш</span>
+              isAdminUser(u) ? (
+                <span className="text-[12px] text-[#95a5a6]">—</span>
               ) : (
                 <input
                   type="date"

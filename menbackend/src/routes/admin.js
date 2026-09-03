@@ -41,6 +41,8 @@ const {
   mapPlanToMembership,
   adminPublicUser,
   hasActivePremium,
+  ensureAdminPlatinum,
+  ASSIGNABLE_MEMBERSHIPS,
 } = require('../utils/membership');
 const { applyKindDefaults, workoutListWhere } = require('../utils/workoutKind');
 
@@ -146,11 +148,13 @@ router.get('/users', adminRequired, async (req, res, next) => {
       order: [['createdAt', 'DESC']],
       attributes: { exclude: ['passwordHash'] },
     });
-    const mapped = users.map((user) => {
+    const mapped = [];
+    for (const user of users) {
+      await ensureAdminPlatinum(user);
       const json = user.toJSON();
       json.hasActivePremium = hasActivePremium(user);
-      return json;
-    });
+      mapped.push(json);
+    }
     return ok(res, { users: mapped });
   } catch (err) {
     next(err);
@@ -173,7 +177,15 @@ router.patch('/users/:id', adminRequired, async (req, res, next) => {
       'membershipExpiresAt',
     ];
 
-    if (req.body.membership !== undefined) {
+    if (user.role === 'admin') {
+      delete req.body.membership;
+      delete req.body.membershipStartedAt;
+      delete req.body.membershipExpiresAt;
+      applyAdminMembershipUpdate(user, 'platinum');
+    } else if (req.body.membership !== undefined) {
+      if (!ASSIGNABLE_MEMBERSHIPS.includes(req.body.membership)) {
+        return fail(res, 'Гишүүнчлэлийг Free, Сар бүр, Жил бүр-ээс сонгоно уу', 400);
+      }
       applyAdminMembershipUpdate(user, req.body.membership, req.body);
     }
 

@@ -2,20 +2,20 @@ import { Article, ArticleStorySlide, StoryTextAlign } from '@/lib/api';
 
 export type { ArticleStorySlide, StoryTextAlign };
 
-export const TITLE_FONT_MIN = 18;
-export const TITLE_FONT_MAX = 48;
+export const TITLE_FONT_MIN = 16;
+export const TITLE_FONT_MAX = 42;
 export const BODY_FONT_MIN = 12;
-export const BODY_FONT_MAX = 24;
+export const BODY_FONT_MAX = 22;
 
-export const DEFAULT_COVER_TITLE_SIZE = 28;
-export const DEFAULT_CONTENT_TITLE_SIZE = 30;
-export const DEFAULT_BODY_SIZE = 16;
+export const DEFAULT_COVER_TITLE_SIZE = 22;
+export const DEFAULT_CONTENT_TITLE_SIZE = 24;
+export const DEFAULT_BODY_SIZE = 14;
 
 export const TITLE_SIZE_PRESETS = [
-  { label: 'Жижиг', value: 22 },
-  { label: 'Дунд', value: 28 },
-  { label: 'Том', value: 34 },
-  { label: 'Маш том', value: 42 },
+  { label: 'Жижиг', value: 20 },
+  { label: 'Дунд', value: 24 },
+  { label: 'Том', value: 30 },
+  { label: 'Маш том', value: 36 },
 ] as const;
 
 function clamp(value: number, min: number, max: number) {
@@ -25,13 +25,15 @@ function clamp(value: number, min: number, max: number) {
 export function resolvedTitleFontSize(slide: ArticleStorySlide) {
   const fallback = slide.isCover ? DEFAULT_COVER_TITLE_SIZE : DEFAULT_CONTENT_TITLE_SIZE;
   const raw = slide.titleFontSize;
-  if (typeof raw !== 'number' || Number.isNaN(raw)) return fallback;
+  if (typeof raw !== 'number' || Number.isNaN(raw) || raw === 28 || raw === 30) {
+    return fallback;
+  }
   return clamp(raw, TITLE_FONT_MIN, TITLE_FONT_MAX);
 }
 
 export function resolvedBodyFontSize(slide: ArticleStorySlide) {
   const raw = slide.bodyFontSize;
-  if (typeof raw !== 'number' || Number.isNaN(raw)) return DEFAULT_BODY_SIZE;
+  if (typeof raw !== 'number' || Number.isNaN(raw) || raw === 16) return DEFAULT_BODY_SIZE;
   return clamp(raw, BODY_FONT_MIN, BODY_FONT_MAX);
 }
 

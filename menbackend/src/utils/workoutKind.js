@@ -92,6 +92,39 @@ async function findFeaturedKegelChallenge() {
   return null;
 }
 
+function isKegelLevel1(program) {
+  if (!program || program.kind !== 'kegel_challenge') return false;
+  const level = Number(program.challengeLevel);
+  if (Number.isFinite(level) && level > 0) return level === 1;
+  if (program.isToday === true) return true;
+  return String(program.level) === '1';
+}
+
+function shareKegelChallengeWorkoutFromLevel1(programs) {
+  const list = Array.isArray(programs) ? programs : [];
+  const level1 = list.find(
+    (program) => isKegelLevel1(program) && Array.isArray(program.exercises) && program.exercises.length > 0
+  );
+  if (!level1 || !Array.isArray(level1.exercises) || level1.exercises.length === 0) {
+    return list;
+  }
+
+  return list.map((program) => {
+    if (program.kind !== 'kegel_challenge') return program;
+    if (program.id === level1.id) return program;
+    return {
+      ...program,
+      durationMinutes: level1.durationMinutes,
+      exercises: level1.exercises,
+      levelPresets: level1.levelPresets,
+      introSlides: level1.introSlides,
+      videoUrl: program.videoUrl || level1.videoUrl,
+      totalSets: level1.totalSets,
+      totalSeconds: level1.totalSeconds,
+    };
+  });
+}
+
 module.exports = {
   WORKOUT_KINDS,
   KIND_DEFAULT_TAG,
@@ -100,4 +133,6 @@ module.exports = {
   workoutListWhere,
   applyKindDefaults,
   findFeaturedKegelChallenge,
+  shareKegelChallengeWorkoutFromLevel1,
+  isKegelLevel1,
 };

@@ -30,7 +30,9 @@ function isAdminGrantedPremium(user) {
 }
 
 function hasActivePremium(user) {
-  if (!user || !membershipIsPremium(user.membership)) return false;
+  if (!user) return false;
+  if (user.role === 'admin') return true;
+  if (!membershipIsPremium(user.membership)) return false;
   if (!user.membershipStartedAt) return false;
   if (user.membershipExpiresAt && user.membershipExpiresAt < new Date()) {
     return false;
@@ -38,8 +40,37 @@ function hasActivePremium(user) {
   return true;
 }
 
+function applyAdminPlatinum(user) {
+  if (!user || user.role !== 'admin') return false;
+  let changed = false;
+  if (user.membership !== 'platinum') {
+    user.membership = 'platinum';
+    changed = true;
+  }
+  if (!user.membershipStartedAt) {
+    user.membershipStartedAt = new Date();
+    changed = true;
+  }
+  if (user.membershipExpiresAt) {
+    user.membershipExpiresAt = null;
+    changed = true;
+  }
+  return changed;
+}
+
+async function ensureAdminPlatinum(user) {
+  if (applyAdminPlatinum(user)) {
+    await user.save();
+  }
+  return user;
+}
+
 async function resolveUserMembership(user) {
   if (!user) return user;
+
+  if (user.role === 'admin') {
+    return ensureAdminPlatinum(user);
+  }
 
   const latestPaid = await Payment.findOne({
     where: {
@@ -117,7 +148,18 @@ function adminPublicUser(user) {
   return json;
 }
 
+const ASSIGNABLE_MEMBERSHIPS = ['free', 'monthly', 'yearly'];
+
 function applyAdminMembershipUpdate(user, membership, body = {}) {
+  if (user.role === 'admin') {
+    applyAdminPlatinum(user);
+    return;
+  }
+
+  if (!ASSIGNABLE_MEMBERSHIPS.includes(membership)) {
+    return;
+  }
+
   user.membership = membership;
 
   if (membership === 'free') {
@@ -143,7 +185,7 @@ function applyAdminMembershipUpdate(user, membership, body = {}) {
     !user.membershipExpiresAt
   ) {
     user.membershipExpiresAt = computeMembershipExpiry(
-      membership === 'platinum' ? 'lifetime' : membership,
+      membership,
       user.membershipStartedAt || new Date()
     );
   }
@@ -159,4 +201,7 @@ module.exports = {
   enrichPublicUser,
   adminPublicUser,
   applyAdminMembershipUpdate,
+  applyAdminPlatinum,
+  ensureAdminPlatinum,
+  ASSIGNABLE_MEMBERSHIPS,
 };

@@ -13,7 +13,7 @@ const {
 } = require('../utils/streak');
 const { onWorkoutSessionSaved } = require('../services/workoutReminders');
 const { hasActivePremium, syncUserMembership } = require('../utils/membership');
-const { findFeaturedKegelChallenge, workoutListWhere } = require('../utils/workoutKind');
+const { findFeaturedKegelChallenge, workoutListWhere, shareKegelChallengeWorkoutFromLevel1, isKegelLevel1 } = require('../utils/workoutKind');
 const {
   applyKegelProgress,
   isKegelChallengeLockedForUser,
@@ -90,7 +90,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
         [{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC'],
       ],
     });
-    const mapped = programs.map(mapProgram);
+    const mapped = shareKegelChallengeWorkoutFromLevel1(programs.map(mapProgram));
     await applyKegelProgress(mapped, req.user);
     return ok(res, { programs: mapped });
   } catch (err) {
@@ -215,9 +215,19 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
       order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
     });
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
-    const mapped = [mapProgram(program)];
-    await applyKegelProgress(mapped, req.user);
-    return ok(res, { program: mapped[0] });
+    let mapped = mapProgram(program);
+    if (mapped.kind === 'kegel_challenge' && !isKegelLevel1(mapped)) {
+      const level1 = await findFeaturedKegelChallenge();
+      if (level1) {
+        mapped =
+          shareKegelChallengeWorkoutFromLevel1([mapProgram(level1), mapped]).find(
+            (item) => item.id === mapped.id
+          ) || mapped;
+      }
+    }
+    const withProgress = [mapped];
+    await applyKegelProgress(withProgress, req.user);
+    return ok(res, { program: withProgress[0] });
   } catch (err) {
     next(err);
   }
