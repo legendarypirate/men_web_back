@@ -19,6 +19,9 @@ import {
   Stethoscope,
   UserCircle2,
   CircleHelp,
+  Trophy,
+  StretchHorizontal,
+  Flame,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,7 +29,7 @@ export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
-  group: 'overview' | 'content' | 'commerce' | 'users';
+  group: 'overview' | 'workouts' | 'content' | 'commerce' | 'users';
 };
 
 export const adminNav: NavItem[] = [
@@ -35,7 +38,10 @@ export const adminNav: NavItem[] = [
   { href: '/notifications', label: 'Push мэдэгдэл', icon: Bell, group: 'users' },
   { href: '/feedback', label: 'Санал хүсэлт', icon: MessageSquare, group: 'users' },
   { href: '/sessions', label: 'Дасгалын сесс', icon: Activity, group: 'users' },
-  { href: '/workouts', label: 'Дасгалууд', icon: Dumbbell, group: 'content' },
+  { href: '/kegel-programs', label: 'Кегел хөтөлбөр', icon: Dumbbell, group: 'workouts' },
+  { href: '/kegel-challenges', label: 'Кегел сорилт', icon: Trophy, group: 'workouts' },
+  { href: '/pelvic-stretching', label: 'Pelvic Stretching', icon: StretchHorizontal, group: 'workouts' },
+  { href: '/groin-fitness', label: 'Groin Fitness', icon: Flame, group: 'workouts' },
   { href: '/coach', label: 'Коуч', icon: UserCircle2, group: 'content' },
   { href: '/faq', label: 'FAQ story', icon: CircleHelp, group: 'content' },
   { href: '/hospital-categories', label: 'Эмнэлгийн төрөл', icon: Stethoscope, group: 'content' },
@@ -55,6 +61,7 @@ export const adminNav: NavItem[] = [
 export const navGroups: { key: NavItem['group']; label: string }[] = [
   { key: 'overview', label: 'Ерөнхий' },
   { key: 'users', label: 'Хэрэглэгч' },
+  { key: 'workouts', label: 'Дасгал' },
   { key: 'content', label: 'Агуулга' },
   { key: 'commerce', label: 'Дэлгүүр & Төлбөр' },
 ];

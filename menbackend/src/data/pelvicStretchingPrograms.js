@@ -57,6 +57,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 19,
     equipment: 'None',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 1,
     exercises: [
@@ -74,6 +75,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 17,
     equipment: 'Mat/Towel',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 2,
     exercises: [
@@ -91,6 +93,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 17,
     equipment: 'Belt/Towel',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 3,
     exercises: [
@@ -109,6 +112,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 12,
     equipment: 'None',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 4,
     exercises: [
@@ -126,6 +130,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 15,
     equipment: 'Mat/Towel',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 5,
     exercises: [
@@ -144,6 +149,7 @@ const PELVIC_STRETCHING_PROGRAMS = [
     durationMinutes: 10,
     equipment: 'None',
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 6,
     exercises: [

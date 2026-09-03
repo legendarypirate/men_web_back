@@ -26,6 +26,8 @@ const {
   breathPhases,
   coreBracePhases,
 } = require('../data/exercisePhases');
+const { KEGEL_CHALLENGE_PROGRAMS } = require('../data/kegelChallengePrograms');
+const { inferKindFromTag } = require('../utils/workoutKind');
 const {
   hospitals,
   hospitalCategories,
@@ -237,6 +239,7 @@ const programs = [
     level: 'Advanced',
     durationMinutes: 17,
     tag: 'PELVIC STRETCHING',
+    kind: 'pelvic_stretching',
     isToday: false,
     sortOrder: 10,
     videoUrl: null,
@@ -262,6 +265,7 @@ const programs = [
       },
     ],
   },
+  ...KEGEL_CHALLENGE_PROGRAMS,
 ];
 
 async function seed() {
@@ -316,7 +320,10 @@ async function seed() {
 
   for (const program of programs) {
     const { exercises, ...programData } = program;
-    await WorkoutProgram.create(programData);
+    await WorkoutProgram.create({
+      ...programData,
+      kind: programData.kind || inferKindFromTag(programData.tag),
+    });
     for (let i = 0; i < exercises.length; i++) {
       await WorkoutExercise.create({
         ...exercises[i],

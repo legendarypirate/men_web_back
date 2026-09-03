@@ -174,7 +174,11 @@ export type WorkoutProgram = {
   durationMinutes: number;
   equipment?: string | null;
   tag: string;
+  kind?: string;
   isToday: boolean;
+  isLocked?: boolean;
+  challengeLevel?: number | null;
+  challengeDays?: number | null;
   sortOrder: number;
   videoUrl?: string | null;
   thumbnailUrl?: string | null;
@@ -602,10 +606,17 @@ export const api = {
   },
 
   workouts: {
-    list: (tag?: string) =>
-      request<{ programs: WorkoutProgram[] }>(
-        tag ? `/api/admin/workouts?tag=${encodeURIComponent(tag)}` : '/api/admin/workouts'
-      ),
+    list: (params?: string | { tag?: string; kind?: string }) => {
+      const query = new URLSearchParams();
+      if (typeof params === 'string') {
+        if (params) query.set('tag', params);
+      } else {
+        if (params?.tag) query.set('tag', params.tag);
+        if (params?.kind) query.set('kind', params.kind);
+      }
+      const suffix = query.toString() ? `?${query.toString()}` : '';
+      return request<{ programs: WorkoutProgram[] }>(`/api/admin/workouts${suffix}`);
+    },
     create: (data: Partial<WorkoutProgram> & { exercises?: WorkoutExercise[] }) =>
       request<{ program: WorkoutProgram }>('/api/admin/workouts', {
         method: 'POST',

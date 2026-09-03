@@ -6,6 +6,8 @@ async function start() {
   try {
     await sequelize.authenticate();
     await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
+    const { ensureWorkoutPrograms } = require('./bootstrap/ensureWorkoutPrograms');
+    await ensureWorkoutPrograms();
     const { startReminderScheduler } = require('./jobs/reminderScheduler');
     startReminderScheduler();
     console.log('Database connected');

@@ -13,6 +13,7 @@ const {
 } = require('../utils/streak');
 const { onWorkoutSessionSaved } = require('../services/workoutReminders');
 const { hasActivePremium, syncUserMembership } = require('../utils/membership');
+const { workoutListWhere } = require('../utils/workoutKind');
 
 const router = express.Router();
 
@@ -52,7 +53,11 @@ function mapProgram(program) {
     durationMinutes: json.durationMinutes,
     equipment: json.equipment || 'None',
     tag: json.tag,
+    kind: json.kind || 'kegel',
     isToday: json.isToday,
+    isLocked: Boolean(json.isLocked),
+    challengeLevel: json.challengeLevel ?? null,
+    challengeDays: json.challengeDays ?? null,
     videoUrl: json.videoUrl || null,
     thumbnailUrl: json.thumbnailUrl || null,
     introSlides: (json.introSlides || []).sort(
@@ -67,8 +72,7 @@ function mapProgram(program) {
 
 router.get('/', optionalAuth, async (req, res, next) => {
   try {
-    const tag = typeof req.query.tag === 'string' ? req.query.tag.trim() : '';
-    const where = tag ? { tag } : undefined;
+    const where = workoutListWhere(req.query);
     const programs = await WorkoutProgram.findAll({
       where,
       include: [{ model: WorkoutExercise, as: 'exercises' }],
@@ -86,12 +90,13 @@ router.get('/', optionalAuth, async (req, res, next) => {
 router.get('/today', optionalAuth, async (req, res, next) => {
   try {
     let program = await WorkoutProgram.findOne({
-      where: { isToday: true },
+      where: { isToday: true, kind: 'kegel' },
       include: [{ model: WorkoutExercise, as: 'exercises' }],
       order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
     });
     if (!program) {
       program = await WorkoutProgram.findOne({
+        where: { kind: 'kegel' },
         include: [{ model: WorkoutExercise, as: 'exercises' }],
         order: [
           ['sortOrder', 'ASC'],

@@ -21,12 +21,13 @@ router.get('/', authRequired, async (req, res, next) => {
     const hour = new Date().getHours();
 
     let todayProgram = await WorkoutProgram.findOne({
-      where: { isToday: true },
+      where: { isToday: true, kind: 'kegel' },
       include: [{ model: WorkoutExercise, as: 'exercises' }],
       order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
     });
     if (!todayProgram) {
       todayProgram = await WorkoutProgram.findOne({
+        where: { kind: 'kegel' },
         include: [{ model: WorkoutExercise, as: 'exercises' }],
         order: [['sortOrder', 'ASC']],
       });

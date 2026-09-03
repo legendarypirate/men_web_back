@@ -42,6 +42,7 @@ const {
   adminPublicUser,
   hasActivePremium,
 } = require('../utils/membership');
+const { applyKindDefaults, workoutListWhere } = require('../utils/workoutKind');
 
 const router = express.Router();
 
@@ -222,10 +223,16 @@ router.post(
   handleVideoUpload
 );
 
+async function setExclusiveKegelToday(programId) {
+  await WorkoutProgram.update(
+    { isToday: false },
+    { where: { kind: 'kegel', id: { [Op.ne]: programId } } }
+  );
+}
+
 router.get('/workouts', adminRequired, async (req, res, next) => {
   try {
-    const tag = typeof req.query.tag === 'string' ? req.query.tag.trim() : '';
-    const where = tag ? { tag } : undefined;
+    const where = workoutListWhere(req.query);
     const programs = await WorkoutProgram.findAll({
       where,
       include: [{ model: WorkoutExercise, as: 'exercises' }],
@@ -247,7 +254,11 @@ router.post('/workouts', adminRequired, async (req, res, next) => {
       return fail(res, 'id болон title шаардлагатай');
     }
 
-    const program = await WorkoutProgram.create(programData);
+    const normalized = applyKindDefaults(programData);
+    const program = await WorkoutProgram.create(normalized);
+    if (normalized.kind === 'kegel' && normalized.isToday) {
+      await setExclusiveKegelToday(program.id);
+    }
     for (let i = 0; i < exercises.length; i++) {
       await WorkoutExercise.create({
         ...exercises[i],
@@ -271,7 +282,14 @@ router.put('/workouts/:id', adminRequired, async (req, res, next) => {
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
 
     const { exercises, ...programData } = req.body;
-    await program.update(programData);
+    const normalized = applyKindDefaults({
+      ...program.toJSON(),
+      ...programData,
+    });
+    await program.update(normalized);
+    if (normalized.kind === 'kegel' && normalized.isToday) {
+      await setExclusiveKegelToday(program.id);
+    }
 
     if (Array.isArray(exercises)) {
       await WorkoutExercise.destroy({ where: { programId: program.id } });
