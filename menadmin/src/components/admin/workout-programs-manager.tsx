@@ -26,7 +26,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
 const DEFAULT_PROGRAM_LEVEL = '—';
@@ -55,7 +54,7 @@ function emptyProgram(kind: WorkoutKind): ProgramDraft {
     tag: KIND_DEFAULT_TAG[kind],
     kind,
     isToday: kind === 'kegel',
-    isLocked: kind === 'kegel_challenge',
+    isLocked: false,
     challengeLevel: kind === 'kegel_challenge' ? 2 : null,
     challengeDays: kind === 'kegel_challenge' ? 14 : null,
     sortOrder: 0,
@@ -142,9 +141,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
         tag: isKegel ? editing.tag || KIND_DEFAULT_TAG.kegel : KIND_DEFAULT_TAG[kind],
         kind,
         isToday: isChallenge && Number(editing.challengeLevel) === 1,
-        isLocked: isChallenge && Number(editing.challengeLevel) !== 1
-          ? Boolean(editing.isLocked)
-          : false,
+        isLocked: false,
         challengeLevel: isChallenge ? Number(editing.challengeLevel || 1) : null,
         challengeDays: isChallenge ? Number(editing.challengeDays || 14) : null,
         sortOrder: editing.sortOrder,
@@ -260,16 +257,16 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                 },
                 {
                   key: 'isLocked' as const,
-                  label: 'Төлөв',
+                  label: 'Нээлт',
                   render: (p: WorkoutProgram) =>
                     Number(p.challengeLevel) === 1 ? (
                       <span className="text-xs font-semibold text-[#1a8f7a]">
                         Өнөөдрийн дасгал
                       </span>
-                    ) : p.isLocked ? (
-                      <span className="text-xs font-semibold text-amber-700">LOCKED</span>
                     ) : (
-                      <span className="text-xs font-semibold text-emerald-700">Нээлттэй</span>
+                      <span className="text-xs text-muted-foreground">
+                        Өмнөх түвшин · 7 хоног
+                      </span>
                     ),
                 },
               ]
@@ -422,7 +419,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
             )}
 
             {isChallenge && (
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label>Түвшин</Label>
                   <Input
@@ -435,7 +432,6 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                         ...editing,
                         challengeLevel,
                         isToday: challengeLevel === 1,
-                        isLocked: challengeLevel === 1 ? false : editing.isLocked,
                       });
                     }}
                   />
@@ -446,7 +442,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>Хоног</Label>
+                  <Label>Картын хоног</Label>
                   <Input
                     type="number"
                     min={1}
@@ -458,24 +454,10 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                       })
                     }
                   />
-                </div>
-                <div className="flex items-end">
-                  <div className="flex w-full items-center justify-between rounded-lg border p-3">
-                    <Label htmlFor="isLocked" className="font-normal">
-                      LOCKED
-                    </Label>
-                    <Switch
-                      id="isLocked"
-                      checked={
-                        Number(editing.challengeLevel) !== 1 &&
-                        Boolean(editing.isLocked)
-                      }
-                      disabled={Number(editing.challengeLevel) === 1}
-                      onCheckedChange={(checked) =>
-                        setEditing({ ...editing, isLocked: checked === true })
-                      }
-                    />
-                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Зөвхөн карт дээр харагдана. Дараагийн түвшин өмнөх түвшинг 7 хоног
+                    хийсний дараа автоматаар нээгдэнэ.
+                  </p>
                 </div>
               </div>
             )}

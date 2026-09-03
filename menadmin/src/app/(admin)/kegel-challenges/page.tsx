@@ -7,7 +7,7 @@ export default function KegelChallengesPage() {
     <WorkoutProgramsManager
       kind="kegel_challenge"
       title="Кегел сорилт"
-      subtitle="Түвшин 1 нь өнөөдрийн дасгал. Бусад түвшин сорилтын жагсаалтад гарна."
+      subtitle="Дараагийн түвшин өмнөх түвшинг 7 хоног хийсний дараа нээгдэнэ"
       addLabel="Сорилт нэмэх"
     />
   );

@@ -45,12 +45,11 @@ function applyKindDefaults(programData = {}) {
       next.challengeDays || (next.challengeLevel === 1 ? 7 : 14)
     );
     if (next.challengeLevel === 1) {
-      next.isLocked = false;
       next.isToday = true;
     } else {
-      next.isLocked = next.isLocked !== false;
       next.isToday = false;
     }
+    next.isLocked = false;
   } else if (kind !== 'kegel') {
     next.tag = KIND_DEFAULT_TAG[kind];
     next.isToday = false;
@@ -75,7 +74,6 @@ async function findFeaturedKegelChallenge() {
   const lookups = [
     { kind: 'kegel_challenge', challengeLevel: 1 },
     { kind: 'kegel_challenge', isToday: true },
-    { kind: 'kegel_challenge', isLocked: false },
     { kind: 'kegel_challenge' },
   ];
 

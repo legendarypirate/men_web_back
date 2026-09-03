@@ -14,6 +14,10 @@ const {
 const { onWorkoutSessionSaved } = require('../services/workoutReminders');
 const { hasActivePremium, syncUserMembership } = require('../utils/membership');
 const { findFeaturedKegelChallenge, workoutListWhere } = require('../utils/workoutKind');
+const {
+  applyKegelProgress,
+  isKegelChallengeLockedForUser,
+} = require('../utils/kegelProgress');
 
 const router = express.Router();
 
@@ -55,9 +59,14 @@ function mapProgram(program) {
     tag: json.tag,
     kind: json.kind || 'kegel',
     isToday: json.isToday,
-    isLocked: Boolean(json.isLocked),
+    isLocked: false,
     challengeLevel: json.challengeLevel ?? null,
     challengeDays: json.challengeDays ?? null,
+    completedDays: 0,
+    unlockDays: 7,
+    previousCompletedDays: 0,
+    unlockRemainingDays: 0,
+    unlockFromTitle: '',
     videoUrl: json.videoUrl || null,
     thumbnailUrl: json.thumbnailUrl || null,
     introSlides: (json.introSlides || []).sort(
@@ -81,7 +90,9 @@ router.get('/', optionalAuth, async (req, res, next) => {
         [{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC'],
       ],
     });
-    return ok(res, { programs: programs.map(mapProgram) });
+    const mapped = programs.map(mapProgram);
+    await applyKegelProgress(mapped, req.user);
+    return ok(res, { programs: mapped });
   } catch (err) {
     next(err);
   }
@@ -91,7 +102,9 @@ router.get('/today', optionalAuth, async (req, res, next) => {
   try {
     const program = await findFeaturedKegelChallenge();
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
-    return ok(res, { program: mapProgram(program) });
+    const mapped = [mapProgram(program)];
+    await applyKegelProgress(mapped, req.user);
+    return ok(res, { program: mapped[0] });
   } catch (err) {
     next(err);
   }
@@ -130,6 +143,10 @@ router.post('/sessions', authRequired, async (req, res, next) => {
 
     if (!programId || durationSeconds == null || completedSets == null) {
       return fail(res, 'Шаардлагатай талбарууд дутуу');
+    }
+
+    if (await isKegelChallengeLockedForUser(req.user, programId)) {
+      return fail(res, 'Өмнөх түвшинг 7 хоног хийсний дараа нээгдэнэ', 403);
     }
 
     const session = await WorkoutSession.create({
@@ -198,7 +215,9 @@ router.get('/:id', optionalAuth, async (req, res, next) => {
       order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
     });
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
-    return ok(res, { program: mapProgram(program) });
+    const mapped = [mapProgram(program)];
+    await applyKegelProgress(mapped, req.user);
+    return ok(res, { program: mapped[0] });
   } catch (err) {
     next(err);
   }

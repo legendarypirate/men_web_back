@@ -11,7 +11,7 @@ function challengeProgram({ id, title, level, days, sortOrder }) {
     tag: 'KEGEL CHALLENGE',
     kind: 'kegel_challenge',
     isToday: false,
-    isLocked: true,
+    isLocked: false,
     challengeLevel: level,
     challengeDays: days,
     sortOrder,

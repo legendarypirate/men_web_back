@@ -116,7 +116,7 @@ async function migrateKegelProgramsToChallenges() {
       kind: 'kegel_challenge',
       challengeLevel: nextLevel,
       challengeDays: program.challengeDays || 14,
-      isLocked: true,
+        isLocked: false,
       isToday: false,
       tag: 'KEGEL CHALLENGE',
     });
