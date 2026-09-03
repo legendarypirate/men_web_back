@@ -33,7 +33,14 @@ const User = sequelize.define(
       allowNull: true,
     },
     membership: {
-      type: DataTypes.ENUM('free', 'monthly', 'yearly', 'lifetime', 'platinum'),
+      type: DataTypes.ENUM(
+        'free',
+        'monthly',
+        'quarterly',
+        'yearly',
+        'lifetime',
+        'platinum'
+      ),
       defaultValue: 'free',
     },
     membershipExpiresAt: {

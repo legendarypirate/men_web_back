@@ -5,6 +5,8 @@ const { sequelize } = require('./models');
 async function start() {
   try {
     await sequelize.authenticate();
+    const { ensureMembershipEnumValues } = require('./utils/membership');
+    await ensureMembershipEnumValues();
     await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
     const { ensureWorkoutPrograms } = require('./bootstrap/ensureWorkoutPrograms');
     await ensureWorkoutPrograms();

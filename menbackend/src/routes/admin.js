@@ -184,7 +184,7 @@ router.patch('/users/:id', adminRequired, async (req, res, next) => {
       applyAdminMembershipUpdate(user, 'platinum');
     } else if (req.body.membership !== undefined) {
       if (!ASSIGNABLE_MEMBERSHIPS.includes(req.body.membership)) {
-        return fail(res, 'Гишүүнчлэлийг Free, Сар бүр, Жил бүр-ээс сонгоно уу', 400);
+        return fail(res, 'Гишүүнчлэлийг Free, Сар бүр, Улирал, Жил бүр-ээс сонгоно уу', 400);
       }
       applyAdminMembershipUpdate(user, req.body.membership, req.body);
     }

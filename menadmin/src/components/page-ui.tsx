@@ -122,6 +122,10 @@ const statusConfig: Record<
     label: 'Сар бүр',
     className: 'bg-primary/10 text-primary border-primary/20',
   },
+  quarterly: {
+    label: 'Улирал',
+    className: 'bg-primary/10 text-primary border-primary/20',
+  },
   yearly: {
     label: 'Жил бүр',
     className: 'bg-primary/10 text-primary border-primary/20',

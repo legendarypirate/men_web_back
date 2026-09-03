@@ -12,6 +12,9 @@ function computeMembershipExpiry(planId, startedAt) {
   if (planId === 'monthly') {
     return new Date(start.getTime() + 30 * MS_DAY);
   }
+  if (planId === 'quarterly') {
+    return new Date(start.getTime() + 90 * MS_DAY);
+  }
   if (planId === 'yearly') {
     return new Date(start.getTime() + 365 * MS_DAY);
   }
@@ -148,7 +151,7 @@ function adminPublicUser(user) {
   return json;
 }
 
-const ASSIGNABLE_MEMBERSHIPS = ['free', 'monthly', 'yearly'];
+const ASSIGNABLE_MEMBERSHIPS = ['free', 'monthly', 'quarterly', 'yearly'];
 
 function applyAdminMembershipUpdate(user, membership, body = {}) {
   if (user.role === 'admin') {
@@ -191,6 +194,28 @@ function applyAdminMembershipUpdate(user, membership, body = {}) {
   }
 }
 
+async function ensureMembershipEnumValues() {
+  const sequelize = require('../config/database');
+  const [types] = await sequelize.query(
+    `SELECT 1 FROM pg_type WHERE typname = 'enum_users_membership'`
+  );
+  if (!types.length) return;
+
+  const [rows] = await sequelize.query(
+    `SELECT e.enumlabel AS label
+     FROM pg_type t
+     JOIN pg_enum e ON t.oid = e.enumtypid
+     WHERE t.typname = 'enum_users_membership'`
+  );
+  const existing = new Set(rows.map((row) => row.label));
+  for (const value of ['quarterly']) {
+    if (existing.has(value)) continue;
+    await sequelize.query(
+      `ALTER TYPE "enum_users_membership" ADD VALUE '${value}'`
+    );
+  }
+}
+
 module.exports = {
   membershipIsPremium,
   hasActivePremium,
@@ -203,5 +228,6 @@ module.exports = {
   applyAdminMembershipUpdate,
   applyAdminPlatinum,
   ensureAdminPlatinum,
+  ensureMembershipEnumValues,
   ASSIGNABLE_MEMBERSHIPS,
 };

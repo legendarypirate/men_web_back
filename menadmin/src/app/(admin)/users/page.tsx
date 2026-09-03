@@ -7,8 +7,8 @@ import { TableSelect } from '@/components/custom/table-select';
 import { ErrorState, LoadingState, PageHeader, StatusBadge } from '@/components/page-ui';
 import { useConfirm } from '@/components/custom/confirm-provider';
 
-const premiumMemberships = new Set(['monthly', 'yearly']);
-const userMembershipOptions = ['free', 'monthly', 'yearly'] as const;
+const premiumMemberships = new Set(['monthly', 'quarterly', 'yearly']);
+const userMembershipOptions = ['free', 'monthly', 'quarterly', 'yearly'] as const;
 
 function membershipAllowsDates(membership: string) {
   return premiumMemberships.has(membership);
@@ -17,6 +17,7 @@ function membershipAllowsDates(membership: string) {
 const membershipLabels: Record<string, string> = {
   free: 'Free',
   monthly: 'Сар бүр',
+  quarterly: 'Улирал',
   yearly: 'Жил бүр',
 };
 
