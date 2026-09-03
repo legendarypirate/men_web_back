@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  Dumbbell,
   Newspaper,
   Lightbulb,
   MessageSquareQuote,
@@ -38,7 +37,6 @@ export const adminNav: NavItem[] = [
   { href: '/notifications', label: 'Push мэдэгдэл', icon: Bell, group: 'users' },
   { href: '/feedback', label: 'Санал хүсэлт', icon: MessageSquare, group: 'users' },
   { href: '/sessions', label: 'Дасгалын сесс', icon: Activity, group: 'users' },
-  { href: '/kegel-programs', label: 'Кегел хөтөлбөр', icon: Dumbbell, group: 'workouts' },
   { href: '/kegel-challenges', label: 'Кегел сорилт', icon: Trophy, group: 'workouts' },
   { href: '/pelvic-stretching', label: 'Pelvic Stretching', icon: StretchHorizontal, group: 'workouts' },
   { href: '/groin-fitness', label: 'Groin Fitness', icon: Flame, group: 'workouts' },

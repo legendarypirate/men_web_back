@@ -141,8 +141,10 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
         equipment: 'None',
         tag: isKegel ? editing.tag || KIND_DEFAULT_TAG.kegel : KIND_DEFAULT_TAG[kind],
         kind,
-        isToday: isKegel ? editing.isToday : false,
-        isLocked: isChallenge ? Boolean(editing.isLocked) : false,
+        isToday: isChallenge && Number(editing.challengeLevel) === 1,
+        isLocked: isChallenge && Number(editing.challengeLevel) !== 1
+          ? Boolean(editing.isLocked)
+          : false,
         challengeLevel: isChallenge ? Number(editing.challengeLevel || 1) : null,
         challengeDays: isChallenge ? Number(editing.challengeDays || 14) : null,
         sortOrder: editing.sortOrder,
@@ -260,7 +262,11 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                   key: 'isLocked' as const,
                   label: 'Төлөв',
                   render: (p: WorkoutProgram) =>
-                    p.isLocked ? (
+                    Number(p.challengeLevel) === 1 ? (
+                      <span className="text-xs font-semibold text-[#1a8f7a]">
+                        Өнөөдрийн дасгал
+                      </span>
+                    ) : p.isLocked ? (
                       <span className="text-xs font-semibold text-amber-700">LOCKED</span>
                     ) : (
                       <span className="text-xs font-semibold text-emerald-700">Нээлттэй</span>
@@ -423,13 +429,21 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                     type="number"
                     min={1}
                     value={editing.challengeLevel ?? 1}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const challengeLevel = Number(e.target.value);
                       setEditing({
                         ...editing,
-                        challengeLevel: Number(e.target.value),
-                      })
-                    }
+                        challengeLevel,
+                        isToday: challengeLevel === 1,
+                        isLocked: challengeLevel === 1 ? false : editing.isLocked,
+                      });
+                    }}
                   />
+                  {Number(editing.challengeLevel) === 1 && (
+                    <p className="text-xs text-muted-foreground">
+                      Түвшин 1 нь кегел дэлгэцийн өнөөдрийн дасгал болно.
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>Хоног</Label>
@@ -452,7 +466,11 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                     </Label>
                     <Switch
                       id="isLocked"
-                      checked={Boolean(editing.isLocked)}
+                      checked={
+                        Number(editing.challengeLevel) !== 1 &&
+                        Boolean(editing.isLocked)
+                      }
+                      disabled={Number(editing.challengeLevel) === 1}
                       onCheckedChange={(checked) =>
                         setEditing({ ...editing, isLocked: checked === true })
                       }

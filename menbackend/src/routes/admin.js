@@ -226,7 +226,7 @@ router.post(
 async function setExclusiveKegelToday(programId) {
   await WorkoutProgram.update(
     { isToday: false },
-    { where: { kind: 'kegel', id: { [Op.ne]: programId } } }
+    { where: { kind: 'kegel_challenge', id: { [Op.ne]: programId } } }
   );
 }
 
@@ -256,7 +256,7 @@ router.post('/workouts', adminRequired, async (req, res, next) => {
 
     const normalized = applyKindDefaults(programData);
     const program = await WorkoutProgram.create(normalized);
-    if (normalized.kind === 'kegel' && normalized.isToday) {
+    if (normalized.kind === 'kegel_challenge' && normalized.isToday) {
       await setExclusiveKegelToday(program.id);
     }
     for (let i = 0; i < exercises.length; i++) {
@@ -287,7 +287,7 @@ router.put('/workouts/:id', adminRequired, async (req, res, next) => {
       ...programData,
     });
     await program.update(normalized);
-    if (normalized.kind === 'kegel' && normalized.isToday) {
+    if (normalized.kind === 'kegel_challenge' && normalized.isToday) {
       await setExclusiveKegelToday(program.id);
     }
 

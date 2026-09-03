@@ -7,7 +7,7 @@ export default function KegelChallengesPage() {
     <WorkoutProgramsManager
       kind="kegel_challenge"
       title="Кегел сорилт"
-      subtitle="Кегел дэлгэцийн сорилтууд · түвшин, хоног, lock"
+      subtitle="Түвшин 1 нь өнөөдрийн дасгал. Бусад түвшин сорилтын жагсаалтад гарна."
       addLabel="Сорилт нэмэх"
     />
   );

@@ -36,7 +36,22 @@ function challengeProgram({ id, title, level, days, sortOrder }) {
   };
 }
 
+const KEGEL_LEVEL1_CHALLENGE = {
+  ...challengeProgram({
+    id: 'kegel_challenge_l1',
+    title: 'Анхан шатны кегел дасгал',
+    level: 1,
+    days: 7,
+    sortOrder: 0,
+  }),
+  description:
+    'Гормоны хариу урвалыг дээд зэргээр нэмэгдүүлэхийн тулд огцом хөдөлгөөн болон хяналттай сунгалтын дасгалуудад анхаарлаа хандуулаарай.',
+  isLocked: false,
+  isToday: true,
+};
+
 const KEGEL_CHALLENGE_PROGRAMS = [
+  KEGEL_LEVEL1_CHALLENGE,
   challengeProgram({
     id: 'kegel_challenge_l2',
     title: 'Mastering the Essentials',
@@ -60,4 +75,4 @@ const KEGEL_CHALLENGE_PROGRAMS = [
   }),
 ];
 
-module.exports = { KEGEL_CHALLENGE_PROGRAMS };
+module.exports = { KEGEL_CHALLENGE_PROGRAMS, KEGEL_LEVEL1_CHALLENGE };

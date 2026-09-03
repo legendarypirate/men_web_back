@@ -38,24 +38,60 @@ function applyKindDefaults(programData = {}) {
   const kind = normalizeKind(programData.kind, programData.tag);
   const next = { ...programData, kind };
 
-  if (kind !== 'kegel') {
+  if (kind === 'kegel_challenge') {
+    next.tag = KIND_DEFAULT_TAG.kegel_challenge;
+    next.challengeLevel = Number(next.challengeLevel || 1);
+    next.challengeDays = Number(
+      next.challengeDays || (next.challengeLevel === 1 ? 7 : 14)
+    );
+    if (next.challengeLevel === 1) {
+      next.isLocked = false;
+      next.isToday = true;
+    } else {
+      next.isLocked = next.isLocked !== false;
+      next.isToday = false;
+    }
+  } else if (kind !== 'kegel') {
     next.tag = KIND_DEFAULT_TAG[kind];
     next.isToday = false;
-  } else if (!String(next.tag || '').trim()) {
-    next.tag = KIND_DEFAULT_TAG.kegel;
-  }
-
-  if (kind === 'kegel_challenge') {
-    next.challengeLevel = Number(next.challengeLevel || 1);
-    next.challengeDays = Number(next.challengeDays || 14);
-    next.isLocked = next.isLocked !== false;
+    next.challengeLevel = null;
+    next.challengeDays = null;
+    next.isLocked = false;
   } else {
+    if (!String(next.tag || '').trim()) {
+      next.tag = KIND_DEFAULT_TAG.kegel;
+    }
     next.challengeLevel = null;
     next.challengeDays = null;
     next.isLocked = false;
   }
 
   return next;
+}
+
+async function findFeaturedKegelChallenge() {
+  const { WorkoutProgram, WorkoutExercise } = require('../models');
+  const include = [{ model: WorkoutExercise, as: 'exercises' }];
+  const lookups = [
+    { kind: 'kegel_challenge', challengeLevel: 1 },
+    { kind: 'kegel_challenge', isToday: true },
+    { kind: 'kegel_challenge', isLocked: false },
+    { kind: 'kegel_challenge' },
+  ];
+
+  for (const where of lookups) {
+    const program = await WorkoutProgram.findOne({
+      where,
+      include,
+      order: [
+        ['challengeLevel', 'ASC'],
+        ['sortOrder', 'ASC'],
+        [{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC'],
+      ],
+    });
+    if (program) return program;
+  }
+  return null;
 }
 
 module.exports = {
@@ -65,4 +101,5 @@ module.exports = {
   normalizeKind,
   workoutListWhere,
   applyKindDefaults,
+  findFeaturedKegelChallenge,
 };

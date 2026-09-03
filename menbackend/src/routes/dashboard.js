@@ -1,5 +1,6 @@
 const express = require('express');
-const { WorkoutProgram, WorkoutExercise, Article } = require('../models');
+const { Article } = require('../models');
+const { findFeaturedKegelChallenge } = require('../utils/workoutKind');
 const { ok } = require('../utils/response');
 const { authRequired } = require('../middleware/auth');
 const {
@@ -20,18 +21,7 @@ router.get('/', authRequired, async (req, res, next) => {
     const user = req.user;
     const hour = new Date().getHours();
 
-    let todayProgram = await WorkoutProgram.findOne({
-      where: { isToday: true, kind: 'kegel' },
-      include: [{ model: WorkoutExercise, as: 'exercises' }],
-      order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
-    });
-    if (!todayProgram) {
-      todayProgram = await WorkoutProgram.findOne({
-        where: { kind: 'kegel' },
-        include: [{ model: WorkoutExercise, as: 'exercises' }],
-        order: [['sortOrder', 'ASC']],
-      });
-    }
+    const todayProgram = await findFeaturedKegelChallenge();
 
     const recommendations = await Article.findAll({
       where: { featured: false },

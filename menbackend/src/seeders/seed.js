@@ -41,13 +41,17 @@ const {
 const programs = [
   {
     id: 'metabolic_primer',
-    title: 'Бүх биеийн бодисын солилцоог идэвхжүүлэгч',
+    title: 'Анхан шатны кегел дасгал',
     description:
       'Гормоны хариу урвалыг дээд зэргээр нэмэгдүүлэхийн тулд огцом хөдөлгөөн болон хяналттай сунгалтын дасгалуудад анхаарлаа хандуулаарай.',
-    level: 'Ахисан түвшин',
+    level: '1',
     durationMinutes: 12,
-    tag: 'ӨНӨӨДРИЙН ДАСГАЛ',
+    tag: 'KEGEL CHALLENGE',
+    kind: 'kegel_challenge',
     isToday: true,
+    isLocked: false,
+    challengeLevel: 1,
+    challengeDays: 7,
     sortOrder: 0,
     exercises: [
       {

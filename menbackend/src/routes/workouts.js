@@ -13,7 +13,7 @@ const {
 } = require('../utils/streak');
 const { onWorkoutSessionSaved } = require('../services/workoutReminders');
 const { hasActivePremium, syncUserMembership } = require('../utils/membership');
-const { workoutListWhere } = require('../utils/workoutKind');
+const { findFeaturedKegelChallenge, workoutListWhere } = require('../utils/workoutKind');
 
 const router = express.Router();
 
@@ -89,21 +89,7 @@ router.get('/', optionalAuth, async (req, res, next) => {
 
 router.get('/today', optionalAuth, async (req, res, next) => {
   try {
-    let program = await WorkoutProgram.findOne({
-      where: { isToday: true, kind: 'kegel' },
-      include: [{ model: WorkoutExercise, as: 'exercises' }],
-      order: [[{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC']],
-    });
-    if (!program) {
-      program = await WorkoutProgram.findOne({
-        where: { kind: 'kegel' },
-        include: [{ model: WorkoutExercise, as: 'exercises' }],
-        order: [
-          ['sortOrder', 'ASC'],
-          [{ model: WorkoutExercise, as: 'exercises' }, 'sortOrder', 'ASC'],
-        ],
-      });
-    }
+    const program = await findFeaturedKegelChallenge();
     if (!program) return fail(res, 'Дасгал олдсонгүй', 404);
     return ok(res, { program: mapProgram(program) });
   } catch (err) {
