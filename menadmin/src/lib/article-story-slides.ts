@@ -1,15 +1,43 @@
-import { Article } from '@/lib/api';
+import { Article, ArticleStorySlide, StoryTextAlign } from '@/lib/api';
 
-export type ArticleStorySlide = {
-  imageUrl?: string | null;
-  videoUrl?: string | null;
-  durationSeconds?: number;
-  accentLine?: string | null;
-  line2?: string | null;
-  line3?: string | null;
-  body?: string | null;
-  isCover?: boolean;
-};
+export type { ArticleStorySlide, StoryTextAlign };
+
+export const TITLE_FONT_MIN = 18;
+export const TITLE_FONT_MAX = 48;
+export const BODY_FONT_MIN = 12;
+export const BODY_FONT_MAX = 24;
+
+export const DEFAULT_COVER_TITLE_SIZE = 28;
+export const DEFAULT_CONTENT_TITLE_SIZE = 30;
+export const DEFAULT_BODY_SIZE = 16;
+
+export const TITLE_SIZE_PRESETS = [
+  { label: 'Жижиг', value: 22 },
+  { label: 'Дунд', value: 28 },
+  { label: 'Том', value: 34 },
+  { label: 'Маш том', value: 42 },
+] as const;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+export function resolvedTitleFontSize(slide: ArticleStorySlide) {
+  const fallback = slide.isCover ? DEFAULT_COVER_TITLE_SIZE : DEFAULT_CONTENT_TITLE_SIZE;
+  const raw = slide.titleFontSize;
+  if (typeof raw !== 'number' || Number.isNaN(raw)) return fallback;
+  return clamp(raw, TITLE_FONT_MIN, TITLE_FONT_MAX);
+}
+
+export function resolvedBodyFontSize(slide: ArticleStorySlide) {
+  const raw = slide.bodyFontSize;
+  if (typeof raw !== 'number' || Number.isNaN(raw)) return DEFAULT_BODY_SIZE;
+  return clamp(raw, BODY_FONT_MIN, BODY_FONT_MAX);
+}
+
+export function resolvedTextAlign(slide: ArticleStorySlide): StoryTextAlign {
+  return slide.textAlign === 'center' ? 'center' : 'left';
+}
 
 function slidesHaveContent(slides: ArticleStorySlide[]): boolean {
   return slides.some((slide) => {
@@ -42,18 +70,20 @@ export function buildStorySlidesFromArticle(
   const imageUrl = article.imageUrl || null;
   const words = article.title.trim().split(/\s+/).filter(Boolean);
 
+  const mid = Math.ceil(words.length / 2);
+  const coverTitle =
+    words.length > 4
+      ? `${words.slice(0, mid).join(' ')}\n${words.slice(mid).join(' ')}`
+      : article.title.trim();
+
   const cover: ArticleStorySlide = {
     isCover: true,
     imageUrl,
-    accentLine: words[0]?.toUpperCase() || null,
-    line2:
-      words.length > 1
-        ? words.slice(1, Math.max(2, Math.ceil(words.length / 2))).join(' ').toUpperCase()
-        : article.title.toUpperCase(),
-    line3:
-      words.length > 2
-        ? words.slice(Math.max(2, Math.ceil(words.length / 2))).join(' ').toUpperCase()
-        : null,
+    titleFontSize: DEFAULT_COVER_TITLE_SIZE,
+    bodyFontSize: DEFAULT_BODY_SIZE,
+    textAlign: 'center',
+    line2: coverTitle || null,
+    line3: article.excerpt?.trim() || null,
   };
 
   const lines = (article.body || '')

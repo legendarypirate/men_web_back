@@ -187,6 +187,8 @@ export type WorkoutProgram = {
   exercises?: WorkoutExercise[];
 };
 
+export type StoryTextAlign = 'left' | 'center';
+
 export type ArticleStorySlide = {
   imageUrl?: string | null;
   videoUrl?: string | null;
@@ -196,6 +198,9 @@ export type ArticleStorySlide = {
   line3?: string | null;
   body?: string | null;
   isCover?: boolean;
+  titleFontSize?: number | null;
+  bodyFontSize?: number | null;
+  textAlign?: StoryTextAlign | null;
 };
 
 export type Article = {
