@@ -24,10 +24,6 @@ function isAdminUser(user: User) {
   return user.role === 'admin';
 }
 
-function isAdminUser(user: User) {
-  return user.role === 'admin';
-}
-
 function isAssignableMembership(
   membership: string
 ): membership is (typeof userMembershipOptions)[number] {
