@@ -117,10 +117,12 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
     e.preventDefault();
     if (!editing) return;
     const syncedPresets = syncLevelPresets(editing.sections, editing.levelPresets);
-    const validationError = validateLevelPresets(editing.sections, syncedPresets);
-    if (validationError) {
-      setError(validationError);
-      return;
+    if (!isHomeWorkout) {
+      const validationError = validateLevelPresets(editing.sections, syncedPresets);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
     }
 
     setSaving(true);
@@ -500,6 +502,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
               levelPresets={editing.levelPresets}
               activeLevel={activeLevel}
               onActiveLevelChange={setActiveLevel}
+              showDifficultyLevels={!isHomeWorkout}
               onUploadImage={async (file) => {
                 const result = await api.upload.image(file);
                 return result.url;
@@ -518,13 +521,24 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
               }
             />
 
-            <p className="text-xs text-muted-foreground">
-              Түвшин {activeLevel} ({activeLevelLabel}): ~{' '}
-              {estimateProgramMinutes(editing.sections, editing.levelPresets, activeLevel)} мин ·{' '}
-              {activeSectionLabels(editing.sections, editing.levelPresets, activeLevel).join(
-                ' → '
-              ) || 'Идэвхтэй хэсэг байхгүй'}
-            </p>
+            {isHomeWorkout ? (
+              <p className="text-xs text-muted-foreground">
+                ~ {estimateProgramMinutes(editing.sections, editing.levelPresets, DEFAULT_TRAINING_LEVEL)} мин ·{' '}
+                {activeSectionLabels(
+                  editing.sections,
+                  editing.levelPresets,
+                  DEFAULT_TRAINING_LEVEL
+                ).join(' → ') || 'Идэвхтэй хэсэг байхгүй'}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Түвшин {activeLevel} ({activeLevelLabel}): ~{' '}
+                {estimateProgramMinutes(editing.sections, editing.levelPresets, activeLevel)} мин ·{' '}
+                {activeSectionLabels(editing.sections, editing.levelPresets, activeLevel).join(
+                  ' → '
+                ) || 'Идэвхтэй хэсэг байхгүй'}
+              </p>
+            )}
           </form>
         )}
       </AppDrawer>

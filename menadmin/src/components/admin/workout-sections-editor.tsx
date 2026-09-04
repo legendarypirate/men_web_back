@@ -81,6 +81,7 @@ type Props = {
   onActiveLevelChange: (level: number) => void;
   onChange: (sections: WorkoutSectionDefinition[], levelPresets: WorkoutLevelPresets) => void;
   onUploadImage: (file: File) => Promise<string>;
+  showDifficultyLevels?: boolean;
 };
 
 function supportsIntervals(type: WorkoutSectionType) {
@@ -98,6 +99,7 @@ export function WorkoutSectionsEditor({
   onActiveLevelChange,
   onChange,
   onUploadImage,
+  showDifficultyLevels = true,
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(0);
   const levelKey = String(activeLevel);
@@ -144,15 +146,21 @@ export function WorkoutSectionsEditor({
 
   function updateTiming(index: number, patch: Partial<SectionTiming>) {
     const nextPresets = { ...levelPresets };
-    const timings = [...(nextPresets[levelKey] ?? [])];
-    timings[index] = normalizeSectionTiming(
-      {
-        ...(timings[index] ?? emptySectionTiming(sections[index]?.type)),
-        ...patch,
-      },
-      sections[index]?.type
-    );
-    nextPresets[levelKey] = timings;
+    const levels = showDifficultyLevels
+      ? [activeLevel]
+      : TRAINING_LEVELS.map(({ level }) => level);
+    for (const level of levels) {
+      const key = String(level);
+      const timings = [...(nextPresets[key] ?? [])];
+      timings[index] = normalizeSectionTiming(
+        {
+          ...(timings[index] ?? emptySectionTiming(sections[index]?.type)),
+          ...patch,
+        },
+        sections[index]?.type
+      );
+      nextPresets[key] = timings;
+    }
     emit(sections, nextPresets);
   }
 
@@ -170,7 +178,7 @@ export function WorkoutSectionsEditor({
         ...(nextPresets[key] ?? []),
         normalizeSectionTiming({
           ...emptySectionTiming(definition.type),
-          enabled: defaultEnabledForLevel(level),
+          enabled: showDifficultyLevels ? defaultEnabledForLevel(level) : true,
         }),
       ];
     }
@@ -217,6 +225,7 @@ export function WorkoutSectionsEditor({
 
   return (
     <div className="space-y-4">
+      {showDifficultyLevels && (
       <div>
         <Label className="text-sm font-semibold">Түвшин бүрийн тохиргоо</Label>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -249,12 +258,15 @@ export function WorkoutSectionsEditor({
           </Button>
         </div>
       </div>
+      )}
 
       <div className="flex items-center justify-between gap-3">
         <div>
           <Label className="text-sm font-semibold">Дасгалын хэсгүүд</Label>
           <p className="text-xs text-muted-foreground">
-            Нэр, төрөл — бүх түвшинд ижил. Доор — зөвхөн {activeLevel}-р түвшин.
+            {showDifficultyLevels
+              ? `Нэр, төрөл — бүх түвшинд ижил. Доор — зөвхөн ${activeLevel}-р түвшин.`
+              : 'Хэсэг бүрийн нэр, төрөл, хугацааг тохируулна.'}
           </p>
         </div>
         <Button type="button" variant="outline" size="sm" onClick={addSection}>
@@ -304,7 +316,9 @@ export function WorkoutSectionsEditor({
                     <p className="truncate text-xs text-muted-foreground">
                       {enabled
                         ? `${timing.durationSeconds}с · ${timing.sets} багц · амралт ${timing.relaxSeconds}с`
-                        : 'Энэ түвшинд идэвхгүй'}
+                        : showDifficultyLevels
+                          ? 'Энэ түвшинд идэвхгүй'
+                          : 'Идэвхгүй'}
                       {(section.avatarImages?.length || 0) > 0
                         ? ` · ${section.avatarImages!.length} зураг`
                         : ''}
@@ -347,6 +361,7 @@ export function WorkoutSectionsEditor({
 
               {open && (
                 <div className="space-y-3 border-t p-4">
+                  {showDifficultyLevels && (
                   <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
                     <Checkbox
                       id={`enabled-${section.id}-${activeLevel}`}
@@ -359,6 +374,7 @@ export function WorkoutSectionsEditor({
                       Энэ түвшинд оруулах
                     </Label>
                   </div>
+                  )}
 
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div className="space-y-1.5">
@@ -493,7 +509,7 @@ export function WorkoutSectionsEditor({
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label>Заавар (бүх түвшинд ижил)</Label>
+                    <Label>Заавар</Label>
                     <Textarea
                       value={section.instruction}
                       onChange={(e) => updateSection(index, { instruction: e.target.value })}
