@@ -146,6 +146,7 @@ export type WorkoutExercise = {
   targetMuscles?: string | null;
   videoUrl?: string | null;
   thumbnailUrl?: string | null;
+  avatarImages?: string[];
   sortOrder?: number;
   introSlides?: WorkoutIntroSlide[];
   phases?: WorkoutExercisePhase[];

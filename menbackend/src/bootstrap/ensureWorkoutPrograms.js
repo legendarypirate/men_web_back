@@ -32,6 +32,11 @@ async function ensureWorkoutProgramColumns() {
     type: DataTypes.INTEGER,
     allowNull: true,
   });
+  await ensureColumn('workout_exercises', 'avatar_images', {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: [],
+  });
 }
 
 async function backfillWorkoutKinds() {

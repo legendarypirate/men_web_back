@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ChevronDown, ChevronUp, Plus, Trash2, Upload } from 'lucide-react';
 import {
   defaultEnabledForLevel,
   defaultHoldIntervalLabel,
@@ -26,8 +26,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ImageUploadField } from '@/components/admin/image-upload-field';
-import { VideoUploadField } from '@/components/admin/video-upload-field';
 import { cn } from '@/lib/utils';
 
 function parseDigits(value: string): number | null {
@@ -83,7 +81,6 @@ type Props = {
   onActiveLevelChange: (level: number) => void;
   onChange: (sections: WorkoutSectionDefinition[], levelPresets: WorkoutLevelPresets) => void;
   onUploadImage: (file: File) => Promise<string>;
-  onUploadVideo: (file: File) => Promise<{ url: string; thumbnailUrl?: string }>;
 };
 
 function supportsIntervals(type: WorkoutSectionType) {
@@ -101,7 +98,6 @@ export function WorkoutSectionsEditor({
   onActiveLevelChange,
   onChange,
   onUploadImage,
-  onUploadVideo,
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(0);
   const levelKey = String(activeLevel);
@@ -309,7 +305,9 @@ export function WorkoutSectionsEditor({
                       {enabled
                         ? `${timing.durationSeconds}с · ${timing.sets} багц · амралт ${timing.relaxSeconds}с`
                         : 'Энэ түвшинд идэвхгүй'}
-                      {section.videoUrl || section.thumbnailUrl ? ' · аватар' : ''}
+                      {(section.avatarImages?.length || 0) > 0
+                        ? ` · ${section.avatarImages!.length} зураг`
+                        : ''}
                     </p>
                   </div>
                   <ChevronDown
@@ -503,38 +501,132 @@ export function WorkoutSectionsEditor({
                     />
                   </div>
 
-                  <div className="space-y-3 rounded-lg border bg-[#fafbfc] p-3">
-                    <div>
-                      <Label className="text-sm font-semibold">Хөдөлгөөнт аватар</Label>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Апп дээрх тойрогт харагдах анимирсан видео эсвэл зураг. Видео байвал
-                        түүнийг тоглуулна.
-                      </p>
-                    </div>
-                    <VideoUploadField
-                      label="Аватар видео"
-                      value={section.videoUrl}
-                      onUpload={onUploadVideo}
-                      onChange={(url, meta) =>
-                        updateSection(index, {
-                          videoUrl: url,
-                          thumbnailUrl: meta?.thumbnailUrl || section.thumbnailUrl,
-                        })
-                      }
-                    />
-                    <ImageUploadField
-                      label="Аватар зураг / GIF"
-                      value={section.thumbnailUrl}
-                      onUpload={onUploadImage}
-                      onChange={(url) => updateSection(index, { thumbnailUrl: url })}
-                    />
-                  </div>
+                  <AvatarImagesField
+                    images={section.avatarImages || []}
+                    onChange={(avatarImages) => updateSection(index, { avatarImages })}
+                    onUpload={onUploadImage}
+                  />
                 </div>
               )}
             </div>
           );
         })
       )}
+    </div>
+  );
+}
+
+function AvatarImagesField({
+  images,
+  onChange,
+  onUpload,
+}: {
+  images: string[];
+  onChange: (images: string[]) => void;
+  onUpload: (file: File) => Promise<string>;
+}) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFiles(files: FileList | null) {
+    if (!files?.length) return;
+    setUploading(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        if (!file.type.startsWith('image/')) continue;
+        uploaded.push(await onUpload(file));
+      }
+      if (uploaded.length) onChange([...images, ...uploaded]);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  }
+
+  function move(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= images.length) return;
+    const next = [...images];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-3 rounded-lg border bg-[#fafbfc] p-3">
+      <div>
+        <Label className="text-sm font-semibold">Аватарын зургууд</Label>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Олон зураг оруулна. Таймер явж байхад апп дээр эдгээр зураг дарааллаар солигдоно.
+        </p>
+      </div>
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {images.map((url, index) => (
+            <div key={`${url}-${index}`} className="overflow-hidden rounded-lg border bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt="" className="h-24 w-full object-cover" />
+              <div className="flex items-center justify-between gap-1 border-t px-1 py-1">
+                <span className="px-1 text-[11px] font-semibold text-muted-foreground">
+                  {index + 1}
+                </span>
+                <div className="flex">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                  >
+                    <ChevronUp className="size-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={index === images.length - 1}
+                    onClick={() => move(index, 1)}
+                  >
+                    <ChevronDown className="size-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-destructive hover:text-destructive"
+                    onClick={() => onChange(images.filter((_, i) => i !== index))}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="rounded-lg border border-dashed p-4 text-center">
+        <p className="mb-3 text-sm text-muted-foreground">
+          {images.length === 0 ? 'Зураг байхгүй' : `${images.length} зураг`}
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={uploading}
+          onClick={() => fileRef.current?.click()}
+        >
+          <Upload className="mr-2 h-4 w-4" />
+          {uploading ? 'Байршуулж байна...' : 'Зураг нэмэх'}
+        </Button>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
     </div>
   );
 }

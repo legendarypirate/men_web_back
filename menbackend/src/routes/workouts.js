@@ -37,6 +37,7 @@ function mapProgram(program) {
       targetMuscles: e.targetMuscles || null,
       videoUrl: e.videoUrl || null,
       thumbnailUrl: e.thumbnailUrl || null,
+      avatarImages: Array.isArray(e.avatarImages) ? e.avatarImages : [],
       introSlides: (e.introSlides || []).sort(
         (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
       ),

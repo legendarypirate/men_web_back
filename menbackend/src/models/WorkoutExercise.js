@@ -34,6 +34,7 @@ const WorkoutExercise = sequelize.define(
     targetMuscles: { type: DataTypes.TEXT, allowNull: true },
     videoUrl: { type: DataTypes.STRING, allowNull: true },
     thumbnailUrl: { type: DataTypes.STRING, allowNull: true },
+    avatarImages: { type: DataTypes.JSON, allowNull: false, defaultValue: [] },
     sortOrder: { type: DataTypes.INTEGER, defaultValue: 0 },
     phases: {
       type: DataTypes.JSON,

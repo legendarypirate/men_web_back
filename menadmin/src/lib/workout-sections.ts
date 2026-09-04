@@ -13,9 +13,24 @@ export type WorkoutSectionDefinition = {
   label: string;
   type: WorkoutSectionType;
   instruction: string;
-  videoUrl?: string | null;
-  thumbnailUrl?: string | null;
+  avatarImages?: string[];
 };
+
+export function normalizeAvatarImages(
+  raw?: unknown,
+  fallback?: string | null
+): string[] {
+  const list: string[] = [];
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      if (typeof item === 'string' && item.trim()) list.push(item.trim());
+    }
+  }
+  if (list.length === 0 && typeof fallback === 'string' && fallback.trim()) {
+    list.push(fallback.trim());
+  }
+  return list;
+}
 
 export const TRAINING_LEVELS = [
   { level: 1, label: 'Хялбар' },
@@ -44,8 +59,7 @@ export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): 
     label: preset?.label ?? 'Шинэ хэсэг',
     type,
     instruction: '',
-    videoUrl: null,
-    thumbnailUrl: null,
+    avatarImages: [],
   };
 }
 
@@ -285,8 +299,9 @@ function buildExerciseFromSection(
     sortOrder,
     phases,
     introSlides: [],
-    videoUrl: section.videoUrl || null,
-    thumbnailUrl: section.thumbnailUrl || null,
+    videoUrl: null,
+    thumbnailUrl: normalizeAvatarImages(section.avatarImages)[0] || null,
+    avatarImages: normalizeAvatarImages(section.avatarImages),
   };
 }
 
@@ -342,8 +357,10 @@ export function loadProgramSections(program: WorkoutProgram): {
         label: exercise.name || 'Дасгал',
         type: phaseTypeToSectionType('hold', exercise.motion),
         instruction: exercise.instruction || '',
-        videoUrl: exercise.videoUrl || null,
-        thumbnailUrl: exercise.thumbnailUrl || null,
+        avatarImages: normalizeAvatarImages(
+          exercise.avatarImages,
+          exercise.thumbnailUrl
+        ),
       });
       baseTimings.push(
         normalizeSectionTiming(
@@ -369,8 +386,10 @@ export function loadProgramSections(program: WorkoutProgram): {
         label: phase.label.trim() || exercise.name || 'Дасгал',
         type: sectionType,
         instruction: exercise.instruction || '',
-        videoUrl: exercise.videoUrl || null,
-        thumbnailUrl: exercise.thumbnailUrl || null,
+        avatarImages: normalizeAvatarImages(
+          exercise.avatarImages,
+          exercise.thumbnailUrl
+        ),
       });
       baseTimings.push(timingFromPhase(phase, exercise, sectionType));
     }
