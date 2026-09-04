@@ -93,6 +93,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
 
   const isChallenge = kind === 'kegel_challenge';
   const isKegel = kind === 'kegel';
+  const isHomeWorkout = kind === 'pelvic_stretching' || kind === 'groin_fitness';
 
   async function load() {
     setLoading(true);
@@ -140,7 +141,13 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
         equipment: 'None',
         tag: isKegel ? editing.tag || KIND_DEFAULT_TAG.kegel : KIND_DEFAULT_TAG[kind],
         kind,
-        isToday: isChallenge && Number(editing.challengeLevel) === 1,
+        isToday: isChallenge
+          ? Number(editing.challengeLevel) === 1
+          : kind === 'pelvic_stretching' || kind === 'groin_fitness'
+            ? Boolean(editing.isToday)
+            : isKegel
+              ? Boolean(editing.isToday)
+              : false,
         isLocked: false,
         challengeLevel: isChallenge ? Number(editing.challengeLevel || 1) : null,
         challengeDays: isChallenge ? Number(editing.challengeDays || 14) : null,
@@ -295,6 +302,16 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                 },
               ]
             : []),
+          ...(isHomeWorkout
+            ? [
+                {
+                  key: 'isToday' as const,
+                  label: 'Нүүр',
+                  render: (p: WorkoutProgram) =>
+                    p.isToday ? <StatusBadge status="active" /> : <StatusBadge status="expired" />,
+                },
+              ]
+            : []),
           { key: 'sortOrder', label: 'Эрэмбэ', align: 'center' },
         ]}
         rows={programs}
@@ -392,6 +409,22 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
                 rows={2}
               />
             </div>
+
+            {isHomeWorkout && (
+              <div className="flex items-center gap-2 rounded-lg border p-3">
+                <Checkbox
+                  id="showOnHome"
+                  checked={editing.isToday}
+                  onCheckedChange={(checked) =>
+                    setEditing({ ...editing, isToday: checked === true })
+                  }
+                />
+                <Label htmlFor="showOnHome" className="font-normal">
+                  Нүүр дэлгэцийн карт. Гарчиг, тайлбар, cover, хугацаа, дасгалууд эндээс
+                  удирдагдана. Өөр хөтөлбөрийг сонговол энэ нь автоматаар болино.
+                </Label>
+              </div>
+            )}
 
             {isKegel && (
               <>

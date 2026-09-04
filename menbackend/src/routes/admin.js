@@ -242,6 +242,16 @@ async function setExclusiveKegelToday(programId) {
   );
 }
 
+const HOME_FEATURED_KINDS = ['pelvic_stretching', 'groin_fitness'];
+
+async function setExclusiveHomeFeatured(kind, programId) {
+  if (!HOME_FEATURED_KINDS.includes(kind)) return;
+  await WorkoutProgram.update(
+    { isToday: false },
+    { where: { kind, id: { [Op.ne]: programId } } }
+  );
+}
+
 router.get('/workouts', adminRequired, async (req, res, next) => {
   try {
     const where = workoutListWhere(req.query);
@@ -270,6 +280,9 @@ router.post('/workouts', adminRequired, async (req, res, next) => {
     const program = await WorkoutProgram.create(normalized);
     if (normalized.kind === 'kegel_challenge' && normalized.isToday) {
       await setExclusiveKegelToday(program.id);
+    }
+    if (normalized.isToday) {
+      await setExclusiveHomeFeatured(normalized.kind, program.id);
     }
     for (let i = 0; i < exercises.length; i++) {
       await WorkoutExercise.create({
@@ -301,6 +314,9 @@ router.put('/workouts/:id', adminRequired, async (req, res, next) => {
     await program.update(normalized);
     if (normalized.kind === 'kegel_challenge' && normalized.isToday) {
       await setExclusiveKegelToday(program.id);
+    }
+    if (normalized.isToday) {
+      await setExclusiveHomeFeatured(normalized.kind, program.id);
     }
 
     if (Array.isArray(exercises)) {

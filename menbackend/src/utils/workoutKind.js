@@ -52,7 +52,10 @@ function applyKindDefaults(programData = {}) {
     next.isLocked = false;
   } else if (kind !== 'kegel') {
     next.tag = KIND_DEFAULT_TAG[kind];
-    next.isToday = false;
+    next.isToday =
+      kind === 'pelvic_stretching' || kind === 'groin_fitness'
+        ? Boolean(next.isToday)
+        : false;
     next.challengeLevel = null;
     next.challengeDays = null;
     next.isLocked = false;
