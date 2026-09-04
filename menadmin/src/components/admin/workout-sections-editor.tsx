@@ -26,6 +26,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ImageUploadField } from '@/components/admin/image-upload-field';
+import { VideoUploadField } from '@/components/admin/video-upload-field';
 import { cn } from '@/lib/utils';
 
 function parseDigits(value: string): number | null {
@@ -80,6 +82,8 @@ type Props = {
   activeLevel: number;
   onActiveLevelChange: (level: number) => void;
   onChange: (sections: WorkoutSectionDefinition[], levelPresets: WorkoutLevelPresets) => void;
+  onUploadImage: (file: File) => Promise<string>;
+  onUploadVideo: (file: File) => Promise<{ url: string; thumbnailUrl?: string }>;
 };
 
 function supportsIntervals(type: WorkoutSectionType) {
@@ -96,6 +100,8 @@ export function WorkoutSectionsEditor({
   activeLevel,
   onActiveLevelChange,
   onChange,
+  onUploadImage,
+  onUploadVideo,
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(0);
   const levelKey = String(activeLevel);
@@ -303,6 +309,7 @@ export function WorkoutSectionsEditor({
                       {enabled
                         ? `${timing.durationSeconds}с · ${timing.sets} багц · амралт ${timing.relaxSeconds}с`
                         : 'Энэ түвшинд идэвхгүй'}
+                      {section.videoUrl || section.thumbnailUrl ? ' · аватар' : ''}
                     </p>
                   </div>
                   <ChevronDown
@@ -493,6 +500,33 @@ export function WorkoutSectionsEditor({
                       value={section.instruction}
                       onChange={(e) => updateSection(index, { instruction: e.target.value })}
                       rows={2}
+                    />
+                  </div>
+
+                  <div className="space-y-3 rounded-lg border bg-[#fafbfc] p-3">
+                    <div>
+                      <Label className="text-sm font-semibold">Хөдөлгөөнт аватар</Label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Апп дээрх тойрогт харагдах анимирсан видео эсвэл зураг. Видео байвал
+                        түүнийг тоглуулна.
+                      </p>
+                    </div>
+                    <VideoUploadField
+                      label="Аватар видео"
+                      value={section.videoUrl}
+                      onUpload={onUploadVideo}
+                      onChange={(url, meta) =>
+                        updateSection(index, {
+                          videoUrl: url,
+                          thumbnailUrl: meta?.thumbnailUrl || section.thumbnailUrl,
+                        })
+                      }
+                    />
+                    <ImageUploadField
+                      label="Аватар зураг / GIF"
+                      value={section.thumbnailUrl}
+                      onUpload={onUploadImage}
+                      onChange={(url) => updateSection(index, { thumbnailUrl: url })}
                     />
                   </div>
                 </div>

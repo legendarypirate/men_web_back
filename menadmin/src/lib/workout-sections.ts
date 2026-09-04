@@ -13,6 +13,8 @@ export type WorkoutSectionDefinition = {
   label: string;
   type: WorkoutSectionType;
   instruction: string;
+  videoUrl?: string | null;
+  thumbnailUrl?: string | null;
 };
 
 export const TRAINING_LEVELS = [
@@ -42,6 +44,8 @@ export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): 
     label: preset?.label ?? 'Шинэ хэсэг',
     type,
     instruction: '',
+    videoUrl: null,
+    thumbnailUrl: null,
   };
 }
 
@@ -281,8 +285,8 @@ function buildExerciseFromSection(
     sortOrder,
     phases,
     introSlides: [],
-    videoUrl: null,
-    thumbnailUrl: null,
+    videoUrl: section.videoUrl || null,
+    thumbnailUrl: section.thumbnailUrl || null,
   };
 }
 
@@ -338,6 +342,8 @@ export function loadProgramSections(program: WorkoutProgram): {
         label: exercise.name || 'Дасгал',
         type: phaseTypeToSectionType('hold', exercise.motion),
         instruction: exercise.instruction || '',
+        videoUrl: exercise.videoUrl || null,
+        thumbnailUrl: exercise.thumbnailUrl || null,
       });
       baseTimings.push(
         normalizeSectionTiming(
@@ -363,6 +369,8 @@ export function loadProgramSections(program: WorkoutProgram): {
         label: phase.label.trim() || exercise.name || 'Дасгал',
         type: sectionType,
         instruction: exercise.instruction || '',
+        videoUrl: exercise.videoUrl || null,
+        thumbnailUrl: exercise.thumbnailUrl || null,
       });
       baseTimings.push(timingFromPhase(phase, exercise, sectionType));
     }

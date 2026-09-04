@@ -500,6 +500,14 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
               levelPresets={editing.levelPresets}
               activeLevel={activeLevel}
               onActiveLevelChange={setActiveLevel}
+              onUploadImage={async (file) => {
+                const result = await api.upload.image(file);
+                return result.url;
+              }}
+              onUploadVideo={async (file) => {
+                const result = await api.upload.video(file);
+                return { url: result.url, thumbnailUrl: result.thumbnailUrl };
+              }}
               onChange={(sections, levelPresets) =>
                 setEditing({
                   ...editing,
