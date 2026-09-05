@@ -592,6 +592,7 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
               activeLevel={activeLevel}
               onActiveLevelChange={setActiveLevel}
               showDifficultyLevels={!isHomeWorkout}
+              showVibration={!isHomeWorkout}
               onUploadImage={async (file) => {
                 const result = await api.upload.image(file);
                 return result.url;

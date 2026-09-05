@@ -80,7 +80,7 @@ export function emptySectionTiming(type: WorkoutSectionType = 'kegelHold'): Sect
   return normalizeSectionTiming({
     enabled: true,
     durationSeconds: type === 'breath' ? 30 : 25,
-    sets: 3,
+    sets: 1,
     holdSeconds: 5,
     relaxSeconds: 5,
     holdIntervalLabel: defaultHoldIntervalLabel(type),
@@ -298,7 +298,7 @@ function buildExerciseFromSection(
       section.instruction.trim() ||
       `${section.label} — зөв хэлбэр, тогтвортой амьсгал хадгална.`,
     durationSeconds: timing.durationSeconds,
-    sets: timing.sets,
+    sets: 1,
     motion,
     motionHint: '',
     sortOrder,
@@ -479,7 +479,7 @@ export function estimateProgramMinutes(
     const duration =
       timing.durationSeconds ||
       (sections[index]?.type === 'breath' ? 30 : 25);
-    return sum + duration * Math.max(1, timing.sets || 1);
+    return sum + duration;
   }, 0);
   return Math.max(1, Math.round(totalSeconds / 60));
 }

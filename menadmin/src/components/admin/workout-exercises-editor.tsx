@@ -190,8 +190,7 @@ export function WorkoutExercisesEditor({
                       {exercise.name || 'Шинэ дасгал'}
                     </p>
                     <p className="truncate text-xs text-[#95a5a6]">
-                      {exercise.category || 'Ангилал'} · {exercise.sets} багц ·{' '}
-                      {exercise.durationSeconds}с
+                      {exercise.category || 'Ангилал'} · {exercise.durationSeconds}с
                       {phaseList.length > 0
                         ? ` · ${phaseList.length} таб`
                         : ''}
@@ -272,16 +271,7 @@ export function WorkoutExercisesEditor({
                     />
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-4">
-                    <div className="space-y-1.5">
-                      <Label>Багц</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        value={exercise.sets}
-                        onChange={(e) => update(index, { sets: Number(e.target.value) })}
-                      />
-                    </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
                     <div className="space-y-1.5">
                       <Label>
                         {primaryHoldPhaseIndex(phaseList) >= 0

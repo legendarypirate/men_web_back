@@ -83,6 +83,7 @@ type Props = {
   onChange: (sections: WorkoutSectionDefinition[], levelPresets: WorkoutLevelPresets) => void;
   onUploadImage: (file: File) => Promise<string>;
   showDifficultyLevels?: boolean;
+  showVibration?: boolean;
 };
 
 function supportsIntervals(type: WorkoutSectionType) {
@@ -90,7 +91,7 @@ function supportsIntervals(type: WorkoutSectionType) {
 }
 
 function supportsVibration(type: WorkoutSectionType) {
-  return type !== 'breath' && type !== 'relax';
+  return type === 'kegelHold' || type === 'coreBrace';
 }
 
 export function WorkoutSectionsEditor({
@@ -101,6 +102,7 @@ export function WorkoutSectionsEditor({
   onChange,
   onUploadImage,
   showDifficultyLevels = true,
+  showVibration = true,
 }: Props) {
   const [expanded, setExpanded] = useState<number | null>(0);
   const levelKey = String(activeLevel);
@@ -321,7 +323,9 @@ export function WorkoutSectionsEditor({
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
                       {enabled
-                        ? `${timing.durationSeconds}с · ${timing.sets} багц · амралт ${timing.relaxSeconds}с`
+                        ? supportsIntervals(section.type)
+                          ? `${timing.durationSeconds}с · амралт ${timing.relaxSeconds}с`
+                          : `${timing.durationSeconds}с`
                         : showDifficultyLevels
                           ? 'Энэ түвшинд идэвхгүй'
                           : 'Идэвхгүй'}
@@ -418,7 +422,14 @@ export function WorkoutSectionsEditor({
                   </div>
 
                   <div className={cn('space-y-3', !enabled && 'pointer-events-none opacity-50')}>
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div
+                    className={cn(
+                      'grid gap-3',
+                      showVibration && supportsVibration(section.type)
+                        ? 'sm:grid-cols-2'
+                        : 'sm:grid-cols-1'
+                    )}
+                  >
                     <div className="space-y-1.5">
                       <Label>Хугацаа (сек)</Label>
                       <NumericInput
@@ -429,15 +440,7 @@ export function WorkoutSectionsEditor({
                         }
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label>Багц</Label>
-                      <NumericInput
-                        min={1}
-                        value={timing.sets}
-                        onChange={(sets) => updateTiming(index, { sets })}
-                      />
-                    </div>
-                    {supportsVibration(section.type) && (
+                    {showVibration && supportsVibration(section.type) && (
                       <div className="space-y-1.5">
                         <Label>Чичиргээ (ms)</Label>
                         <NumericInput
@@ -498,7 +501,7 @@ export function WorkoutSectionsEditor({
                     </>
                   )}
 
-                  {supportsVibration(section.type) && (
+                  {showVibration && supportsVibration(section.type) && (
                     <div className="flex items-center gap-2 rounded-lg border px-3 py-2.5">
                       <Checkbox
                         id={`vibration-${section.id}-${activeLevel}`}
