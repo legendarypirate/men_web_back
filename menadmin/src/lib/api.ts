@@ -642,6 +642,16 @@ export const api = {
     uploadVideoWithMeta: (file: File) =>
       uploadMultipart('/api/admin/upload/video', 'video', file),
     uploadImage: (file: File) => uploadMultipart('/api/admin/upload/image', 'image', file),
+    labels: () =>
+      request<{ labels: Record<string, string> }>('/api/admin/workouts/labels'),
+    updateLabel: (kind: string, title: string) =>
+      request<{ labels: Record<string, string> }>(
+        `/api/admin/workouts/labels/${encodeURIComponent(kind)}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ title }),
+        }
+      ),
   },
 
   articleCategories: {

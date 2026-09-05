@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
+import { SquarePen } from 'lucide-react';
 import { api, WorkoutLevelPresets, WorkoutProgram } from '@/lib/api';
 import { AppDrawer } from '@/components/custom/app-drawer';
 import { AppTable } from '@/components/custom/app-table';
@@ -90,6 +91,10 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
   const [activeLevel, setActiveLevel] = useState(DEFAULT_TRAINING_LEVEL);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [kindTitle, setKindTitle] = useState(title);
+  const [titleDraft, setTitleDraft] = useState(title);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [savingTitle, setSavingTitle] = useState(false);
 
   const isChallenge = kind === 'kegel_challenge';
   const isKegel = kind === 'kegel';
@@ -108,10 +113,45 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
     }
   }
 
+  async function loadLabel() {
+    try {
+      const res = await api.workouts.labels();
+      const saved = res.data.labels?.[kind];
+      if (typeof saved === 'string' && saved.trim()) {
+        setKindTitle(saved.trim());
+        setTitleDraft(saved.trim());
+      }
+    } catch {
+      // Keep the page fallback title if labels are unavailable.
+    }
+  }
+
   useEffect(() => {
+    setKindTitle(title);
+    setTitleDraft(title);
+    setEditingTitle(false);
     load();
+    loadLabel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind]);
+
+  async function handleSaveKindTitle(e: FormEvent) {
+    e.preventDefault();
+    const next = titleDraft.trim();
+    if (!next || savingTitle) return;
+    setSavingTitle(true);
+    try {
+      await api.workouts.updateLabel(kind, next);
+      setKindTitle(next);
+      setTitleDraft(next);
+      setEditingTitle(false);
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Нэр хадгалахад алдаа');
+    } finally {
+      setSavingTitle(false);
+    }
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -200,7 +240,52 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
   return (
     <div>
       <PageHeader
-        title={title}
+        title={
+          editingTitle ? (
+            <form
+              className="flex flex-wrap items-center gap-2"
+              onSubmit={handleSaveKindTitle}
+            >
+              <Input
+                value={titleDraft}
+                onChange={(e) => setTitleDraft(e.target.value)}
+                className="h-10 max-w-md text-lg font-semibold"
+                maxLength={80}
+                autoFocus
+              />
+              <Button type="submit" size="sm" disabled={savingTitle || !titleDraft.trim()}>
+                Хадгалах
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={savingTitle}
+                onClick={() => {
+                  setTitleDraft(kindTitle);
+                  setEditingTitle(false);
+                }}
+              >
+                Болих
+              </Button>
+            </form>
+          ) : (
+            <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
+              <span>{kindTitle}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setTitleDraft(kindTitle);
+                  setEditingTitle(true);
+                }}
+                className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label="Нэр засах"
+              >
+                <SquarePen className="size-4" />
+              </button>
+            </h1>
+          )
+        }
         subtitle={`${programs.length} ${isChallenge ? 'сорилт' : 'хөтөлбөр'} · ${subtitle}`}
         action={
           <AddButton

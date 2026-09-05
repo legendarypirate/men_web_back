@@ -9,14 +9,18 @@ export function PageHeader({
   subtitle,
   action,
 }: {
-  title: string;
+  title: React.ReactNode;
   subtitle?: string;
   action?: React.ReactNode;
 }) {
   return (
     <div className="mb-6 flex items-start justify-between gap-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+      <div className="min-w-0 flex-1">
+        {typeof title === 'string' ? (
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+        ) : (
+          title
+        )}
         {subtitle && (
           <p className="mt-1 text-sm font-medium text-muted-foreground">{subtitle}</p>
         )}

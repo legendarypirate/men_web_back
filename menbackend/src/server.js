@@ -10,6 +10,8 @@ async function start() {
     await sequelize.sync({ alter: process.env.NODE_ENV !== 'production' });
     const { ensureWorkoutPrograms } = require('./bootstrap/ensureWorkoutPrograms');
     await ensureWorkoutPrograms();
+    const { ensureWorkoutKindLabels } = require('./utils/workoutKindLabels');
+    await ensureWorkoutKindLabels();
     const { startReminderScheduler } = require('./jobs/reminderScheduler');
     startReminderScheduler();
     console.log('Database connected');

@@ -3,6 +3,7 @@ const User = require('./User');
 const WorkoutProgram = require('./WorkoutProgram');
 const WorkoutExercise = require('./WorkoutExercise');
 const WorkoutSession = require('./WorkoutSession');
+const WorkoutKindLabel = require('./WorkoutKindLabel');
 const Article = require('./Article');
 const ArticleCategory = require('./ArticleCategory');
 const HealthBite = require('./HealthBite');
@@ -84,6 +85,7 @@ module.exports = {
   WorkoutProgram,
   WorkoutExercise,
   WorkoutSession,
+  WorkoutKindLabel,
   Article,
   ArticleCategory,
   HealthBite,

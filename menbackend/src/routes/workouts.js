@@ -4,6 +4,7 @@ const {
   WorkoutExercise,
   WorkoutSession,
 } = require('../models');
+const { getKindLabelsMap } = require('../utils/workoutKindLabels');
 const { ok, fail } = require('../utils/response');
 const { authRequired, optionalAuth } = require('../middleware/auth');
 const {
@@ -94,6 +95,15 @@ router.get('/', optionalAuth, async (req, res, next) => {
     const mapped = shareKegelChallengeWorkoutFromLevel1(programs.map(mapProgram));
     await applyKegelProgress(mapped, req.user);
     return ok(res, { programs: mapped });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/labels', async (req, res, next) => {
+  try {
+    const labels = await getKindLabelsMap();
+    return ok(res, { labels });
   } catch (err) {
     next(err);
   }

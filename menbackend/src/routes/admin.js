@@ -7,6 +7,7 @@ const {
   WorkoutProgram,
   WorkoutExercise,
   WorkoutSession,
+  WorkoutKindLabel,
   Article,
   ArticleCategory,
   HealthBite,
@@ -45,6 +46,10 @@ const {
   ASSIGNABLE_MEMBERSHIPS,
 } = require('../utils/membership');
 const { applyKindDefaults, workoutListWhere } = require('../utils/workoutKind');
+const {
+  getKindLabelsMap,
+  isWorkoutKind,
+} = require('../utils/workoutKindLabels');
 
 const router = express.Router();
 
@@ -251,6 +256,44 @@ async function setExclusiveHomeFeatured(kind, programId) {
     { where: { kind, id: { [Op.ne]: programId } } }
   );
 }
+
+router.get('/workouts/labels', adminRequired, async (req, res, next) => {
+  try {
+    const labels = await getKindLabelsMap();
+    return ok(res, { labels });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/workouts/labels/:kind', adminRequired, async (req, res, next) => {
+  try {
+    const kind = String(req.params.kind || '').trim();
+    const title = String(req.body?.title || '').trim();
+    if (!isWorkoutKind(kind)) {
+      return fail(res, 'Буруу төрөл', 400);
+    }
+    if (!title) {
+      return fail(res, 'Нэр шаардлагатай');
+    }
+    if (title.length > 80) {
+      return fail(res, 'Нэр хэт урт байна');
+    }
+
+    const [row] = await WorkoutKindLabel.findOrCreate({
+      where: { kind },
+      defaults: { title },
+    });
+    if (row.title !== title) {
+      await row.update({ title });
+    }
+
+    const labels = await getKindLabelsMap();
+    return ok(res, { labels }, 'Нэр хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/workouts', adminRequired, async (req, res, next) => {
   try {
