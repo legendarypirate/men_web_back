@@ -52,6 +52,11 @@ export const SECTION_TYPE_OPTIONS: { value: WorkoutSectionType; label: string }[
   { value: 'stretch', label: 'Сунгалт' },
 ];
 
+export const HOME_SECTION_TYPE_OPTIONS: { value: WorkoutSectionType; label: string }[] = [
+  { value: 'relax', label: 'Амрах' },
+  { value: 'stretch', label: 'Дасгал' },
+];
+
 export function emptySectionDefinition(type: WorkoutSectionType = 'kegelHold'): WorkoutSectionDefinition {
   const preset = SECTION_TYPE_OPTIONS.find((o) => o.value === type);
   return {

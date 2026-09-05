@@ -9,6 +9,7 @@ import {
   emptySectionTiming,
   normalizeSectionTiming,
   SECTION_TYPE_OPTIONS,
+  HOME_SECTION_TYPE_OPTIONS,
   TRAINING_LEVELS,
   WorkoutSectionDefinition,
   WorkoutSectionType,
@@ -104,6 +105,9 @@ export function WorkoutSectionsEditor({
   const [expanded, setExpanded] = useState<number | null>(0);
   const levelKey = String(activeLevel);
   const activeTimings = levelPresets[levelKey] ?? [];
+  const typeOptions = showDifficultyLevels
+    ? SECTION_TYPE_OPTIONS
+    : HOME_SECTION_TYPE_OPTIONS;
 
   function emit(nextSections: WorkoutSectionDefinition[], nextPresets: WorkoutLevelPresets) {
     onChange(nextSections, nextPresets);
@@ -169,7 +173,9 @@ export function WorkoutSectionsEditor({
   }
 
   function addSection() {
-    const definition = emptySectionDefinition();
+    const definition = emptySectionDefinition(
+      showDifficultyLevels ? 'kegelHold' : 'stretch'
+    );
     const nextSections = [...sections, definition];
     const nextPresets = { ...levelPresets };
     for (const { level } of TRAINING_LEVELS) {
@@ -380,7 +386,11 @@ export function WorkoutSectionsEditor({
                     <div className="space-y-1.5">
                       <Label>Төрөл</Label>
                       <Select
-                        value={section.type}
+                        value={
+                          typeOptions.some((option) => option.value === section.type)
+                            ? section.type
+                            : 'stretch'
+                        }
                         onValueChange={(value) =>
                           value && updateSection(index, { type: value as WorkoutSectionType })
                         }
@@ -389,7 +399,7 @@ export function WorkoutSectionsEditor({
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {SECTION_TYPE_OPTIONS.map((option) => (
+                          {typeOptions.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -398,7 +408,7 @@ export function WorkoutSectionsEditor({
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Нэр (апп дээрх таб)</Label>
+                      <Label>{showDifficultyLevels ? 'Нэр (апп дээрх таб)' : 'Нэр'}</Label>
                       <Input
                         value={section.label}
                         onChange={(e) => updateSection(index, { label: e.target.value })}
