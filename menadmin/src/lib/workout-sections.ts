@@ -329,8 +329,11 @@ function timingFromPhase(
 function referenceTiming(
   levelPresets: WorkoutLevelPresets,
   sectionIndex: number,
-  section: WorkoutSectionDefinition
+  section: WorkoutSectionDefinition,
+  level = REFERENCE_TRAINING_LEVEL
 ): SectionTiming {
+  const fromRequested = levelPresets[String(level)]?.[sectionIndex];
+  if (fromRequested) return normalizeSectionTiming(fromRequested);
   const fromSix = levelPresets[String(REFERENCE_TRAINING_LEVEL)]?.[sectionIndex];
   if (fromSix) return normalizeSectionTiming(fromSix);
   const fromFive = levelPresets[String(DEFAULT_TRAINING_LEVEL)]?.[sectionIndex];
@@ -429,12 +432,13 @@ export function loadProgramSections(program: WorkoutProgram): {
 /** Full section templates stored on the program (all sections, regardless of level). */
 export function templateExercisesFromSections(
   sections: WorkoutSectionDefinition[],
-  levelPresets: WorkoutLevelPresets
+  levelPresets: WorkoutLevelPresets,
+  level = REFERENCE_TRAINING_LEVEL
 ): WorkoutExercise[] {
   return sections.map((section, index) =>
     buildExerciseFromSection(
       section,
-      referenceTiming(levelPresets, index, section),
+      referenceTiming(levelPresets, index, section, level),
       index
     )
   );

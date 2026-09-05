@@ -127,7 +127,11 @@ export function WorkoutProgramsManager({ kind, title, subtitle, addLabel }: Prop
 
     setSaving(true);
     try {
-      const exercises = templateExercisesFromSections(editing.sections, syncedPresets);
+      const exercises = templateExercisesFromSections(
+        editing.sections,
+        syncedPresets,
+        isHomeWorkout ? DEFAULT_TRAINING_LEVEL : undefined
+      );
       const payload: WorkoutProgram = {
         id: editing.id,
         title: editing.title,
