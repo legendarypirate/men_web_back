@@ -412,7 +412,8 @@ function StoryTextPreview({ slide }: { slide: ArticleStorySlide }) {
           media
             ? {
                 backgroundImage: `url(${media})`,
-                backgroundSize: 'cover',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
               }
             : undefined

@@ -123,10 +123,11 @@ router.get('/today', optionalAuth, async (req, res, next) => {
 
 router.get('/sessions/mine', authRequired, async (req, res, next) => {
   try {
+    const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 200);
     const sessions = await WorkoutSession.findAll({
       where: { userId: req.user.id },
       order: [['createdAt', 'DESC']],
-      limit: 50,
+      limit,
     });
     return ok(res, { sessions });
   } catch (err) {
