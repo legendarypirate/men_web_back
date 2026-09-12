@@ -29,6 +29,11 @@ import {
   type SlideDirection,
 } from '@/components/quiz/quiz-motion';
 import { SITE } from '@/lib/site-config';
+import {
+  collectQuizVideoUrls,
+  ensureVideoReady,
+  preloadQuizVideos,
+} from '@/lib/quiz-video-preload';
 import { cn } from '@/lib/utils';
 
 type Phase = 'quiz' | 'section-end' | 'processing' | 'result';
@@ -50,6 +55,11 @@ export function KegelQuiz() {
       .then(setQuiz)
       .catch(() => setQuiz(getQuizFallback()));
   }, []);
+
+  useEffect(() => {
+    if (!quiz?.stages?.length) return;
+    preloadQuizVideos(collectQuizVideoUrls(quiz.stages));
+  }, [quiz]);
 
   const stages = quiz?.stages ?? getQuizFallback().stages;
   const questions = quiz?.questions ?? getQuizFallback().questions;
@@ -180,6 +190,23 @@ export function KegelQuiz() {
   function selectOption(questionId: string, optionId: string) {
     setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   }
+
+  useEffect(() => {
+    if (phase !== 'quiz' || !question) return;
+    const next = questions[stepIndex + 1];
+    const endsStage = !next || next.stage !== question.stage;
+    if (!endsStage) return;
+    const items = stageById.get(question.stage)?.endMediaItems ?? [];
+    preloadQuizVideos(
+      items.filter((item) => item.type === 'video').map((item) => item.url)
+    );
+  }, [phase, question, stepIndex, stageById, questions]);
+
+  useEffect(() => {
+    if (phase !== 'section-end') return;
+    const next = sectionEndItems[sectionMediaIndex + 1];
+    if (next?.type === 'video') preloadQuizVideos([next.url]);
+  }, [phase, sectionMediaIndex, sectionEndItems]);
 
   useEffect(() => {
     if (phase !== 'processing') return;
@@ -584,27 +611,67 @@ export function KegelQuiz() {
 
 function SectionEndVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const [buffered, setBuffered] = useState(false);
+
+  useEffect(() => {
+    void ensureVideoReady(src);
+  }, [src]);
 
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
+
+    let cancelled = false;
+    setBuffered(false);
     video.muted = true;
-    void video.play().catch(() => {});
+
+    const startPlayback = () => {
+      if (cancelled) return;
+      setBuffered(true);
+      void video.play().catch(() => {});
+    };
+
+    if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
+      startPlayback();
+    } else {
+      video.addEventListener('canplaythrough', startPlayback, { once: true });
+      video.addEventListener('loadeddata', startPlayback, { once: true });
+    }
+
+    return () => {
+      cancelled = true;
+      video.removeEventListener('canplaythrough', startPlayback);
+      video.removeEventListener('loadeddata', startPlayback);
+    };
   }, [src]);
 
   return (
-    <video
-      ref={ref}
-      src={src}
-      autoPlay
-      muted
-      loop
-      playsInline
-      controls={false}
-      disablePictureInPicture
-      controlsList="nodownload nofullscreen noremoteplayback"
-      className="pointer-events-none max-h-[420px] w-full bg-black object-contain"
-    />
+    <div className="relative max-h-[420px] w-full bg-black">
+      {!buffered && (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-black/80"
+          aria-hidden
+        >
+          <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
+        </div>
+      )}
+      <video
+        ref={ref}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        controls={false}
+        disablePictureInPicture
+        controlsList="nodownload nofullscreen noremoteplayback"
+        className={cn(
+          'pointer-events-none max-h-[420px] w-full object-contain transition-opacity duration-300',
+          buffered ? 'opacity-100' : 'opacity-0'
+        )}
+      />
+    </div>
   );
 }
 

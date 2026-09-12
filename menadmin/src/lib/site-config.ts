@@ -15,7 +15,7 @@ export const SITE = {
   url: 'https://tenkhee.mn',
   supportEmail: 'support@tenkhee.mn',
   infoEmail: 'info@tenkhee.mn',
-  appStoreUrl: 'https://apps.apple.com/app/tenkhee-plus',
+  appStoreUrl: 'https://apps.apple.com/us/app/tenkhee/id6800526981',
   playStoreUrl: 'https://play.google.com/store/apps/details?id=mn.vitalmen.mgl',
 } as const;
 
