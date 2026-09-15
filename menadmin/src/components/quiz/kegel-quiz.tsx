@@ -11,6 +11,7 @@ import {
   buildQuizResult,
   fetchPublicQuiz,
   getQuizFallback,
+  recordQuizCompletion,
   type QuizEndMediaItem,
   type QuizPayload,
   type QuizStagePayload,
@@ -49,6 +50,7 @@ export function KegelQuiz() {
   const [slideDirection, setSlideDirection] = useState<SlideDirection>(1);
   const [glowBurst, setGlowBurst] = useState(false);
   const [animSeed, setAnimSeed] = useState(0);
+  const completionRecordedRef = useRef(false);
 
   useEffect(() => {
     fetchPublicQuiz()
@@ -207,6 +209,12 @@ export function KegelQuiz() {
     const next = sectionEndItems[sectionMediaIndex + 1];
     if (next?.type === 'video') preloadQuizVideos([next.url]);
   }, [phase, sectionMediaIndex, sectionEndItems]);
+
+  useEffect(() => {
+    if (phase !== 'result' || completionRecordedRef.current) return;
+    completionRecordedRef.current = true;
+    void recordQuizCompletion('web');
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== 'processing') return;

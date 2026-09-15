@@ -4,6 +4,7 @@ const { authRequired } = require('../middleware/auth');
 const { enrichPublicUser } = require('../utils/membership');
 const { deleteUserAccount } = require('../services/deleteUserAccount');
 const { DeviceToken } = require('../models');
+const { getActiveMainGoalKeys } = require('../utils/mainGoals');
 
 const router = express.Router();
 
@@ -36,6 +37,10 @@ router.post('/goal', authRequired, async (req, res, next) => {
   try {
     const { primaryGoal } = req.body;
     if (!primaryGoal) return fail(res, 'Зорилго шаардлагатай');
+    const allowedKeys = await getActiveMainGoalKeys();
+    if (allowedKeys.length > 0 && !allowedKeys.includes(primaryGoal)) {
+      return fail(res, 'Зорилго буруу байна');
+    }
     req.user.primaryGoal = primaryGoal;
     await req.user.save();
     return ok(res, { user: publicUser(req.user) }, 'Зорилго хадгалагдлаа');

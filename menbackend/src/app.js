@@ -19,6 +19,7 @@ const coachRoutes = require('./routes/coach');
 const homeRoutes = require('./routes/home');
 const feedbackRoutes = require('./routes/feedback');
 const quizRoutes = require('./routes/quiz');
+const appRoutes = require('./routes/app');
 const adminRoutes = require('./routes/admin');
 
 const app = express();
@@ -78,6 +79,7 @@ app.get('/api', (req, res) => {
       home: '/api/home',
       feedback: '/api/feedback',
       quiz: '/api/quiz',
+      app: '/api/app',
       admin: '/api/admin',
     },
   });
@@ -97,6 +99,7 @@ app.use('/api/coach', coachRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/quiz', quizRoutes);
+app.use('/api/app', appRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use(notFound);

@@ -1,5 +1,5 @@
 const express = require('express');
-const { QuizStage, QuizQuestion, QuizConfig } = require('../models');
+const { QuizStage, QuizQuestion, QuizConfig, QuizCompletion } = require('../models');
 const { ok } = require('../utils/response');
 const { normalizeEndMediaItems } = require('../utils/quizMedia');
 
@@ -56,6 +56,17 @@ router.get('/', async (req, res, next) => {
       questions: questions.map(mapQuestion),
       config,
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/complete', async (req, res, next) => {
+  try {
+    const raw = String(req.body?.source || 'web').trim().toLowerCase();
+    const source = raw === 'app' ? 'app' : 'web';
+    await QuizCompletion.create({ source });
+    return ok(res, { recorded: true, source }, 'Quiz дууссан');
   } catch (err) {
     next(err);
   }

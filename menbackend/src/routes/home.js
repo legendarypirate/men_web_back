@@ -1,6 +1,7 @@
 const express = require('express');
 const { HomeProTip, Article } = require('../models');
 const { ok } = require('../utils/response');
+const { getPublicMainGoals } = require('../utils/mainGoals');
 
 const router = express.Router();
 
@@ -10,6 +11,15 @@ router.get('/onboarding-story', async (req, res, next) => {
       where: { isOnboarding: true, published: true },
     });
     return ok(res, { article: article || null });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/main-goals', async (req, res, next) => {
+  try {
+    const payload = await getPublicMainGoals();
+    return ok(res, payload);
   } catch (err) {
     next(err);
   }

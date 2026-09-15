@@ -273,6 +273,17 @@ export type PaymentSettings = {
   transferNote: string;
 };
 
+export type AppVersionSettings = {
+  iosForceUpdate: boolean;
+  iosMinVersion: string;
+  iosStoreUrl: string;
+  androidForceUpdate: boolean;
+  androidMinVersion: string;
+  androidStoreUrl: string;
+  updateTitle: string;
+  updateMessage: string;
+};
+
 export type Payment = {
   id: string;
   invoiceId: string;
@@ -302,6 +313,9 @@ export type Stats = {
   assessmentQuestions: number;
   hospitals: number;
   coachPrograms: number;
+  quizCompletions: number;
+  quizCompletionsWeb: number;
+  quizCompletionsApp: number;
 };
 
 export type Product = {
@@ -514,6 +528,20 @@ export type QuizConfigRecord = {
   id: string;
   processingTitle: string;
   processingMessages: string[];
+  active: boolean;
+};
+
+export type MainGoalConfigRecord = {
+  id: string;
+  screenTitle: string;
+  defaultKey: string;
+};
+
+export type MainGoalOptionRecord = {
+  key: string;
+  title: string;
+  description: string;
+  sortOrder: number;
   active: boolean;
 };
 
@@ -811,6 +839,13 @@ export const api = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
+    getAppVersion: () =>
+      request<{ settings: AppVersionSettings }>('/api/admin/settings/app-version'),
+    updateAppVersion: (data: Partial<AppVersionSettings>) =>
+      request<{ settings: AppVersionSettings }>('/api/admin/settings/app-version', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
   },
 
   hospitalCategories: {
@@ -946,6 +981,25 @@ export const api = {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
+  },
+
+  mainGoals: {
+    get: () =>
+      request<{ config: MainGoalConfigRecord; options: MainGoalOptionRecord[] }>(
+        '/api/admin/main-goals'
+      ),
+    update: (data: {
+      screenTitle?: string;
+      defaultKey?: string;
+      options: MainGoalOptionRecord[];
+    }) =>
+      request<{ config: MainGoalConfigRecord; options: MainGoalOptionRecord[] }>(
+        '/api/admin/main-goals',
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+        }
+      ),
   },
 };
 

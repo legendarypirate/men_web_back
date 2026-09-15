@@ -28,6 +28,9 @@ const {
   QuizStage,
   QuizQuestion,
   QuizConfig,
+  QuizCompletion,
+  MainGoalConfig,
+  MainGoalOption,
 } = require('../models');
 const { ok, fail, publicUser, formatMnt } = require('../utils/response');
 const { syncLegacyMediaFields } = require('../utils/quizMedia');
@@ -35,6 +38,10 @@ const { adminRequired, signToken } = require('../middleware/auth');
 const { uploadVideo, uploadImage } = require('../middleware/upload');
 const { handleImageUpload, handleVideoUpload } = require('./upload');
 const { getPaymentSettings, mapPaymentSettings } = require('../utils/paymentSettings');
+const {
+  getAppVersionSettings,
+  mapAppVersionSettings,
+} = require('../utils/appVersion');
 const { getPushStats, sendAdminPush } = require('../services/adminPushNotifications');
 const {
   applyAdminMembershipUpdate,
@@ -99,6 +106,9 @@ router.get('/stats', adminRequired, async (req, res, next) => {
       assessmentQuestions,
       hospitals,
       coachPrograms,
+      quizCompletions,
+      quizCompletionsWeb,
+      quizCompletionsApp,
     ] = await Promise.all([
       User.count(),
       WorkoutSession.count(),
@@ -116,6 +126,9 @@ router.get('/stats', adminRequired, async (req, res, next) => {
       AssessmentQuestion.count({ where: { active: true } }),
       Hospital.count({ where: { active: true } }),
       CoachProgram.count({ where: { active: true } }),
+      QuizCompletion.count(),
+      QuizCompletion.count({ where: { source: 'web' } }),
+      QuizCompletion.count({ where: { source: 'app' } }),
     ]);
 
     const premiumUsers = await User.count({
@@ -140,6 +153,9 @@ router.get('/stats', adminRequired, async (req, res, next) => {
       assessmentQuestions,
       hospitals,
       coachPrograms,
+      quizCompletions,
+      quizCompletionsWeb,
+      quizCompletionsApp,
     });
   } catch (err) {
     next(err);
@@ -1015,6 +1031,58 @@ router.patch('/settings/payment', adminRequired, async (req, res, next) => {
   }
 });
 
+router.get('/settings/app-version', adminRequired, async (req, res, next) => {
+  try {
+    const settings = await getAppVersionSettings();
+    return ok(res, { settings: mapAppVersionSettings(settings) });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/settings/app-version', adminRequired, async (req, res, next) => {
+  try {
+    const settings = await getAppVersionSettings();
+    const {
+      iosForceUpdate,
+      iosMinVersion,
+      iosStoreUrl,
+      androidForceUpdate,
+      androidMinVersion,
+      androidStoreUrl,
+      updateTitle,
+      updateMessage,
+    } = req.body;
+
+    await settings.update({
+      ...(typeof iosForceUpdate === 'boolean' ? { iosForceUpdate } : {}),
+      ...(iosMinVersion != null
+        ? { iosMinVersion: String(iosMinVersion).trim() }
+        : {}),
+      ...(iosStoreUrl != null ? { iosStoreUrl: String(iosStoreUrl).trim() } : {}),
+      ...(typeof androidForceUpdate === 'boolean' ? { androidForceUpdate } : {}),
+      ...(androidMinVersion != null
+        ? { androidMinVersion: String(androidMinVersion).trim() }
+        : {}),
+      ...(androidStoreUrl != null
+        ? { androidStoreUrl: String(androidStoreUrl).trim() }
+        : {}),
+      ...(updateTitle != null ? { updateTitle: String(updateTitle).trim() } : {}),
+      ...(updateMessage != null
+        ? { updateMessage: String(updateMessage).trim() }
+        : {}),
+    });
+
+    return ok(
+      res,
+      { settings: mapAppVersionSettings(settings) },
+      'Хувилбарын тохиргоо хадгалагдлаа'
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 // --- Hospital categories ---
 router.get('/hospital-categories', adminRequired, async (req, res, next) => {
   try {
@@ -1380,6 +1448,93 @@ router.put('/quiz/config', adminRequired, async (req, res, next) => {
       await config.update(req.body);
     }
     return ok(res, { config }, 'Тохиргоо хадгалагдлаа');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/main-goals', adminRequired, async (req, res, next) => {
+  try {
+    let config = await MainGoalConfig.findByPk('default');
+    if (!config) {
+      const { MAIN_GOAL_CONFIG } = require('../data/mainGoalsSeed');
+      config = await MainGoalConfig.create(MAIN_GOAL_CONFIG);
+    }
+    const options = await MainGoalOption.findAll({
+      order: [['sortOrder', 'ASC'], ['key', 'ASC']],
+    });
+    return ok(res, { config, options });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/main-goals', adminRequired, async (req, res, next) => {
+  try {
+    const { screenTitle, defaultKey, options } = req.body || {};
+    if (!Array.isArray(options) || options.length === 0) {
+      return fail(res, 'Дор хаяж нэг зорилго шаардлагатай');
+    }
+
+    let config = await MainGoalConfig.findByPk('default');
+    if (!config) {
+      config = await MainGoalConfig.create({ id: 'default' });
+    }
+
+    const updates = {};
+    if (typeof screenTitle === 'string' && screenTitle.trim()) {
+      updates.screenTitle = screenTitle.trim();
+    }
+    if (typeof defaultKey === 'string' && defaultKey.trim()) {
+      updates.defaultKey = defaultKey.trim();
+    }
+    if (Object.keys(updates).length > 0) {
+      await config.update(updates);
+    }
+
+    for (const row of options) {
+      const key = typeof row.key === 'string' ? row.key.trim() : '';
+      if (!key) continue;
+
+      const title = typeof row.title === 'string' ? row.title.trim() : '';
+      const description =
+        typeof row.description === 'string' ? row.description.trim() : '';
+      if (!title) return fail(res, `"${key}" зорилгын гарчиг хоосон байна`);
+
+      const existing = await MainGoalOption.findByPk(key);
+      const payload = {
+        title,
+        description,
+        sortOrder: Number.isFinite(row.sortOrder) ? row.sortOrder : 0,
+        active: row.active !== false,
+      };
+
+      if (existing) {
+        await existing.update(payload);
+      } else {
+        await MainGoalOption.create({ key, ...payload });
+      }
+    }
+
+    const activeKeys = await MainGoalOption.findAll({
+      where: { active: true },
+      attributes: ['key'],
+    });
+    const activeKeyList = activeKeys.map((row) => row.key);
+    if (activeKeyList.length > 0 && !activeKeyList.includes(config.defaultKey)) {
+      await config.update({ defaultKey: activeKeyList[0] });
+    }
+
+    const refreshedOptions = await MainGoalOption.findAll({
+      order: [['sortOrder', 'ASC'], ['key', 'ASC']],
+    });
+    await config.reload();
+
+    return ok(
+      res,
+      { config, options: refreshedOptions },
+      'Үндсэн зорилго хадгалагдлаа'
+    );
   } catch (err) {
     next(err);
   }

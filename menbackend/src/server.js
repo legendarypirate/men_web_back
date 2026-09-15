@@ -12,6 +12,10 @@ async function start() {
     await ensureWorkoutPrograms();
     const { ensureWorkoutKindLabels } = require('./utils/workoutKindLabels');
     await ensureWorkoutKindLabels();
+    const { ensureMainGoals } = require('./bootstrap/ensureMainGoals');
+    await ensureMainGoals();
+    const { ensureAppVersionSettings } = require('./bootstrap/ensureAppVersionSettings');
+    await ensureAppVersionSettings();
     const { startReminderScheduler } = require('./jobs/reminderScheduler');
     startReminderScheduler();
     console.log('Database connected');

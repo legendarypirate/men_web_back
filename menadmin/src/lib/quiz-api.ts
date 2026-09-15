@@ -90,4 +90,16 @@ export function getQuizFallback(): QuizPayload {
   };
 }
 
+export async function recordQuizCompletion(source: 'web' | 'app' = 'web') {
+  try {
+    await fetch('/api/quiz/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ source }),
+    });
+  } catch {
+    // Best-effort analytics — quiz UX should not break if this fails.
+  }
+}
+
 export { buildQuizResult };

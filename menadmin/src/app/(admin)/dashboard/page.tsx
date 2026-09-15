@@ -38,6 +38,11 @@ export default function DashboardPage() {
         <StatCard label="Нийтлэл" value={stats.articles} />
         <StatCard label="Дасгалын хөтөлбөр" value={stats.programs} />
         <StatCard label="Үнэлгээний асуулт" value={stats.assessmentQuestions} />
+        <StatCard
+          label="Quiz дууссан"
+          value={stats.quizCompletions}
+          hint={`${stats.quizCompletionsWeb} вэб · ${stats.quizCompletionsApp} апп`}
+        />
         <StatCard label="QPay орлого" value={stats.paidRevenueLabel} />
         <StatCard label="Дэлгүүрийн орлого" value={stats.orderRevenueLabel} />
         <StatCard

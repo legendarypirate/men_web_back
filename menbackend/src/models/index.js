@@ -26,6 +26,10 @@ const Feedback = require('./Feedback');
 const QuizStage = require('./QuizStage');
 const QuizQuestion = require('./QuizQuestion');
 const QuizConfig = require('./QuizConfig');
+const QuizCompletion = require('./QuizCompletion');
+const MainGoalConfig = require('./MainGoalConfig');
+const MainGoalOption = require('./MainGoalOption');
+const AppVersionSettings = require('./AppVersionSettings');
 const DeviceToken = require('./DeviceToken');
 const ScheduledReminder = require('./ScheduledReminder');
 const NotificationLog = require('./NotificationLog');
@@ -108,6 +112,10 @@ module.exports = {
   QuizStage,
   QuizQuestion,
   QuizConfig,
+  QuizCompletion,
+  MainGoalConfig,
+  MainGoalOption,
+  AppVersionSettings,
   DeviceToken,
   ScheduledReminder,
   NotificationLog,
