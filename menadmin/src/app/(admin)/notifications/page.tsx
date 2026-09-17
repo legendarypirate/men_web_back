@@ -1,12 +1,38 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
-import { api, PushNotificationStats, SendPushNotificationResult } from '@/lib/api';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import {
+  api,
+  PushNotificationAudience,
+  PushNotificationStats,
+  SendPushNotificationResult,
+} from '@/lib/api';
 import { ErrorState, LoadingState, PageHeader, StatCard } from '@/components/page-ui';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+
+const audienceOptions: { value: PushNotificationAudience; label: string }[] = [
+  { value: 'all', label: 'Бүх хэрэглэгч' },
+  { value: 'free', label: 'Зөвхөн Free' },
+  { value: 'monthly', label: 'Сар бүр (Monthly)' },
+  { value: 'quarterly', label: 'Улирал (Quarterly)' },
+  { value: 'yearly', label: 'Жил бүр (Yearly)' },
+  { value: 'platinum', label: 'Platinum / Lifetime' },
+  { value: 'paid', label: 'Бүх төлбөртэй' },
+];
+
+function audienceLabel(audience: PushNotificationAudience) {
+  return audienceOptions.find((option) => option.value === audience)?.label || audience;
+}
 
 export default function NotificationsPage() {
   const [stats, setStats] = useState<PushNotificationStats | null>(null);
@@ -14,9 +40,20 @@ export default function NotificationsPage() {
   const [error, setError] = useState('');
   const [title, setTitle] = useState('Tenkhee');
   const [body, setBody] = useState('');
+  const [audience, setAudience] = useState<PushNotificationAudience>('all');
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState<SendPushNotificationResult | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
+
+  const audiencePreview = useMemo(() => {
+    if (stats?.audienceCounts) {
+      return stats.audienceCounts[audience] || { users: 0, devices: 0 };
+    }
+    if (audience === 'all' && stats) {
+      return { users: stats.usersWithTokens, devices: stats.registeredDevices };
+    }
+    return null;
+  }, [stats, audience]);
 
   async function loadStats() {
     setLoading(true);
@@ -44,9 +81,14 @@ export default function NotificationsPage() {
       return;
     }
 
+    const recipientText =
+      audience === 'all'
+        ? 'бүх бүртгэлтэй хэрэглэгчид'
+        : `${audienceLabel(audience)} гишүүнчлэлтэй хэрэглэгчид`;
+
     if (
       !confirm(
-        'Бүх бүртгэлтэй хэрэглэгчид push мэдэгдэл илгээх үү?\n\nЭнэ үйлдлийг буцаах боломжгүй.'
+        `${recipientText} push мэдэгдэл илгээх үү?\n\nЭнэ үйлдлийг буцаах боломжгүй.`
       )
     ) {
       return;
@@ -62,6 +104,7 @@ export default function NotificationsPage() {
         title: trimmedTitle,
         body: trimmedBody,
         target: 'all',
+        ...(audience !== 'all' ? { membership: audience } : {}),
         data: { type: 'admin_broadcast' },
       });
       setResult(res.data);
@@ -81,7 +124,7 @@ export default function NotificationsPage() {
     <div>
       <PageHeader
         title="Push мэдэгдэл"
-        subtitle="Бүх хэрэглэгчид FCM push илгээх"
+        subtitle="Гишүүнчлэлээр шүүж FCM push илгээх"
       />
 
       {error && (
@@ -226,16 +269,59 @@ export default function NotificationsPage() {
           <p className="text-xs text-muted-foreground">{body.length}/500</p>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="push-audience">Хүлээн авагч</Label>
+          <Select
+            value={audience}
+            onValueChange={(value) => setAudience(value as PushNotificationAudience)}
+          >
+            <SelectTrigger id="push-audience" className="w-full max-w-md">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {audienceOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                  {stats?.audienceCounts?.[option.value] && (
+                    <span className="text-muted-foreground">
+                      {' '}
+                      ({stats.audienceCounts[option.value]?.users} хэрэглэгч,{' '}
+                      {stats.audienceCounts[option.value]?.devices} төхөөрөмж)
+                    </span>
+                  )}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {audiencePreview && (
+            <p className="text-xs text-muted-foreground">
+              Сонгосон бүлэг: {audiencePreview.users} хэрэглэгч,{' '}
+              {audiencePreview.devices} төхөөрөмжид илгээнэ.
+            </p>
+          )}
+        </div>
+
         <div className="rounded-lg bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
           Зөвхөн мэдэгдэл идэвхжүүлсэн, admin биш, апп-д нэвтэрч FCM token
-          бүртгүүлсэн хэрэглэгчид илгээнэ.
+          бүртгүүлсэн хэрэглэгчид илгээнэ. Гишүүнчлэл нь хэрэглэгчийн{' '}
+          <code className="rounded bg-muted px-1">membership</code> талбараар
+          шүүгдэнэ.
         </div>
 
         <Button
           type="submit"
-          disabled={sending || !stats?.fcmConfigured || stats.registeredDevices === 0}
+          disabled={
+            sending ||
+            !stats?.fcmConfigured ||
+            (audiencePreview !== null && audiencePreview.devices === 0) ||
+            (audience !== 'all' && !stats?.audienceCounts)
+          }
         >
-          {sending ? 'Илгээж байна...' : 'Бүх хэрэглэгчид илгээх'}
+          {sending
+            ? 'Илгээж байна...'
+            : audience === 'all'
+              ? 'Бүх хэрэглэгчид илгээх'
+              : `${audienceLabel(audience)} руу илгээх`}
         </Button>
       </form>
     </div>

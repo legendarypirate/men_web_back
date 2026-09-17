@@ -50,6 +50,21 @@ export type PushNotificationDevice = {
   updatedAt: string;
 };
 
+export type PushAudienceCount = {
+  users: number;
+  devices: number;
+};
+
+export type PushNotificationAudience =
+  | 'all'
+  | 'free'
+  | 'monthly'
+  | 'quarterly'
+  | 'yearly'
+  | 'lifetime'
+  | 'platinum'
+  | 'paid';
+
 export type PushNotificationStats = {
   fcmConfigured: boolean;
   fcmInitError?: string | null;
@@ -58,6 +73,7 @@ export type PushNotificationStats = {
   usersWithTokens: number;
   iosDevices: number;
   androidDevices: number;
+  audienceCounts?: Partial<Record<PushNotificationAudience, PushAudienceCount>>;
   devices?: PushNotificationDevice[];
 };
 
@@ -82,7 +98,7 @@ export type SendPushNotificationPayload = {
   body: string;
   target?: 'all' | 'user';
   userId?: string;
-  membership?: string;
+  membership?: PushNotificationAudience;
   data?: Record<string, string>;
 };
 

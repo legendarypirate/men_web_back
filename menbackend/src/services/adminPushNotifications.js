@@ -2,6 +2,58 @@ const { Op } = require('sequelize');
 const { User, DeviceToken } = require('../models');
 const { isFcmConfigured, sendToTokens, getFcmStatus } = require('./fcm');
 
+const MEMBERSHIP_FILTERS = [
+  'free',
+  'monthly',
+  'quarterly',
+  'yearly',
+  'lifetime',
+  'platinum',
+  'paid',
+];
+
+const AUDIENCE_KEYS = ['all', ...MEMBERSHIP_FILTERS];
+
+function applyMembershipFilter(where, membership) {
+  if (!membership) return;
+
+  if (membership === 'paid') {
+    where.membership = { [Op.ne]: 'free' };
+    return;
+  }
+
+  if (!MEMBERSHIP_FILTERS.includes(membership)) {
+    const err = new Error(
+      `Буруу гишүүнчлэл: ${membership}. Зөвшөөрөгдсөн: ${MEMBERSHIP_FILTERS.join(', ')}`
+    );
+    err.statusCode = 400;
+    throw err;
+  }
+
+  where.membership = membership;
+}
+
+async function countEligibleRecipients(membershipFilter) {
+  const userIds = await resolveTargetUserIds({
+    target: 'all',
+    membership: membershipFilter === 'all' ? undefined : membershipFilter,
+  });
+
+  if (!userIds.length) {
+    return { users: 0, devices: 0 };
+  }
+
+  const tokenRows = await DeviceToken.findAll({
+    where: { userId: { [Op.in]: userIds } },
+    attributes: ['userId'],
+  });
+
+  return {
+    users: new Set(tokenRows.map((row) => row.userId)).size,
+    devices: tokenRows.length,
+  };
+}
+
 async function getPushStats() {
   const tokenRows = await DeviceToken.findAll({
     attributes: ['userId', 'token', 'platform', 'updatedAt', 'createdAt'],
@@ -17,6 +69,13 @@ async function getPushStats() {
   const userIds = new Set(tokenRows.map((row) => row.userId));
   const fcmStatus = getFcmStatus();
 
+  const audienceCounts = {};
+  await Promise.all(
+    AUDIENCE_KEYS.map(async (key) => {
+      audienceCounts[key] = await countEligibleRecipients(key);
+    })
+  );
+
   return {
     fcmConfigured: isFcmConfigured(),
     fcmInitError: fcmStatus.error,
@@ -25,6 +84,7 @@ async function getPushStats() {
     usersWithTokens: userIds.size,
     iosDevices: tokenRows.filter((row) => row.platform === 'ios').length,
     androidDevices: tokenRows.filter((row) => row.platform === 'android').length,
+    audienceCounts,
     devices: tokenRows.map((row) => ({
       userId: row.userId,
       userEmail: row.user?.email || null,
@@ -49,8 +109,8 @@ async function resolveTargetUserIds({ target = 'all', userId, membership }) {
       throw err;
     }
     where.id = userId;
-  } else if (membership) {
-    where.membership = membership;
+  } else {
+    applyMembershipFilter(where, membership);
   }
 
   const users = await User.findAll({
