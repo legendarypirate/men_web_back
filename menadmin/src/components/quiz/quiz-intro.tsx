@@ -85,12 +85,12 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
 
       {/* Mobile readability overlay */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-[#070b10]/10 lg:to-[#070b10]/50"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-[#070b10]/25"
         aria-hidden
       />
 
       {/* Content over the right side of the background */}
-      <div className="relative z-10 ml-auto flex w-full max-w-lg flex-col justify-center px-6 py-10 sm:px-8 lg:max-w-[520px] lg:px-10 lg:pr-12 xl:max-w-[540px] xl:pr-16">
+      <div className="relative z-10 ml-auto flex w-full flex-col justify-center px-6 py-10 sm:px-8 lg:w-[62%] lg:max-w-[920px] lg:px-10 lg:pr-10 xl:w-[60%] xl:px-12 xl:pr-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,13 +103,13 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           </p>
 
           {/* Headline */}
-          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-[2rem] lg:text-[2.15rem]">
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[2.6rem]">
             Танд яг юу хэрэгтэйг{' '}
             <span className="text-[#ff453a]">1 минутанд</span> тодорхойлъё.
           </h1>
 
           {/* Description */}
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60 sm:text-[0.95rem]">
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/60 sm:text-[0.95rem]">
             Хэдэн асуулт хариулаад хөвчрөлт, дур тавилтын хяналт, аарцгийн
             булчин, давсагны үйл ажиллагаатай холбоотой таны одоогийн түвшинг
             үнэлнэ.
@@ -121,12 +121,12 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 grid grid-cols-2 gap-3"
+          className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-3.5"
         >
           {FEATURES.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
-              className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#121620]/60 p-4 text-center transition hover:border-[#ff453a]/30 hover:bg-[#161c28]"
+              className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#121620]/60 p-4 text-center transition hover:border-[#ff453a]/30 hover:bg-[#161c28] lg:p-5"
             >
               <div className="mb-3 flex size-10 items-center justify-center text-[#ff453a]">
                 <Icon className="size-7" strokeWidth={1.8} />
@@ -142,7 +142,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-white/50 sm:text-sm"
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-white/50 sm:text-sm lg:justify-start"
         >
           {META.map(({ icon: Icon, label }, index) => (
             <div key={label} className="flex items-center gap-6">
@@ -176,7 +176,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
             <ArrowRight className="size-5" />
           </motion.button>
 
-          <p className="mt-4 flex items-start justify-center gap-2 text-center text-[11px] leading-relaxed text-white/35 sm:text-xs">
+          <p className="mt-4 flex items-start justify-center gap-2 text-center text-[11px] leading-relaxed text-white/35 sm:text-xs lg:justify-start lg:text-left">
             <Info className="mt-0.5 size-3.5 shrink-0 text-white/50" />
             <span>
               Энэхүү үнэлгээ нь эмнэлгийн оношилгоо биш бөгөөд TenkheePlus доторх
