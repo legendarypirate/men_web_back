@@ -70,27 +70,18 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative flex h-full min-h-0 w-full flex-1 items-end justify-start bg-[#070b10]',
+        'relative h-full min-h-0 w-full flex-1 bg-[#070b10]',
         className
       )}
     >
-      {/* Full-height image — never crop bottom; floor under phone stays visible */}
       <Image
         src="/backg.png"
         alt=""
-        width={1672}
-        height={941}
+        fill
         priority
-        className="max-h-full w-auto max-w-none shrink-0 object-contain object-left-bottom select-none"
+        sizes="100vw"
+        className="object-cover object-[left_center]"
       />
-
-      {/* Overlays + content */}
-      <div className="pointer-events-none absolute inset-0 flex">
-        <div
-          className="h-full w-full bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-[#070b10]/25"
-          aria-hidden
-        />
-      </div>
 
       <div className="pointer-events-auto absolute inset-0 flex items-center">
         {/* Content over the right side of the background */}
