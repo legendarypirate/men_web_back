@@ -35,13 +35,15 @@ import {
   ensureVideoReady,
   preloadQuizVideos,
 } from '@/lib/quiz-video-preload';
+import { QuizFlowProgress } from '@/components/quiz/quiz-flow-progress';
+import { QuizIntro } from '@/components/quiz/quiz-intro';
 import { cn } from '@/lib/utils';
 
-type Phase = 'quiz' | 'section-end' | 'processing' | 'result';
+type Phase = 'intro' | 'quiz' | 'section-end' | 'processing' | 'result';
 
 export function KegelQuiz() {
   const [quiz, setQuiz] = useState<QuizPayload | null>(null);
-  const [phase, setPhase] = useState<Phase>('quiz');
+  const [phase, setPhase] = useState<Phase>('intro');
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [processingIndex, setProcessingIndex] = useState(0);
@@ -172,7 +174,15 @@ export function KegelQuiz() {
     });
   }
 
+  function startQuiz() {
+    triggerForward(() => setPhase('quiz'));
+  }
+
   function goBack() {
+    if (phase === 'quiz' && stepIndex === 0) {
+      triggerBackward(() => setPhase('intro'));
+      return;
+    }
     if (phase === 'section-end') {
       if (sectionMediaIndex > 0) {
         triggerBackward(() => setSectionMediaIndex((i) => i - 1));
@@ -261,6 +271,26 @@ export function KegelQuiz() {
         <main className="relative mx-auto flex w-full max-w-xl flex-1 items-center justify-center px-4 py-16">
           <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
         </main>
+      )}
+
+      {!loading && phase === 'intro' && (
+        <>
+          <QuizFlowProgress activeStep="start" />
+          <QuizSlide
+            slideKey="intro"
+            direction={slideDirection}
+            animStyle="rise"
+            className="relative flex w-full flex-1 flex-col"
+          >
+            <QuizIntro onStart={startQuiz} />
+          </QuizSlide>
+          <QuizFooter
+            backDisabled
+            continueDisabled
+            onBack={goBack}
+            onContinue={startQuiz}
+          />
+        </>
       )}
 
       {!loading && phase === 'quiz' && question && (
@@ -747,6 +777,7 @@ function resolveCurrentStage(
   phase: Phase,
   sectionStageId: number | null
 ): number | null {
+  if (phase === 'intro') return null;
   if (phase === 'section-end') return sectionStageId;
   if (phase === 'processing' || phase === 'result') {
     return questions[questions.length - 1]?.stage ?? null;
