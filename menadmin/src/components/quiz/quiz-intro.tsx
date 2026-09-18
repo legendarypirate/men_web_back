@@ -70,61 +70,39 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div className={cn('relative flex w-full flex-1 overflow-hidden', className)}>
       {/* ════════════════════════════════════════
-          LEFT HALF — anatomy background + phone overlay
+          LEFT HALF — direct hero artwork from reference
           ════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative hidden w-1/2 shrink-0 lg:block overflow-hidden"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        className="relative hidden w-1/2 shrink-0 lg:flex items-center justify-center p-6 xl:p-10 overflow-hidden bg-[#070b10]"
       >
-        {/* Anatomy image fills the entire left half */}
-        <Image
-          src="/body-anatomy.jpg"
-          alt="Аарцгийн булчин"
-          fill
-          className="object-cover object-center"
-          priority
-        />
-        {/* Gradient overlays for cinematic contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070b10]/80 via-transparent to-[#070b10]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#070b10]/60 via-transparent to-[#070b10]/80" />
+        {/* Glowing background ambient light */}
+        <div className="absolute left-1/4 top-1/3 size-72 rounded-full bg-[#ff453a]/20 blur-[120px] pointer-events-none" />
 
-        {/* Floating Top Right Badge */}
-        <div className="absolute top-6 right-8 flex items-center gap-1.5 text-xs font-semibold text-[#ff453a] tracking-wider uppercase">
-          <span className="relative flex size-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ff453a] opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-[#ff453a]" />
-          </span>
-          Эхлэх
-        </div>
-
-        {/* Phone mockup — bottom-left area, overlaid on the image */}
+        {/* Hero image container with subtle 3D tilt and floating effect */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute bottom-6 left-6 xl:bottom-10 xl:left-10 z-10"
+          animate={{
+            y: [0, -8, 0],
+            rotate: [-1, 1, -1],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 6,
+            ease: 'easeInOut',
+          }}
+          className="relative w-full max-w-[480px] aspect-[4/4.5] overflow-hidden rounded-[2.5rem] border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.9)] ring-1 ring-white/10"
         >
-          <PhoneMockup />
-        </motion.div>
-
-        {/* Italic tagline — bottom-right of the left half */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.7 }}
-          className="absolute bottom-10 right-8 space-y-1.5 text-right z-10"
-        >
-          {['Илүү хүчтэй', 'Илүү итгэлтэй', 'Илүү сайн амьдрал'].map((line) => (
-            <p
-              key={line}
-              className="font-serif text-lg xl:text-xl italic tracking-wide text-white/40 drop-shadow-md"
-              style={{ fontFamily: 'Georgia, serif' }}
-            >
-              {line}
-            </p>
-          ))}
+          <Image
+            src="/quiz-intro-hero.jpg"
+            alt="TenkheePlus Кегел асуулга"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          {/* Subtle edge vignette to blend seamlessly */}
+          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2.5rem]" />
         </motion.div>
       </motion.div>
 
