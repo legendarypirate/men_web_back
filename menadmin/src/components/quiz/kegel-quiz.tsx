@@ -250,10 +250,12 @@ export function KegelQuiz() {
   return (
     <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
       <QuizGlowBurst active={glowBurst} seed={animSeed} />
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
-        <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
-      </div>
+      {phase !== 'intro' && (
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
+          <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
+        </div>
+      )}
 
       <header className="relative border-b border-white/10 bg-[#0a0f14]/80 backdrop-blur-xl">
         <div className="flex items-center justify-between gap-3 px-6 py-4">
@@ -283,7 +285,7 @@ export function KegelQuiz() {
             slideKey="intro"
             direction={slideDirection}
             animStyle="rise"
-            className="relative flex w-full flex-1 flex-col"
+            className="relative flex w-full flex-1 flex-col overflow-hidden"
           >
             <QuizIntro onStart={startQuiz} />
           </QuizSlide>

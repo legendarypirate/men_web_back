@@ -70,29 +70,27 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative mx-auto flex w-full max-w-7xl flex-1 items-center justify-center gap-10 overflow-hidden px-6 py-10 lg:gap-14 xl:gap-20 lg:px-10',
+        'relative flex min-h-[min(680px,calc(100dvh-200px))] w-full flex-1 items-center overflow-hidden',
         className
       )}
     >
-      {/* Left — hero sized to image */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="relative hidden shrink-0 items-center justify-center overflow-hidden lg:flex"
-      >
-        <Image
-          src="/quiz-intro-hero.jpg"
-          alt="TenkheePlus Кегел асуулга"
-          width={921}
-          height={1024}
-          className="h-[min(calc(100vh-240px),680px)] w-auto object-contain"
-          priority
-        />
-      </motion.div>
+      <Image
+        src="/bac.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-left"
+      />
 
-      {/* Right — narrower content column */}
-      <div className="flex w-full max-w-lg flex-col justify-center lg:max-w-[520px] xl:max-w-[540px]">
+      {/* Mobile readability overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-[#070b10]/10 lg:to-[#070b10]/50"
+        aria-hidden
+      />
+
+      {/* Content over the right side of the background */}
+      <div className="relative z-10 ml-auto flex w-full max-w-lg flex-col justify-center px-6 py-10 sm:px-8 lg:max-w-[520px] lg:px-10 lg:pr-12 xl:max-w-[540px] xl:pr-16">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
