@@ -287,12 +287,6 @@ export function KegelQuiz() {
           >
             <QuizIntro onStart={startQuiz} />
           </QuizSlide>
-          <QuizFooter
-            backDisabled
-            continueDisabled
-            onBack={goBack}
-            onContinue={startQuiz}
-          />
         </>
       )}
 
