@@ -35,7 +35,6 @@ import {
   ensureVideoReady,
   preloadQuizVideos,
 } from '@/lib/quiz-video-preload';
-import { QuizFlowProgress } from '@/components/quiz/quiz-flow-progress';
 import { QuizIntro } from '@/components/quiz/quiz-intro';
 import { cn } from '@/lib/utils';
 
@@ -280,7 +279,14 @@ export function KegelQuiz() {
 
       {!loading && phase === 'intro' && (
         <>
-          <QuizFlowProgress activeStep="start" />
+          <StageProgress
+            stages={stages}
+            questions={questions}
+            answers={answers}
+            stepIndex={stepIndex}
+            phase={phase}
+            sectionStageId={sectionStageId}
+          />
           <QuizSlide
             slideKey="intro"
             direction={slideDirection}
@@ -776,7 +782,7 @@ function resolveCurrentStage(
   phase: Phase,
   sectionStageId: number | null
 ): number | null {
-  if (phase === 'intro') return null;
+  if (phase === 'intro') return questions[0]?.stage ?? null;
   if (phase === 'section-end') return sectionStageId;
   if (phase === 'processing' || phase === 'result') {
     return questions[questions.length - 1]?.stage ?? null;
@@ -838,8 +844,8 @@ function StageProgress({
   const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
 
   return (
-    <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
-      <div className="mx-auto max-w-xl">
+    <div className="relative border-b border-white/10 bg-[#0a0f14]/60 px-4 pt-5 pb-2 sm:px-6 sm:px-10">
+      <div className="mx-auto max-w-6xl">
         <div className="flex items-center">
           {stages.map((stage, index) => {
             const done = isStageComplete(
