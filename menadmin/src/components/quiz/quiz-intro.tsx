@@ -5,13 +5,20 @@ import { motion } from 'framer-motion';
 import {
   ArrowRight,
   BarChart2,
+  BookOpen,
+  ChevronRight,
   Clock,
   Dumbbell,
+  Home,
+  Hourglass,
   Info,
   Lock,
+  PlusSquare,
   Shield,
+  ShoppingBag,
   Tag,
   Target,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,16 +57,8 @@ const DAYS: { label: string; num: string; active?: boolean }[] = [
   { label: 'Лх', num: '16' },
   { label: 'Пү', num: '17' },
   { label: 'Ба', num: '18', active: true },
-  { label: 'Бш', num: '19' },
+  { label: 'Бя', num: '19' },
   { label: 'Ня', num: '20' },
-];
-
-const BOTTOM_NAV = [
-  { label: 'Нүүр', active: true },
-  { label: 'Мэдэр' },
-  { label: 'Эмэлт' },
-  { label: 'Дасгал' },
-  { label: 'Профайл' },
 ];
 
 type QuizIntroProps = {
@@ -77,7 +76,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative hidden w-1/2 shrink-0 lg:block"
+        className="relative hidden w-1/2 shrink-0 lg:block overflow-hidden"
       >
         {/* Anatomy image fills the entire left half */}
         <Image
@@ -87,17 +86,25 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           className="object-cover object-center"
           priority
         />
-        {/* Gradient: fade left edge into bg */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070b10]/70 via-transparent to-[#070b10]/80" />
-        {/* Gradient: fade top into bg */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#070b10]/50 via-transparent to-[#070b10]/60" />
+        {/* Gradient overlays for cinematic contrast */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070b10]/80 via-transparent to-[#070b10]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#070b10]/60 via-transparent to-[#070b10]/80" />
+
+        {/* Floating Top Right Badge */}
+        <div className="absolute top-6 right-8 flex items-center gap-1.5 text-xs font-semibold text-[#ff453a] tracking-wider uppercase">
+          <span className="relative flex size-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ff453a] opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-[#ff453a]" />
+          </span>
+          Эхлэх
+        </div>
 
         {/* Phone mockup — bottom-left area, overlaid on the image */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="absolute bottom-10 left-10"
+          className="absolute bottom-6 left-6 xl:bottom-10 xl:left-10 z-10"
         >
           <PhoneMockup />
         </motion.div>
@@ -107,10 +114,14 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.7 }}
-          className="absolute bottom-8 right-6 space-y-0.5 text-right"
+          className="absolute bottom-10 right-8 space-y-1.5 text-right z-10"
         >
           {['Илүү хүчтэй', 'Илүү итгэлтэй', 'Илүү сайн амьдрал'].map((line) => (
-            <p key={line} className="font-serif text-base italic text-white/30">
+            <p
+              key={line}
+              className="font-serif text-lg xl:text-xl italic tracking-wide text-white/40 drop-shadow-md"
+              style={{ fontFamily: 'Georgia, serif' }}
+            >
               {line}
             </p>
           ))}
@@ -214,114 +225,181 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   );
 }
 
-/* ── Phone mockup ── */
+/* ── Phone mockup matching reference screenshot ── */
 function PhoneMockup() {
   return (
-    <div className="relative aspect-[10/19] w-[200px] overflow-hidden rounded-[2.2rem] border border-white/15 bg-[#0d1219] shadow-2xl shadow-black/70 ring-1 ring-white/5">
-      {/* Dynamic island / notch */}
-      <div className="absolute left-1/2 top-2.5 z-20 h-4 w-20 -translate-x-1/2 rounded-full bg-black" />
+    <div className="relative aspect-[9/18.5] w-[270px] sm:w-[285px] xl:w-[300px] overflow-hidden rounded-[2.8rem] border-[5px] border-[#22272e] bg-[#0b0f14] shadow-[0_25px_60px_rgba(0,0,0,0.9)] ring-1 ring-white/15">
+      {/* Side buttons simulation */}
+      <div className="absolute -left-[9px] top-24 h-7 w-[4px] rounded-l-sm bg-[#333a42]" />
+      <div className="absolute -left-[9px] top-36 h-10 w-[4px] rounded-l-sm bg-[#333a42]" />
+      <div className="absolute -left-[9px] top-48 h-10 w-[4px] rounded-l-sm bg-[#333a42]" />
+      <div className="absolute -right-[9px] top-32 h-14 w-[4px] rounded-r-sm bg-[#333a42]" />
 
-      <div className="flex h-full flex-col">
+      {/* Dynamic island */}
+      <div className="absolute left-1/2 top-2.5 z-30 flex h-4.5 w-24 -translate-x-1/2 items-center justify-end px-2.5 rounded-full bg-black">
+        <div className="size-2 rounded-full bg-[#12161f]" />
+      </div>
+
+      <div className="flex h-full flex-col justify-between pt-1 pb-1">
         {/* Status bar */}
-        <div className="flex shrink-0 items-center justify-between px-5 pt-8 pb-1 text-[8px] text-white/50">
-          <span className="font-semibold">9:41</span>
-          <div className="flex items-center gap-0.5 text-[8px]">
-            <span>▲▲▲</span>
-            <span className="ml-0.5">▮</span>
+        <div className="flex shrink-0 items-center justify-between px-6 pt-2.5 pb-1 text-[9px] font-medium text-white/80">
+          <span>9:41</span>
+          <div className="flex items-center gap-1.5 text-[9px]">
+            <span className="text-[10px] font-bold">5G</span>
+            <div className="flex gap-0.5">
+              <div className="h-2 w-0.5 bg-white rounded-full" />
+              <div className="h-2 w-0.5 bg-white rounded-full" />
+              <div className="h-2 w-0.5 bg-white rounded-full" />
+              <div className="h-2 w-0.5 bg-white/40 rounded-full" />
+            </div>
+            <div className="h-2.5 w-5 rounded-sm border border-white/60 p-0.5 flex items-center">
+              <div className="h-full w-3 bg-white rounded-xs" />
+            </div>
           </div>
         </div>
 
-        {/* Date header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-white/8 px-4 pb-2 pt-0.5">
-          <div>
-            <p className="text-[9px] font-semibold text-white">Баасан, 8-р сар 18 2026</p>
-          </div>
-          <div className="size-5 rounded-full bg-white/10 text-center text-[7px] leading-5 text-white/40">⊙</div>
+        {/* Date header with info button */}
+        <div className="flex shrink-0 items-center justify-between px-5 pt-1 pb-2">
+          <span className="text-[11px] font-bold tracking-tight text-white/90">
+            Баасан, 9-р сар 18 2026
+          </span>
+          <button
+            type="button"
+            className="flex size-5 items-center justify-center rounded-full bg-white/10 text-white/70 hover:bg-white/20 transition"
+          >
+            <Info className="size-3" />
+          </button>
         </div>
 
-        {/* Day picker */}
-        <div className="flex shrink-0 items-center gap-1 overflow-hidden px-3 py-2">
+        {/* Day selector row */}
+        <div className="flex shrink-0 items-center gap-1 px-3 py-1">
           {DAYS.map(({ label, num, active }) => (
             <div
               key={num}
               className={cn(
-                'flex min-w-0 flex-1 flex-col items-center gap-0.5 rounded-lg py-1 text-[7px]',
-                active ? 'bg-[#ff453a] text-white' : 'bg-white/5 text-white/40'
+                'flex flex-1 flex-col items-center justify-center py-1.5 rounded-xl transition',
+                active
+                  ? 'bg-[#ff453a] text-white shadow-md shadow-[#ff453a]/40 ring-1 ring-[#ff453a]'
+                  : 'bg-white/[0.06] text-white/40'
               )}
             >
-              <span>{label}</span>
-              <span className={cn('font-bold text-[8px]', active ? 'text-white' : 'text-white/60')}>{num}</span>
+              <span className="text-[8px] font-medium">{label}</span>
+              <span className={cn('text-[10px] font-extrabold mt-0.5', active ? 'text-white' : 'text-white/80')}>
+                {num}
+              </span>
             </div>
           ))}
         </div>
 
-        {/* tenkhee + header */}
-        <div className="flex shrink-0 items-center justify-between px-4 pb-1">
-          <span className="text-[10px] font-bold text-white">tenkhee +</span>
-          <span className="text-[7px] text-white/35">Өнөөдөр харах &rsaquo;</span>
+        {/* Header row 1: tenkhee + */}
+        <div className="flex shrink-0 items-center justify-between px-5 pt-2 pb-1.5">
+          <span className="text-[13px] font-extrabold tracking-tight text-white">
+            tenkhee <span className="text-[#ff453a]">+</span>
+          </span>
+          <span className="flex items-center gap-0.5 text-[9px] font-medium text-white/40 hover:text-white/70">
+            Бүгдийг харах <ChevronRight className="size-3" />
+          </span>
         </div>
 
-        {/* Workout banner with photo */}
-        <div className="relative mx-3 mb-2 h-[80px] shrink-0 overflow-hidden rounded-xl">
+        {/* Card 1: Workout Banner with photo */}
+        <div className="relative mx-3.5 h-[105px] shrink-0 overflow-hidden rounded-2xl border border-white/10">
           <Image
             src="/workout-thumb.jpg"
             alt="workout"
             fill
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-end p-2.5">
-            <p className="text-[7px] font-bold uppercase tracking-wide text-[#ff453a]">ЯАК БАЙНА</p>
-            <p className="text-[9px] font-bold leading-tight text-white">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent" />
+
+          {/* Badge top right */}
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 px-2 py-0.5">
+            <span className="size-1.5 rounded-full bg-[#ff453a]" />
+            <span className="text-[7.5px] font-bold text-white tracking-wide">ЯВЖ БАЙНА</span>
+          </div>
+
+          {/* Card info bottom */}
+          <div className="absolute inset-x-0 bottom-0 p-3">
+            <p className="text-[11px] font-extrabold leading-snug text-white">
               Анхан шатны кегел<br />дасгал
             </p>
-            <p className="mt-0.5 text-[6.5px] text-white/45">Дасгалын хэмж: 0/7</p>
-          </div>
-        </div>
+            <p className="mt-1 text-[8px] text-white/50">Дасгалын өдөр: 0/7</p>
 
-        {/* Section header */}
-        <div className="flex shrink-0 items-center justify-between px-4 pb-1">
-          <span className="text-[9px] font-bold text-white">Дасгалын хөтөлбөр</span>
-          <span className="text-[7px] text-white/35">Дэлгэрэнгүй &rsaquo;</span>
-        </div>
-
-        {/* Workout card */}
-        <div className="mx-3 flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/[0.05] p-2">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#ff453a]/20">
-            <div className="size-4 rounded bg-[#ff453a]/70" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[8px] font-semibold text-white">Дасгалын хөтөлбөр оппоор</p>
-            <button className="mt-1.5 rounded bg-[#ff453a] px-2 py-0.5 text-[6px] font-bold text-white">
-              Эхлэх
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1" />
-
-        {/* Bottom nav */}
-        <div className="flex shrink-0 items-center justify-around border-t border-white/10 bg-[#0d1219] px-1 pb-3 pt-2">
-          {BOTTOM_NAV.map(({ label, active }) => (
-            <div
-              key={label}
-              className={cn(
-                'flex flex-col items-center gap-0.5',
-                active ? 'text-[#ff453a]' : 'text-white/25'
-              )}
-            >
-              <div
-                className={cn(
-                  'size-3 rounded',
-                  active ? 'bg-[#ff453a]' : 'bg-white/15'
-                )}
-              />
-              <span className="text-[5.5px]">{label}</span>
+            {/* Progress bar */}
+            <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-white/20">
+              <div className="h-full w-[10%] rounded-full bg-white/80" />
             </div>
-          ))}
+          </div>
+        </div>
+
+        {/* Header row 2: Дасгалын хөтөлбөр */}
+        <div className="flex shrink-0 items-center justify-between px-5 pt-2 pb-1">
+          <span className="text-[12px] font-extrabold tracking-tight text-white">
+            Дасгалын хөтөлбөр
+          </span>
+          <span className="flex items-center gap-0.5 text-[9px] font-medium text-white/40 hover:text-white/70">
+            Дэлгэрэнгүй <ChevronRight className="size-3" />
+          </span>
+        </div>
+
+        {/* Card 2: Hourglass Card */}
+        <div className="mx-3.5 flex shrink-0 items-center justify-between rounded-2xl border border-white/10 bg-[#161d26]/90 p-3 shadow-lg">
+          <div className="flex items-center gap-3">
+            {/* Glowing red hourglass icon */}
+            <div className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-red-950/80 border border-red-500/40 shadow-[0_0_15px_rgba(255,69,58,0.4)]">
+              <Hourglass className="size-5 text-[#ff453a]" />
+            </div>
+            <p className="max-w-[110px] text-[10px] font-bold leading-tight text-white">
+              Дасгалын хөтөлбөрөө олоорой
+            </p>
+          </div>
+          <button
+            type="button"
+            className="rounded-full bg-[#ff453a] px-3.5 py-1.5 text-[9.5px] font-bold text-white shadow-md shadow-[#ff453a]/30 hover:bg-[#e63e35] transition"
+          >
+            Эхлэх
+          </button>
+        </div>
+
+        {/* Bottom Navigation Bar */}
+        <div className="mt-2 mx-2 flex shrink-0 items-center justify-around rounded-2xl border border-white/10 bg-[#11161d]/95 p-1.5 backdrop-blur-md">
+          {/* Item 1: Нүүр (Active) */}
+          <div className="flex flex-col items-center gap-0.5 rounded-xl bg-white/10 px-2.5 py-1 text-white">
+            <Home className="size-3.5 text-white" />
+            <span className="text-[7.5px] font-bold">Нүүр</span>
+          </div>
+
+          {/* Item 2: Мэдлэг (With badge 5) */}
+          <div className="relative flex flex-col items-center gap-0.5 px-2 py-1 text-white/40">
+            <div className="relative">
+              <BookOpen className="size-3.5 text-white/50" />
+              <span className="absolute -top-1.5 -right-2 flex size-3.5 items-center justify-center rounded-full bg-[#ff453a] text-[7px] font-extrabold text-white ring-1 ring-black">
+                5
+              </span>
+            </div>
+            <span className="text-[7.5px] font-medium">Мэдлэг</span>
+          </div>
+
+          {/* Item 3: Эмнэлэг */}
+          <div className="flex flex-col items-center gap-0.5 px-2 py-1 text-white/40">
+            <PlusSquare className="size-3.5 text-white/50" />
+            <span className="text-[7.5px] font-medium">Эмнэлэг</span>
+          </div>
+
+          {/* Item 4: Дэлгүүр */}
+          <div className="flex flex-col items-center gap-0.5 px-2 py-1 text-white/40">
+            <ShoppingBag className="size-3.5 text-white/50" />
+            <span className="text-[7.5px] font-medium">Дэлгүүр</span>
+          </div>
+
+          {/* Item 5: Профайл */}
+          <div className="flex flex-col items-center gap-0.5 px-2 py-1 text-white/40">
+            <User className="size-3.5 text-white/50" />
+            <span className="text-[7.5px] font-medium">Профайл</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
