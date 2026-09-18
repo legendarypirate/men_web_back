@@ -70,40 +70,21 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div className={cn('relative flex w-full flex-1 overflow-hidden', className)}>
       {/* ════════════════════════════════════════
-          LEFT HALF — direct hero artwork from reference
+          LEFT HALF — direct unbordered hero artwork
           ════════════════════════════════════════ */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        className="relative hidden w-1/2 shrink-0 lg:flex items-center justify-center p-6 xl:p-10 overflow-hidden bg-[#070b10]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="relative hidden w-1/2 shrink-0 lg:flex items-center justify-center overflow-hidden"
       >
-        {/* Glowing background ambient light */}
-        <div className="absolute left-1/4 top-1/3 size-72 rounded-full bg-[#ff453a]/20 blur-[120px] pointer-events-none" />
-
-        {/* Hero image container with subtle 3D tilt and floating effect */}
-        <motion.div
-          animate={{
-            y: [0, -8, 0],
-            rotate: [-1, 1, -1],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 6,
-            ease: 'easeInOut',
-          }}
-          className="relative w-full max-w-[480px] aspect-[4/4.5] overflow-hidden rounded-[2.5rem] border border-white/10 shadow-[0_30px_90px_rgba(0,0,0,0.9)] ring-1 ring-white/10"
-        >
-          <Image
-            src="/quiz-intro-hero.jpg"
-            alt="TenkheePlus Кегел асуулга"
-            fill
-            className="object-cover object-center"
-            priority
-          />
-          {/* Subtle edge vignette to blend seamlessly */}
-          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[2.5rem]" />
-        </motion.div>
+        <Image
+          src="/quiz-intro-hero.jpg"
+          alt="TenkheePlus Кегел асуулга"
+          fill
+          className="object-contain object-center"
+          priority
+        />
       </motion.div>
 
       {/* ════════════════════════════════════════
@@ -116,20 +97,20 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           {/* Brand */}
-          <p className="text-lg font-bold tracking-tight">
-            <span className="text-[#ff453a]">Tenkhee</span>
-            <span className="text-white">Plus</span>
+          <p className="text-xl font-extrabold tracking-tight">
+            <span className="text-white">Tenkhee</span>
+            <span className="text-[#ff453a]">Plus</span>
           </p>
 
           {/* Headline */}
-          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[2.5rem]">
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[2.6rem]">
             Танд яг юу хэрэгтэйг{' '}
             <span className="text-[#ff453a]">1 минутанд</span> тодорхойлъё.
           </h1>
 
           {/* Description */}
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-white/55 sm:text-[0.9rem]">
-            Хэдэн асуулт хариулахад хөвчрөлт, дур тавилтын хяналт, аарцгийн
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/60 sm:text-[0.95rem]">
+            Хэдэн асуулт хариулаад хөвчрөлт, дур тавилтын хяналт, аарцгийн
             булчин, давсагны үйл ажиллагаатай холбоотой таны одоогийн түвшинг
             үнэлнэ.
           </p>
@@ -140,18 +121,18 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 grid grid-cols-2 gap-3 xl:grid-cols-4"
+          className="mt-8 grid grid-cols-2 gap-3.5 xl:grid-cols-4"
         >
           {FEATURES.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
-              className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition hover:border-[#ff453a]/30 hover:bg-white/[0.07]"
+              className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#121620]/60 p-5 text-center transition hover:border-[#ff453a]/30 hover:bg-[#161c28]"
             >
-              <div className="mb-3 inline-flex size-10 items-center justify-center rounded-xl bg-[#ff453a]/15 text-[#ff453a]">
-                <Icon className="size-5" strokeWidth={2} />
+              <div className="mb-3 flex size-10 items-center justify-center text-[#ff453a]">
+                <Icon className="size-7" strokeWidth={1.8} />
               </div>
-              <p className="text-sm font-bold text-white">{title}</p>
-              <p className="mt-1 text-[11px] leading-relaxed text-white/45">{body}</p>
+              <p className="text-sm font-bold text-white leading-snug">{title}</p>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-white/50">{body}</p>
             </div>
           ))}
         </motion.div>
@@ -161,13 +142,18 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/40 sm:text-sm"
+          className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-white/50 sm:text-sm"
         >
-          {META.map(({ icon: Icon, label }) => (
-            <span key={label} className="inline-flex items-center gap-2">
-              <Icon className="size-4 text-[#ff453a]/70" />
-              {label}
-            </span>
+          {META.map(({ icon: Icon, label }, index) => (
+            <div key={label} className="flex items-center gap-6">
+              <span className="inline-flex items-center gap-2">
+                <Icon className="size-4 text-[#ff453a]" />
+                {label}
+              </span>
+              {index < META.length - 1 && (
+                <span className="h-4 w-[1px] bg-white/15" />
+              )}
+            </div>
           ))}
         </motion.div>
 
@@ -184,17 +170,17 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
             whileTap={{ scale: 0.98 }}
             whileHover={{ scale: 1.01 }}
             transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ff453a] to-[#e63e35] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-[#ff453a]/30 hover:from-[#e63e35] hover:to-[#d63530] sm:text-base"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#ff453a] to-[#e63e35] px-6 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-lg shadow-[#ff453a]/30 hover:from-[#e63e35] hover:to-[#d63530] sm:text-base"
           >
-            Миний үнэлгээг эхлүүлэх
+            МИНИЙ ҮНЭЛГЭЭГ ЭХЛҮҮЛЭХ
             <ArrowRight className="size-5" />
           </motion.button>
 
-          <p className="mt-4 flex items-start gap-2 text-[11px] leading-relaxed text-white/30 sm:text-xs">
-            <Info className="mt-0.5 size-3.5 shrink-0" />
+          <p className="mt-4 flex items-start justify-center gap-2 text-center text-[11px] leading-relaxed text-white/35 sm:text-xs">
+            <Info className="mt-0.5 size-3.5 shrink-0 text-white/50" />
             <span>
               Энэхүү үнэлгээ нь эмнэлгийн оношилгоо биш бөгөөд TenkheePlus доторх
-              тохирох дасгал, мэдаллийн чиглэлийг сонгоход зориулагдана.
+              тохирох дасгал, мэдээллийн чиглэлийг сонгоход зориулагдана.
             </span>
           </p>
         </motion.div>
