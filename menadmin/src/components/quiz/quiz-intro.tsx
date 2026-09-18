@@ -70,27 +70,31 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative flex min-h-0 w-full flex-1 items-end overflow-hidden',
+        'relative flex h-full min-h-0 w-full flex-1 items-end justify-start bg-[#070b10]',
         className
       )}
     >
+      {/* Full-height image — never crop bottom; floor under phone stays visible */}
       <Image
-        src="/bac.png"
+        src="/backg.png"
         alt=""
-        fill
+        width={1672}
+        height={941}
         priority
-        sizes="100vw"
-        className="object-contain object-left-bottom"
+        className="max-h-full w-auto max-w-none shrink-0 object-contain object-left-bottom select-none"
       />
 
-      {/* Mobile readability overlay */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-[#070b10]/25"
-        aria-hidden
-      />
+      {/* Overlays + content */}
+      <div className="pointer-events-none absolute inset-0 flex">
+        <div
+          className="h-full w-full bg-gradient-to-t from-[#070b10] via-[#070b10]/70 to-[#070b10]/30 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-[#070b10]/25"
+          aria-hidden
+        />
+      </div>
 
-      {/* Content over the right side of the background */}
-      <div className="relative z-10 ml-auto flex w-full flex-col justify-center self-center px-6 py-8 sm:px-8 lg:w-[62%] lg:max-w-[920px] lg:px-10 lg:pr-10 xl:w-[60%] xl:px-12 xl:pr-12">
+      <div className="pointer-events-auto absolute inset-0 flex items-center">
+        {/* Content over the right side of the background */}
+        <div className="relative z-10 ml-auto flex w-full flex-col justify-center px-6 py-8 sm:px-8 lg:w-[62%] lg:max-w-[920px] lg:px-10 lg:pr-10 xl:w-[60%] xl:px-12 xl:pr-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -184,6 +188,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
             </span>
           </p>
         </motion.div>
+        </div>
       </div>
     </div>
   );
