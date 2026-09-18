@@ -730,8 +730,8 @@ function QuizFooter({
   onContinue: () => void;
 }) {
   return (
-    <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-4 py-4 backdrop-blur-xl sm:px-6">
-      <div className="mx-auto flex max-w-xl items-center justify-between gap-4">
+    <footer className="sticky bottom-0 border-t border-white/10 bg-[#0a0f14]/90 px-6 py-4 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <motion.button
           type="button"
           onClick={onBack}
