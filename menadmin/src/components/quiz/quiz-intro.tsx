@@ -70,7 +70,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative h-full min-h-0 w-full flex-1 bg-[#070b10]',
+        'relative h-full min-h-0 w-full flex-1 bg-black',
         className
       )}
     >
@@ -80,12 +80,12 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[left_center]"
+        className="object-contain object-left-bottom"
       />
 
-      <div className="pointer-events-auto absolute inset-0 flex items-center">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center">
         {/* Content over the right side of the background */}
-        <div className="relative z-10 ml-auto flex w-full flex-col justify-center px-6 py-8 sm:px-8 lg:w-[62%] lg:max-w-[920px] lg:px-10 lg:pr-10 xl:w-[60%] xl:px-12 xl:pr-12">
+        <div className="pointer-events-auto relative ml-auto flex w-full flex-col justify-center px-6 py-8 sm:px-8 lg:w-[62%] lg:max-w-[920px] lg:px-10 lg:pr-10 xl:w-[60%] xl:px-12 xl:pr-12">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
