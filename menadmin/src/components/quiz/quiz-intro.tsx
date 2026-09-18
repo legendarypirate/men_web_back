@@ -68,29 +68,26 @@ type QuizIntroProps = {
 
 export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
-    <div className={cn('relative flex w-full flex-1 overflow-hidden', className)}>
-      {/* ════════════════════════════════════════
-          LEFT HALF — direct unbordered hero artwork
-          ════════════════════════════════════════ */}
+    <div className={cn('relative flex w-full flex-1 items-center overflow-hidden', className)}>
+      {/* Left — hero sized to image, hugging the content column */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative hidden w-1/2 shrink-0 lg:flex items-center justify-center overflow-hidden"
+        className="relative hidden shrink-0 items-center justify-end overflow-hidden py-6 pl-4 lg:flex"
       >
         <Image
           src="/quiz-intro-hero.jpg"
           alt="TenkheePlus Кегел асуулга"
-          fill
-          className="object-contain object-center"
+          width={921}
+          height={1024}
+          className="h-[min(calc(100vh-240px),680px)] w-auto object-contain object-right"
           priority
         />
       </motion.div>
 
-      {/* ════════════════════════════════════════
-          RIGHT HALF — content
-          ════════════════════════════════════════ */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-10 lg:px-12 xl:px-16">
+      {/* Right — content */}
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-10 lg:mx-0 lg:max-w-none lg:pl-2 lg:pr-10 xl:pl-4 xl:pr-14">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
