@@ -68,26 +68,31 @@ type QuizIntroProps = {
 
 export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
-    <div className={cn('relative flex w-full flex-1 items-center overflow-hidden', className)}>
-      {/* Left — hero sized to image, hugging the content column */}
+    <div
+      className={cn(
+        'relative mx-auto flex w-full max-w-7xl flex-1 items-center justify-center gap-10 overflow-hidden px-6 py-10 lg:gap-14 xl:gap-20 lg:px-10',
+        className
+      )}
+    >
+      {/* Left — hero sized to image */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
-        className="relative hidden shrink-0 items-center justify-end overflow-hidden py-6 pl-4 lg:flex"
+        className="relative hidden shrink-0 items-center justify-center overflow-hidden lg:flex"
       >
         <Image
           src="/quiz-intro-hero.jpg"
           alt="TenkheePlus Кегел асуулга"
           width={921}
           height={1024}
-          className="h-[min(calc(100vh-240px),680px)] w-auto object-contain object-right"
+          className="h-[min(calc(100vh-240px),680px)] w-auto object-contain"
           priority
         />
       </motion.div>
 
-      {/* Right — content */}
-      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-6 py-10 lg:mx-0 lg:max-w-none lg:pl-2 lg:pr-10 xl:pl-4 xl:pr-14">
+      {/* Right — narrower content column */}
+      <div className="flex w-full max-w-lg flex-col justify-center lg:max-w-[520px] xl:max-w-[540px]">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,7 +105,7 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           </p>
 
           {/* Headline */}
-          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl lg:text-[2.6rem]">
+          <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-[2rem] lg:text-[2.15rem]">
             Танд яг юу хэрэгтэйг{' '}
             <span className="text-[#ff453a]">1 минутанд</span> тодорхойлъё.
           </h1>
@@ -118,12 +123,12 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-8 grid grid-cols-2 gap-3.5 xl:grid-cols-4"
+          className="mt-8 grid grid-cols-2 gap-3"
         >
           {FEATURES.map(({ icon: Icon, title, body }) => (
             <div
               key={title}
-              className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#121620]/60 p-5 text-center transition hover:border-[#ff453a]/30 hover:bg-[#161c28]"
+              className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-[#121620]/60 p-4 text-center transition hover:border-[#ff453a]/30 hover:bg-[#161c28]"
             >
               <div className="mb-3 flex size-10 items-center justify-center text-[#ff453a]">
                 <Icon className="size-7" strokeWidth={1.8} />
