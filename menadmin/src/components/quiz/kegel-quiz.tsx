@@ -256,12 +256,15 @@ export function KegelQuiz() {
       </div>
 
       <header className="relative border-b border-white/10 bg-[#0a0f14]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <TenkheeLogo href="/" size="sm" />
-            <span className="text-sm font-medium text-white/55">Эрэгтэйчүүдийн эрүүл мэнд</span>
+        <div className="flex items-center justify-between gap-3 px-6 py-4">
+          <div className="w-16 shrink-0" />
+          <div className="flex items-center gap-2">
+            <svg className="size-4 text-[#ff453a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            <span className="text-sm font-medium text-white/70">Эрэгтэйчүүдийн эрүүл мэнд</span>
           </div>
-          <Link href="/" className="text-xs font-medium text-white/45 hover:text-[#ff453a] sm:text-sm">
+          <Link href="/" className="w-16 shrink-0 text-right text-xs font-medium text-white/45 hover:text-[#ff453a] sm:text-sm">
             Гарах
           </Link>
         </div>

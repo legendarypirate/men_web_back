@@ -17,8 +17,8 @@ export function QuizFlowProgress({ activeStep }: { activeStep: QuizFlowStepId })
   const activeIndex = QUIZ_FLOW_STEPS.findIndex((s) => s.id === activeStep);
 
   return (
-    <div className="relative px-4 pt-6 pb-2 sm:px-6 sm:pt-8">
-      <div className="mx-auto max-w-4xl">
+    <div className="relative border-b border-white/10 bg-[#0a0f14]/60 px-6 pt-5 pb-2 sm:px-10">
+      <div className="mx-auto max-w-6xl">
         <div className="flex items-center">
           {QUIZ_FLOW_STEPS.map((step, index) => {
             const done = index < activeIndex;
