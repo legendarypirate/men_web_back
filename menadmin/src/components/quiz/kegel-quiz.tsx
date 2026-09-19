@@ -256,16 +256,29 @@ export function KegelQuiz() {
         </div>
       )}
 
-      <header className="relative border-b border-white/10 bg-[#0a0f14]/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between gap-3 px-6 py-4">
-          <div className="w-16 shrink-0" />
+      <header className="relative border-b border-white/[0.08] bg-[#080C0F]">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1520px] items-center justify-between px-6">
+          <div className="w-20 shrink-0" />
           <div className="flex items-center gap-2">
-            <svg className="size-4 text-[#ff453a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className="size-4 text-[#FF443D]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
             </svg>
-            <span className="text-sm font-medium text-white/70">Эрэгтэйчүүдийн эрүүл мэнд</span>
+            <span className="text-xs sm:text-sm font-medium text-[#9298A1]">
+              Эрэгтэйчүүдийн эрүүл мэнд
+            </span>
           </div>
-          <Link href="/" className="w-16 shrink-0 text-right text-xs font-medium text-white/45 hover:text-[#ff453a] sm:text-sm">
+          <Link
+            href="/"
+            className="w-20 shrink-0 text-right text-xs sm:text-sm font-medium text-[#9298A1] hover:text-[#FF443D] transition-colors"
+          >
             Гарах
           </Link>
         </div>
@@ -844,8 +857,8 @@ function StageProgress({
   const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
 
   return (
-    <div className="relative border-b border-white/10 bg-[#0a0f14]/60 px-4 pt-5 pb-2 sm:px-6 sm:px-10">
-      <div className="mx-auto max-w-6xl">
+    <div className="relative border-b border-white/[0.08] bg-[#05080B] px-4 py-5 sm:px-8 sm:py-6">
+      <div className="mx-auto max-w-[1100px]">
         <div className="flex items-center">
           {stages.map((stage, index) => {
             const done = isStageComplete(
@@ -873,8 +886,8 @@ function StageProgress({
                   layout
                   animate={
                     active
-                      ? { scale: [1, 1.08, 1], boxShadow: '0 0 0 4px rgba(255,69,58,0.15)' }
-                      : { scale: 1, boxShadow: '0 0 0 0px rgba(255,69,58,0)' }
+                      ? { scale: [1, 1.06, 1], boxShadow: '0 0 12px rgba(255,68,61,0.35)' }
+                      : { scale: 1, boxShadow: '0 0 0px rgba(0,0,0,0)' }
                   }
                   transition={
                     active
@@ -885,10 +898,12 @@ function StageProgress({
                       : { duration: 0.3 }
                   }
                   className={cn(
-                    'relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border-2',
-                    done && 'border-[#ff453a] bg-[#ff453a] text-white shadow-md shadow-[#ff453a]/30',
-                    active && 'border-[#ff453a] bg-[#0a0f14]',
-                    !done && !active && 'border-white/20 bg-[#0a0f14]'
+                    'relative z-10 flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    done
+                      ? 'border-[#FF443D] bg-[#FF443D] text-white shadow-md shadow-[#FF443D]/30'
+                      : active
+                      ? 'border-[#FF443D] bg-[#05080B]'
+                      : 'border-white/20 bg-[#05080B]'
                   )}
                 >
                   {done ? (
@@ -899,21 +914,18 @@ function StageProgress({
                     >
                       <Check className="size-4" strokeWidth={3} />
                     </motion.div>
+                  ) : active ? (
+                    <span className="size-2.5 rounded-full bg-[#FF443D]" />
                   ) : (
-                    <span
-                      className={cn(
-                        'size-2.5 rounded-full transition',
-                        active ? 'bg-[#ff453a]' : 'bg-transparent'
-                      )}
-                    />
+                    <span className="size-2 rounded-full bg-transparent" />
                   )}
                 </motion.div>
 
                 {!isLast && (
-                  <div className="relative mx-1.5 h-1 min-w-0 flex-1 self-center sm:mx-2">
-                    <div className="absolute inset-0 rounded-full bg-white/20" aria-hidden />
+                  <div className="relative mx-1.5 h-[1.5px] min-w-0 flex-1 self-center sm:mx-2">
+                    <div className="absolute inset-0 rounded-full bg-white/15" aria-hidden />
                     <motion.div
-                      className="absolute inset-y-0 left-0 rounded-full bg-[#ff453a] shadow-[0_0_8px_rgba(255,69,58,0.45)]"
+                      className="absolute inset-y-0 left-0 rounded-full bg-[#FF443D] shadow-[0_0_8px_rgba(255,68,61,0.5)]"
                       initial={false}
                       animate={{ width: `${connectorFill * 100}%` }}
                       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -941,15 +953,18 @@ function StageProgress({
 
             return (
               <div key={`label-${stage.id}`} className="contents">
-                <div className="flex w-9 shrink-0 justify-center">
+                <div className="flex w-8 sm:w-9 shrink-0 justify-center">
                   <motion.span
                     animate={
                       active
-                        ? { opacity: 1, y: 0, color: '#ffb4af' }
-                        : { opacity: done ? 0.55 : 0.35, y: 0, color: 'rgba(255,255,255,0.35)' }
+                        ? { opacity: 1, color: '#FF443D' }
+                        : { opacity: done ? 0.75 : 1, color: done ? 'rgba(255,255,255,0.7)' : '#9298A1' }
                     }
                     transition={{ duration: 0.35 }}
-                    className="max-w-[4.5rem] text-center text-[9px] font-medium leading-tight sm:max-w-none sm:text-[10px]"
+                    className={cn(
+                      'max-w-[4.5rem] text-center text-[10px] sm:text-xs leading-tight sm:max-w-none transition-colors',
+                      active ? 'font-bold' : 'font-medium'
+                    )}
                   >
                     {stage.label}
                   </motion.span>
