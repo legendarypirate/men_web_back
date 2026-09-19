@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -255,16 +254,10 @@ export function KegelQuiz() {
       )}
     >
       {phase === 'intro' && (
-        <div className="pointer-events-none fixed inset-0 z-0 h-[100dvh] w-full bg-black">
-          <Image
-            src="/backg.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-contain object-left-bottom"
-          />
-        </div>
+        <div
+          className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black bg-[url(/backg.png)] bg-[length:100%_auto] bg-[position:left_bottom] bg-no-repeat"
+          aria-hidden
+        />
       )}
 
       <QuizGlowBurst active={glowBurst} seed={animSeed} />
