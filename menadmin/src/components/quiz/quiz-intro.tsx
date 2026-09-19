@@ -53,32 +53,23 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative flex min-h-0 w-full flex-1 flex-col overflow-y-auto bg-[#05080B] lg:overflow-hidden',
+        'relative min-h-0 w-full flex-1 overflow-y-auto bg-black lg:overflow-hidden',
         className
       )}
     >
-      {/* Background ambient red glow */}
-      <div className="pointer-events-none absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 size-[500px] rounded-full bg-[#FF443D]/15 blur-[140px]" />
+      {/* Full background — object-contain never crops any edge */}
+      <Image
+        src="/backg.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="pointer-events-none object-contain object-left-bottom"
+      />
 
-      <div className="relative mx-auto flex w-full max-w-[1520px] flex-1 flex-col lg:flex-row lg:items-center">
-        {/* LEFT VISUAL SECTION */}
-        <div className="relative flex w-full items-center justify-center overflow-hidden px-4 pt-4 sm:px-6 lg:w-[54%] lg:min-h-[640px] lg:px-8 lg:py-6">
-          <div className="relative aspect-[1672/941] w-full max-w-[760px] overflow-hidden rounded-2xl">
-            <Image
-              src="/backg.png"
-              alt="TenkheePlus Health & Phone Mockup"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 54vw"
-              className="object-contain object-center lg:object-left-center"
-            />
-            {/* Subtle bottom vignette gradient for floor blending */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#05080B] to-transparent" />
-          </div>
-        </div>
-
-        {/* RIGHT CONTENT SECTION */}
-        <div className="relative z-10 flex w-full flex-col justify-center px-5 py-6 sm:px-8 lg:w-[46%] lg:max-w-[700px] lg:px-8 lg:py-10">
+      {/* Content sits in letterbox / dark-right area; scrolls on small screens */}
+      <div className="relative z-10 flex min-h-full flex-col justify-start lg:min-h-0 lg:justify-center">
+        <div className="ml-auto flex w-full flex-col px-5 py-6 pb-10 sm:px-6 sm:py-8 lg:w-[58%] lg:max-w-[720px] lg:px-10 lg:py-10 xl:max-w-[780px] xl:pr-12">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
