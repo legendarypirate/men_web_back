@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   ArrowRight,
@@ -53,22 +52,11 @@ export function QuizIntro({ onStart, className }: QuizIntroProps) {
   return (
     <div
       className={cn(
-        'relative min-h-0 w-full flex-1 overflow-y-auto bg-black lg:overflow-hidden',
+        'relative min-h-0 w-full flex-1 overflow-y-auto lg:overflow-hidden',
         className
       )}
     >
-      {/* Full background — object-contain never crops any edge */}
-      <Image
-        src="/backg.png"
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="pointer-events-none object-contain object-left-bottom"
-      />
-
-      {/* Content sits in letterbox / dark-right area; scrolls on small screens */}
-      <div className="relative z-10 flex min-h-full flex-col justify-start lg:min-h-0 lg:justify-center">
+      <div className="flex min-h-full flex-col justify-start lg:min-h-0 lg:justify-center">
         <div className="ml-auto flex w-full flex-col px-5 py-6 pb-10 sm:px-6 sm:py-8 lg:w-[58%] lg:max-w-[720px] lg:px-10 lg:py-10 xl:max-w-[780px] xl:pr-12">
           <motion.div
             initial={{ opacity: 0, y: 16 }}

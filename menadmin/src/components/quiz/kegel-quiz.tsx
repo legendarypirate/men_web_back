@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -247,7 +248,25 @@ export function KegelQuiz() {
   const loading = !quiz;
 
   return (
-    <div className="relative flex min-h-screen min-h-[100dvh] flex-col bg-[#070b10] text-white">
+    <div
+      className={cn(
+        'relative flex min-h-screen min-h-[100dvh] flex-col text-white',
+        phase === 'intro' ? 'bg-black' : 'bg-[#070b10]'
+      )}
+    >
+      {phase === 'intro' && (
+        <div className="pointer-events-none fixed inset-0 z-0 h-[100dvh] w-full bg-black">
+          <Image
+            src="/backg.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-contain object-left-bottom"
+          />
+        </div>
+      )}
+
       <QuizGlowBurst active={glowBurst} seed={animSeed} />
       {phase !== 'intro' && (
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -256,7 +275,12 @@ export function KegelQuiz() {
         </div>
       )}
 
-      <header className="relative border-b border-white/[0.08] bg-[#080C0F]">
+      <header
+        className={cn(
+          'relative z-10 border-b border-white/[0.08]',
+          phase === 'intro' ? 'bg-transparent' : 'bg-[#080C0F]'
+        )}
+      >
         <div className="mx-auto flex h-16 sm:h-20 max-w-[1520px] items-center justify-between px-6">
           <div className="w-20 shrink-0" />
           <div className="flex items-center gap-2">
@@ -285,13 +309,13 @@ export function KegelQuiz() {
       </header>
 
       {loading && (
-        <main className="relative mx-auto flex w-full max-w-xl flex-1 items-center justify-center px-4 py-16">
+        <main className="relative z-10 mx-auto flex w-full max-w-xl flex-1 items-center justify-center px-4 py-16">
           <div className="size-10 animate-spin rounded-full border-4 border-[#ff453a]/20 border-t-[#ff453a]" />
         </main>
       )}
 
       {!loading && phase === 'intro' && (
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
           <StageProgress
             stages={stages}
             questions={questions}
@@ -857,7 +881,12 @@ function StageProgress({
   const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
 
   return (
-    <div className="relative border-b border-white/[0.08] bg-[#05080B] px-4 py-5 sm:px-8 sm:py-6">
+    <div
+      className={cn(
+        'relative z-10 border-b border-white/[0.08] px-4 py-5 sm:px-8 sm:py-6',
+        phase === 'intro' ? 'bg-transparent' : 'bg-[#05080B]'
+      )}
+    >
       <div className="mx-auto max-w-[1100px]">
         <div className="flex items-center">
           {stages.map((stage, index) => {
