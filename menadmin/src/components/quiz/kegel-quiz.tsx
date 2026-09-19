@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
-import { TenkheeLogo } from '@/components/brand/tenkhee-logo';
-import { StoreBadges } from '@/components/landing/store-badges';
-import { buttonVariants } from '@/components/ui/button';
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { TenkheeLogo } from "@/components/brand/tenkhee-logo";
+import { StoreBadges } from "@/components/landing/store-badges";
+import { buttonVariants } from "@/components/ui/button";
 import {
   buildQuizResult,
   fetchPublicQuiz,
@@ -15,8 +15,8 @@ import {
   type QuizEndMediaItem,
   type QuizPayload,
   type QuizStagePayload,
-} from '@/lib/quiz-api';
-import type { QuizQuestion } from '@/lib/quiz-data';
+} from "@/lib/quiz-api";
+import type { QuizQuestion } from "@/lib/quiz-data";
 import {
   counterVariants,
   getAnimationStyle,
@@ -28,21 +28,21 @@ import {
   QuizGlowBurst,
   QuizSlide,
   type SlideDirection,
-} from '@/components/quiz/quiz-motion';
-import { SITE } from '@/lib/site-config';
+} from "@/components/quiz/quiz-motion";
+import { SITE } from "@/lib/site-config";
 import {
   collectQuizVideoUrls,
   ensureVideoReady,
   preloadQuizVideos,
-} from '@/lib/quiz-video-preload';
-import { QuizIntro } from '@/components/quiz/quiz-intro';
-import { cn } from '@/lib/utils';
+} from "@/lib/quiz-video-preload";
+import { QuizIntro } from "@/components/quiz/quiz-intro";
+import { cn } from "@/lib/utils";
 
-type Phase = 'intro' | 'quiz' | 'section-end' | 'processing' | 'result';
+type Phase = "intro" | "quiz" | "section-end" | "processing" | "result";
 
 export function KegelQuiz() {
   const [quiz, setQuiz] = useState<QuizPayload | null>(null);
-  const [phase, setPhase] = useState<Phase>('intro');
+  const [phase, setPhase] = useState<Phase>("intro");
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [processingIndex, setProcessingIndex] = useState(0);
@@ -66,10 +66,9 @@ export function KegelQuiz() {
 
   const stages = quiz?.stages ?? getQuizFallback().stages;
   const questions = quiz?.questions ?? getQuizFallback().questions;
-  const processingMessages =
-    quiz?.config.processingMessages.length
-      ? quiz.config.processingMessages
-      : getQuizFallback().config.processingMessages;
+  const processingMessages = quiz?.config.processingMessages.length
+    ? quiz.config.processingMessages
+    : getQuizFallback().config.processingMessages;
   const processingTitle =
     quiz?.config.processingTitle ?? getQuizFallback().config.processingTitle;
 
@@ -85,17 +84,18 @@ export function KegelQuiz() {
 
   const sectionEndItems: QuizEndMediaItem[] =
     sectionStageId != null
-      ? stageById.get(sectionStageId)?.endMediaItems ?? []
+      ? (stageById.get(sectionStageId)?.endMediaItems ?? [])
       : [];
 
   const sectionEndMedia: QuizEndMediaItem | null =
     sectionEndItems[sectionMediaIndex] ?? null;
 
-  const hasMoreSectionMedia =
-    sectionMediaIndex < sectionEndItems.length - 1;
+  const hasMoreSectionMedia = sectionMediaIndex < sectionEndItems.length - 1;
 
   const quizAnimStyle = getAnimationStyle(stepIndex);
-  const sectionAnimStyle = getAnimationStyle(stepIndex * 2 + sectionMediaIndex + 1);
+  const sectionAnimStyle = getAnimationStyle(
+    stepIndex * 2 + sectionMediaIndex + 1,
+  );
   const processingAnimStyle = getAnimationStyle(totalQuestions + 1);
   const resultAnimStyle = getAnimationStyle(totalQuestions + 2);
 
@@ -141,13 +141,13 @@ export function KegelQuiz() {
         if (stage?.endMediaItems?.length) {
           setSectionStageId(question.stage);
           setSectionMediaIndex(0);
-          setPhase('section-end');
+          setPhase("section-end");
           return;
         }
       }
 
       if (isLastQuestion) {
-        setPhase('processing');
+        setPhase("processing");
         return;
       }
 
@@ -165,24 +165,24 @@ export function KegelQuiz() {
       setSectionStageId(null);
       setSectionMediaIndex(0);
       if (stepIndex >= totalQuestions - 1) {
-        setPhase('processing');
+        setPhase("processing");
         return;
       }
-      setPhase('quiz');
+      setPhase("quiz");
       setStepIndex((i) => i + 1);
     });
   }
 
   function startQuiz() {
-    triggerForward(() => setPhase('quiz'));
+    triggerForward(() => setPhase("quiz"));
   }
 
   function goBack() {
-    if (phase === 'quiz' && stepIndex === 0) {
-      triggerBackward(() => setPhase('intro'));
+    if (phase === "quiz" && stepIndex === 0) {
+      triggerBackward(() => setPhase("intro"));
       return;
     }
-    if (phase === 'section-end') {
+    if (phase === "section-end") {
       if (sectionMediaIndex > 0) {
         triggerBackward(() => setSectionMediaIndex((i) => i - 1));
         return;
@@ -190,7 +190,7 @@ export function KegelQuiz() {
       triggerBackward(() => {
         setSectionStageId(null);
         setSectionMediaIndex(0);
-        setPhase('quiz');
+        setPhase("quiz");
       });
       return;
     }
@@ -203,37 +203,37 @@ export function KegelQuiz() {
   }
 
   useEffect(() => {
-    if (phase !== 'quiz' || !question) return;
+    if (phase !== "quiz" || !question) return;
     const next = questions[stepIndex + 1];
     const endsStage = !next || next.stage !== question.stage;
     if (!endsStage) return;
     const items = stageById.get(question.stage)?.endMediaItems ?? [];
     preloadQuizVideos(
-      items.filter((item) => item.type === 'video').map((item) => item.url)
+      items.filter((item) => item.type === "video").map((item) => item.url),
     );
   }, [phase, question, stepIndex, stageById, questions]);
 
   useEffect(() => {
-    if (phase !== 'section-end') return;
+    if (phase !== "section-end") return;
     const next = sectionEndItems[sectionMediaIndex + 1];
-    if (next?.type === 'video') preloadQuizVideos([next.url]);
+    if (next?.type === "video") preloadQuizVideos([next.url]);
   }, [phase, sectionMediaIndex, sectionEndItems]);
 
   useEffect(() => {
-    if (phase !== 'result' || completionRecordedRef.current) return;
+    if (phase !== "result" || completionRecordedRef.current) return;
     completionRecordedRef.current = true;
-    void recordQuizCompletion('web');
+    void recordQuizCompletion("web");
   }, [phase]);
 
   useEffect(() => {
-    if (phase !== 'processing') return;
+    if (phase !== "processing") return;
 
     setProcessingIndex(0);
     const interval = window.setInterval(() => {
       setProcessingIndex((i) => {
         if (i >= processingMessages.length - 1) {
           window.clearInterval(interval);
-          window.setTimeout(() => setPhase('result'), 700);
+          window.setTimeout(() => setPhase("result"), 700);
           return i;
         }
         return i + 1;
@@ -249,11 +249,11 @@ export function KegelQuiz() {
   return (
     <div
       className={cn(
-        'relative flex min-h-screen min-h-[100dvh] flex-col text-white',
-        phase === 'intro' ? 'bg-black' : 'bg-[#070b10]'
+        "relative flex min-h-screen min-h-[100dvh] flex-col text-white",
+        phase === "intro" ? "bg-black" : "bg-[#070b10]",
       )}
     >
-      {phase === 'intro' && (
+      {phase === "intro" && (
         <div
           className="pointer-events-none fixed inset-0 z-0 h-[100dvh] w-full bg-black bg-[url(/backg.png)] bg-[length:100%_100%] bg-no-repeat bg-center"
           aria-hidden
@@ -261,7 +261,7 @@ export function KegelQuiz() {
       )}
 
       <QuizGlowBurst active={glowBurst} seed={animSeed} />
-      {phase !== 'intro' && (
+      {phase !== "intro" && (
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
           <div className="absolute -left-32 top-0 size-[420px] rounded-full bg-[#ff453a]/15 blur-[120px]" />
           <div className="absolute -right-20 bottom-0 size-[360px] rounded-full bg-[#ff453a]/10 blur-[100px]" />
@@ -270,8 +270,8 @@ export function KegelQuiz() {
 
       <header
         className={cn(
-          'relative z-10 border-b border-white/[0.08]',
-          phase === 'intro' ? 'bg-transparent' : 'bg-[#080C0F]'
+          "relative z-10 border-b border-white/[0.08]",
+          phase === "intro" ? "bg-transparent" : "bg-[#080C0F]",
         )}
       >
         <div className="mx-auto flex h-16 sm:h-20 max-w-[1520px] items-center justify-between px-6">
@@ -307,16 +307,18 @@ export function KegelQuiz() {
         </main>
       )}
 
-      {!loading && phase === 'intro' && (
+      {!loading && phase === "intro" && (
         <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-          <StageProgress
-            stages={stages}
-            questions={questions}
-            answers={answers}
-            stepIndex={stepIndex}
-            phase={phase}
-            sectionStageId={sectionStageId}
-          />
+          <div className="ml-auto w-[58%] shrink-0 pr-4 sm:pr-6 lg:max-w-[720px] lg:px-10 xl:max-w-[780px] xl:pr-12">
+            <StageProgress
+              stages={stages}
+              questions={questions}
+              answers={answers}
+              stepIndex={stepIndex}
+              phase={phase}
+              sectionStageId={sectionStageId}
+            />
+          </div>
           <QuizSlide
             slideKey="intro"
             direction={slideDirection}
@@ -328,7 +330,7 @@ export function KegelQuiz() {
         </div>
       )}
 
-      {!loading && phase === 'quiz' && question && (
+      {!loading && phase === "quiz" && question && (
         <>
           <StageProgress
             stages={stages}
@@ -380,36 +382,64 @@ export function KegelQuiz() {
                       animate={
                         isSelected
                           ? {
-                              borderColor: 'rgba(255,69,58,0.6)',
-                              boxShadow: '0 10px 40px rgba(255,69,58,0.15)',
+                              borderColor: "rgba(255,69,58,0.6)",
+                              boxShadow: "0 10px 40px rgba(255,69,58,0.15)",
                             }
-                          : { borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 0 0 rgba(0,0,0,0)' }
+                          : {
+                              borderColor: "rgba(255,255,255,0.1)",
+                              boxShadow: "0 0 0 rgba(0,0,0,0)",
+                            }
                       }
-                      transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 28,
+                      }}
                       className={cn(
-                        'flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left',
+                        "flex w-full items-center justify-between gap-4 rounded-2xl border px-5 py-4 text-left",
                         isSelected
-                          ? 'bg-[#ff453a]/15'
-                          : 'border-white/10 bg-white/[0.04] hover:border-[#ff453a]/30 hover:bg-white/[0.07]'
+                          ? "bg-[#ff453a]/15"
+                          : "border-white/10 bg-white/[0.04] hover:border-[#ff453a]/30 hover:bg-white/[0.07]",
                       )}
                     >
-                      <span className="text-base font-medium text-white">{option.label}</span>
+                      <span className="text-base font-medium text-white">
+                        {option.label}
+                      </span>
                       <motion.span
                         animate={
                           isSelected
-                            ? { scale: 1, backgroundColor: '#ff453a', borderColor: '#ff453a' }
-                            : { scale: 1, backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.25)' }
+                            ? {
+                                scale: 1,
+                                backgroundColor: "#ff453a",
+                                borderColor: "#ff453a",
+                              }
+                            : {
+                                scale: 1,
+                                backgroundColor: "transparent",
+                                borderColor: "rgba(255,255,255,0.25)",
+                              }
                         }
-                        transition={{ type: 'spring', stiffness: 600, damping: 22 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 600,
+                          damping: 22,
+                        }}
                         className="flex size-6 shrink-0 items-center justify-center rounded-full border-2"
                       >
                         {isSelected && (
                           <motion.span
                             initial={{ scale: 0, rotate: -90 }}
                             animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: 'spring', stiffness: 700, damping: 18 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 700,
+                              damping: 18,
+                            }}
                           >
-                            <Check className="size-3.5 text-white" strokeWidth={3} />
+                            <Check
+                              className="size-3.5 text-white"
+                              strokeWidth={3}
+                            />
                           </motion.span>
                         )}
                       </motion.span>
@@ -438,7 +468,7 @@ export function KegelQuiz() {
         </>
       )}
 
-      {!loading && phase === 'section-end' && sectionEndMedia && (
+      {!loading && phase === "section-end" && sectionEndMedia && (
         <>
           <StageProgress
             stages={stages}
@@ -470,14 +500,17 @@ export function KegelQuiz() {
               animate="show"
               className="text-center text-2xl font-bold leading-snug tracking-tight sm:text-[1.75rem]"
             >
-              {sectionEndMedia.title?.trim() || 'Хэсэг дууслаа'}
+              {sectionEndMedia.title?.trim() || "Хэсэг дууслаа"}
             </motion.h1>
             <motion.div
               variants={sectionMediaVariants}
               initial="hidden"
               animate="show"
               className="relative mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-[0_20px_60px_rgba(255,69,58,0.12)]"
-              style={{ transformStyle: sectionAnimStyle === 'flip' ? 'preserve-3d' : undefined }}
+              style={{
+                transformStyle:
+                  sectionAnimStyle === "flip" ? "preserve-3d" : undefined,
+              }}
             >
               <motion.div
                 aria-hidden
@@ -486,7 +519,7 @@ export function KegelQuiz() {
                 transition={{ duration: 1.2, delay: 0.15 }}
                 className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#ff453a]/20 via-transparent to-transparent"
               />
-              {sectionEndMedia.type === 'video' ? (
+              {sectionEndMedia.type === "video" ? (
                 <SectionEndVideo src={sectionEndMedia.url} />
               ) : (
                 <motion.div
@@ -527,14 +560,14 @@ export function KegelQuiz() {
           <QuizFooter
             backDisabled={false}
             continueDisabled={false}
-            continueLabel={hasMoreSectionMedia ? 'Дараах' : 'Үргэлжлүүлэх'}
+            continueLabel={hasMoreSectionMedia ? "Дараах" : "Үргэлжлүүлэх"}
             onBack={goBack}
             onContinue={advanceSectionEnd}
           />
         </>
       )}
 
-      {!loading && phase === 'processing' && (
+      {!loading && phase === "processing" && (
         <QuizSlide
           slideKey="processing"
           direction={slideDirection}
@@ -544,7 +577,7 @@ export function KegelQuiz() {
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 320, damping: 22 }}
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
             className="relative mb-8 size-20"
           >
             <div className="absolute inset-0 animate-ping rounded-full bg-[#ff453a]/20" />
@@ -555,7 +588,12 @@ export function KegelQuiz() {
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 400, damping: 30 }}
+            transition={{
+              delay: 0.1,
+              type: "spring",
+              stiffness: 400,
+              damping: 30,
+            }}
             className="text-2xl font-bold"
           >
             {processingTitle}
@@ -582,7 +620,7 @@ export function KegelQuiz() {
         </QuizSlide>
       )}
 
-      {!loading && phase === 'result' && (
+      {!loading && phase === "result" && (
         <QuizSlide
           slideKey="result"
           direction={slideDirection}
@@ -592,18 +630,25 @@ export function KegelQuiz() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+            transition={{ type: "spring", stiffness: 360, damping: 28 }}
             className="text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 18, delay: 0.08 }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 18,
+                delay: 0.08,
+              }}
               className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff453a]/15 text-[#ff453a]"
             >
               <Check className="size-8" strokeWidth={2.5} />
             </motion.div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Таны хувийн төлөвлөгөө бэлэн!</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              Таны хувийн төлөвлөгөө бэлэн!
+            </h1>
             <p className="mt-3 text-white/55">
               {SITE.name} танд тохирсон Кегel хөтөлбөр бэлтгэлээ.
             </p>
@@ -614,26 +659,37 @@ export function KegelQuiz() {
             animate="show"
             variants={{
               hidden: {},
-              show: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+              show: {
+                transition: { staggerChildren: 0.08, delayChildren: 0.2 },
+              },
             }}
             className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] divide-y divide-white/10"
           >
             {[
-              { label: 'Гол зорилго', value: result.goalLabel },
-              { label: 'Түвшин', value: result.level },
-              { label: 'Өдөрт', value: `${result.minutes} минут` },
-              { label: 'Долоо хоногт', value: `${result.sessionsPerWeek} удаа` },
+              { label: "Гол зорилго", value: result.goalLabel },
+              { label: "Түвшин", value: result.level },
+              { label: "Өдөрт", value: `${result.minutes} минут` },
+              {
+                label: "Долоо хоногт",
+                value: `${result.sessionsPerWeek} удаа`,
+              },
             ].map((row) => (
               <motion.div
                 key={row.label}
                 variants={{
                   hidden: { opacity: 0, x: -20 },
-                  show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 420, damping: 30 } },
+                  show: {
+                    opacity: 1,
+                    x: 0,
+                    transition: { type: "spring", stiffness: 420, damping: 30 },
+                  },
                 }}
                 className="flex items-center justify-between gap-4 px-5 py-4"
               >
                 <dt className="text-sm text-white/50">{row.label}</dt>
-                <dd className="text-right text-sm font-semibold text-white">{row.value}</dd>
+                <dd className="text-right text-sm font-semibold text-white">
+                  {row.value}
+                </dd>
               </motion.div>
             ))}
           </motion.dl>
@@ -641,7 +697,12 @@ export function KegelQuiz() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, type: 'spring', stiffness: 360, damping: 28 }}
+            transition={{
+              delay: 0.45,
+              type: "spring",
+              stiffness: 360,
+              damping: 28,
+            }}
             className="mt-8 rounded-2xl border border-[#ff453a]/25 bg-[#ff453a]/10 p-6 text-center"
           >
             <p className="font-bold">Апп-аа татаад эхлээрэй</p>
@@ -654,14 +715,19 @@ export function KegelQuiz() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55, type: 'spring', stiffness: 360, damping: 28 }}
+            transition={{
+              delay: 0.55,
+              type: "spring",
+              stiffness: 360,
+              damping: 28,
+            }}
             className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center"
           >
             <Link
               href="/#download"
               className={cn(
-                buttonVariants({ size: 'lg' }),
-                'h-12 bg-[#ff453a] font-semibold text-white hover:bg-[#e63e35]'
+                buttonVariants({ size: "lg" }),
+                "h-12 bg-[#ff453a] font-semibold text-white hover:bg-[#e63e35]",
               )}
             >
               Апп татах
@@ -669,8 +735,8 @@ export function KegelQuiz() {
             <Link
               href="/"
               className={cn(
-                buttonVariants({ variant: 'outline', size: 'lg' }),
-                'h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white'
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "h-12 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white",
               )}
             >
               Нүүр хуудас
@@ -707,14 +773,14 @@ function SectionEndVideo({ src }: { src: string }) {
     if (video.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
       startPlayback();
     } else {
-      video.addEventListener('canplaythrough', startPlayback, { once: true });
-      video.addEventListener('loadeddata', startPlayback, { once: true });
+      video.addEventListener("canplaythrough", startPlayback, { once: true });
+      video.addEventListener("loadeddata", startPlayback, { once: true });
     }
 
     return () => {
       cancelled = true;
-      video.removeEventListener('canplaythrough', startPlayback);
-      video.removeEventListener('loadeddata', startPlayback);
+      video.removeEventListener("canplaythrough", startPlayback);
+      video.removeEventListener("loadeddata", startPlayback);
     };
   }, [src]);
 
@@ -740,8 +806,8 @@ function SectionEndVideo({ src }: { src: string }) {
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback"
         className={cn(
-          'pointer-events-none max-h-[420px] w-full object-contain transition-opacity duration-300',
-          buffered ? 'opacity-100' : 'opacity-0'
+          "pointer-events-none max-h-[420px] w-full object-contain transition-opacity duration-300",
+          buffered ? "opacity-100" : "opacity-0",
         )}
       />
     </div>
@@ -751,7 +817,7 @@ function SectionEndVideo({ src }: { src: string }) {
 function QuizFooter({
   backDisabled,
   continueDisabled,
-  continueLabel = 'Үргэлжлүүлэх',
+  continueLabel = "Үргэлжлүүлэх",
   onBack,
   onContinue,
 }: {
@@ -770,10 +836,10 @@ function QuizFooter({
           disabled={backDisabled}
           whileTap={backDisabled ? undefined : { scale: 0.96 }}
           className={cn(
-            'inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition',
+            "inline-flex h-12 items-center gap-1 rounded-xl border px-4 text-sm font-semibold transition",
             backDisabled
-              ? 'cursor-not-allowed border-transparent text-white/20'
-              : 'border-white/15 text-white/70 hover:border-white/25 hover:bg-white/5 hover:text-white'
+              ? "cursor-not-allowed border-transparent text-white/20"
+              : "border-white/15 text-white/70 hover:border-white/25 hover:bg-white/5 hover:text-white",
           )}
         >
           <ChevronLeft className="size-5" />
@@ -785,18 +851,18 @@ function QuizFooter({
           disabled={continueDisabled}
           whileTap={continueDisabled ? undefined : { scale: 0.95 }}
           whileHover={continueDisabled ? undefined : { scale: 1.02 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 22 }}
+          transition={{ type: "spring", stiffness: 500, damping: 22 }}
           className={cn(
-            'inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white',
+            "inline-flex h-12 min-w-[148px] items-center justify-center gap-1 rounded-xl px-6 text-sm font-semibold text-white",
             continueDisabled
-              ? 'cursor-not-allowed bg-white/10 text-white/30'
-              : 'bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]'
+              ? "cursor-not-allowed bg-white/10 text-white/30"
+              : "bg-[#ff453a] shadow-lg shadow-[#ff453a]/25 hover:bg-[#e63e35]",
           )}
         >
           {continueLabel}
           <motion.span
             animate={continueDisabled ? {} : { x: [0, 3, 0] }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
           >
             <ChevronRight className="size-5" />
           </motion.span>
@@ -810,11 +876,11 @@ function resolveCurrentStage(
   questions: QuizQuestion[],
   stepIndex: number,
   phase: Phase,
-  sectionStageId: number | null
+  sectionStageId: number | null,
 ): number | null {
-  if (phase === 'intro') return questions[0]?.stage ?? null;
-  if (phase === 'section-end') return sectionStageId;
-  if (phase === 'processing' || phase === 'result') {
+  if (phase === "intro") return questions[0]?.stage ?? null;
+  if (phase === "section-end") return sectionStageId;
+  if (phase === "processing" || phase === "result") {
     return questions[questions.length - 1]?.stage ?? null;
   }
   return questions[stepIndex]?.stage ?? null;
@@ -830,16 +896,21 @@ function getConnectorProgress(
   stepIndex: number,
   phase: Phase,
   sectionStageId: number | null,
-  stageId: number
+  stageId: number,
 ): number {
   const stageQuestions = getStageQuestions(questions, stageId);
   if (stageQuestions.length === 0) return 0;
 
-  if (phase === 'processing' || phase === 'result') return 1;
+  if (phase === "processing" || phase === "result") return 1;
 
-  const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
+  const currentStage = resolveCurrentStage(
+    questions,
+    stepIndex,
+    phase,
+    sectionStageId,
+  );
   if (currentStage != null && currentStage > stageId) return 1;
-  if (phase === 'section-end' && sectionStageId === stageId) return 1;
+  if (phase === "section-end" && sectionStageId === stageId) return 1;
 
   const answered = stageQuestions.filter((q) => answers[q.id]).length;
   return Math.min(1, answered / stageQuestions.length);
@@ -851,9 +922,18 @@ function isStageComplete(
   answers: Record<string, string>,
   stepIndex: number,
   phase: Phase,
-  sectionStageId: number | null
+  sectionStageId: number | null,
 ): boolean {
-  return getConnectorProgress(questions, answers, stepIndex, phase, sectionStageId, stageId) >= 1;
+  return (
+    getConnectorProgress(
+      questions,
+      answers,
+      stepIndex,
+      phase,
+      sectionStageId,
+      stageId,
+    ) >= 1
+  );
 }
 
 function StageProgress({
@@ -871,16 +951,23 @@ function StageProgress({
   phase: Phase;
   sectionStageId: number | null;
 }) {
-  const currentStage = resolveCurrentStage(questions, stepIndex, phase, sectionStageId);
+  const currentStage = resolveCurrentStage(
+    questions,
+    stepIndex,
+    phase,
+    sectionStageId,
+  );
+
+  const isIntro = phase === "intro";
 
   return (
     <div
       className={cn(
-        'relative z-10 border-b border-white/[0.08] px-4 py-5 sm:px-8 sm:py-6',
-        phase === 'intro' ? 'bg-transparent' : 'bg-[#05080B]'
+        "relative z-10 border-b border-white/[0.08] py-5 sm:py-6",
+        isIntro ? "border-transparent bg-transparent px-0" : "bg-[#05080B] px-4 sm:px-8",
       )}
     >
-      <div className="mx-auto max-w-[1100px]">
+      <div className={cn("w-full", !isIntro && "mx-auto max-w-[1100px]")}>
         <div className="flex items-center">
           {stages.map((stage, index) => {
             const done = isStageComplete(
@@ -889,7 +976,7 @@ function StageProgress({
               answers,
               stepIndex,
               phase,
-              sectionStageId
+              sectionStageId,
             );
             const active = currentStage === stage.id && !done;
             const isLast = index === stages.length - 1;
@@ -899,7 +986,7 @@ function StageProgress({
               stepIndex,
               phase,
               sectionStageId,
-              stage.id
+              stage.id,
             );
 
             return (
@@ -908,31 +995,42 @@ function StageProgress({
                   layout
                   animate={
                     active
-                      ? { scale: [1, 1.06, 1], boxShadow: '0 0 12px rgba(255,68,61,0.35)' }
-                      : { scale: 1, boxShadow: '0 0 0px rgba(0,0,0,0)' }
+                      ? {
+                          scale: [1, 1.06, 1],
+                          boxShadow: "0 0 12px rgba(255,68,61,0.35)",
+                        }
+                      : { scale: 1, boxShadow: "0 0 0px rgba(0,0,0,0)" }
                   }
                   transition={
                     active
                       ? {
-                          scale: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' },
+                          scale: {
+                            repeat: Infinity,
+                            duration: 2.4,
+                            ease: "easeInOut",
+                          },
                           boxShadow: { duration: 0.3 },
                         }
                       : { duration: 0.3 }
                   }
                   className={cn(
-                    'relative z-10 flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300',
+                    "relative z-10 flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300",
                     done
-                      ? 'border-[#FF443D] bg-[#FF443D] text-white shadow-md shadow-[#FF443D]/30'
+                      ? "border-[#FF443D] bg-[#FF443D] text-white shadow-md shadow-[#FF443D]/30"
                       : active
-                      ? 'border-[#FF443D] bg-[#05080B]'
-                      : 'border-white/20 bg-[#05080B]'
+                        ? "border-[#FF443D] bg-[#05080B]"
+                        : "border-white/20 bg-[#05080B]",
                   )}
                 >
                   {done ? (
                     <motion.div
                       initial={{ scale: 0, rotate: -180 }}
                       animate={{ scale: 1, rotate: 0 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 20,
+                      }}
                     >
                       <Check className="size-4" strokeWidth={3} />
                     </motion.div>
@@ -945,7 +1043,10 @@ function StageProgress({
 
                 {!isLast && (
                   <div className="relative mx-1.5 h-[1.5px] min-w-0 flex-1 self-center sm:mx-2">
-                    <div className="absolute inset-0 rounded-full bg-white/15" aria-hidden />
+                    <div
+                      className="absolute inset-0 rounded-full bg-white/15"
+                      aria-hidden
+                    />
                     <motion.div
                       className="absolute inset-y-0 left-0 rounded-full bg-[#FF443D] shadow-[0_0_8px_rgba(255,68,61,0.5)]"
                       initial={false}
@@ -968,7 +1069,7 @@ function StageProgress({
               answers,
               stepIndex,
               phase,
-              sectionStageId
+              sectionStageId,
             );
             const active = currentStage === stage.id && !done;
             const isLast = index === stages.length - 1;
@@ -979,13 +1080,16 @@ function StageProgress({
                   <motion.span
                     animate={
                       active
-                        ? { opacity: 1, color: '#FF443D' }
-                        : { opacity: done ? 0.75 : 1, color: done ? 'rgba(255,255,255,0.7)' : '#9298A1' }
+                        ? { opacity: 1, color: "#FF443D" }
+                        : {
+                            opacity: done ? 0.75 : 1,
+                            color: done ? "rgba(255,255,255,0.7)" : "#9298A1",
+                          }
                     }
                     transition={{ duration: 0.35 }}
                     className={cn(
-                      'max-w-[4.5rem] text-center text-[10px] sm:text-xs leading-tight sm:max-w-none transition-colors',
-                      active ? 'font-bold' : 'font-medium'
+                      "max-w-[4.5rem] text-center text-[10px] sm:text-xs leading-tight sm:max-w-none transition-colors",
+                      active ? "font-bold" : "font-medium",
                     )}
                   >
                     {stage.label}
