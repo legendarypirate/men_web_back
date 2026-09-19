@@ -255,12 +255,9 @@ export function KegelQuiz() {
     >
       {phase === 'intro' && (
         <div
-          className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black pt-[max(3dvh,14px)] sm:pt-[max(3.5dvh,18px)] lg:pt-[max(2.5dvh,16px)]"
+          className="pointer-events-none fixed inset-0 z-0 h-[100dvh] w-full bg-black bg-[url(/backg.png)] bg-[length:100%_100%] bg-no-repeat bg-center"
           aria-hidden
-        >
-          {/* Mobile: full height of area below top gap. Desktop: full width (Mac layout). */}
-          <div className="h-full w-full bg-[url(/backg.png)] bg-[length:auto_100%] bg-[position:left_bottom] bg-no-repeat lg:bg-[length:100%_auto]" />
-        </div>
+        />
       )}
 
       <QuizGlowBurst active={glowBurst} seed={animSeed} />
